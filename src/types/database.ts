@@ -119,6 +119,9 @@ export interface PlayableTopicExercise {
   options: string[] | null;
   diamond_reward: number;
   is_exam: boolean;
+  lesson_id: string | null;
+  lesson_name: string | null;
+  lesson_sort_order: number | null;
 }
 
 export interface FinishTopicResult {

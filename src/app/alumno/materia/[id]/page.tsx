@@ -101,6 +101,24 @@ export default function MateriaTopicsPage() {
     [recommendation]
   );
 
+  const groupedByModule = useMemo(() => {
+    const groups: { age: number | null; items: SubjectTopic[]; total: number; passedCount: number }[] = [];
+    for (const t of topics) {
+      const age = t.recommended_age ?? null;
+      let group = groups.find((g) => g.age === age);
+      if (!group) {
+        group = { age, items: [], total: 0, passedCount: 0 };
+        groups.push(group);
+      }
+      group.items.push(t);
+      if (t.practice_count + t.exam_count > 0) {
+        group.total += 1;
+        if (t.passed) group.passedCount += 1;
+      }
+    }
+    return groups;
+  }, [topics]);
+
   function speakRecommendation() {
     if (!recommendation || !myTeacher) return;
     speakText(
@@ -307,62 +325,72 @@ export default function MateriaTopicsPage() {
             initial="initial"
             animate="animate"
             variants={staggerContainer(0.06)}
-            className="mt-2 flex flex-col gap-3"
+            className="mt-2 flex flex-col gap-6"
           >
             <AnimatePresence>
-              {topics.map((t) => {
-                const hasContent = t.practice_count + t.exam_count > 0;
-                return (
-                  <motion.div key={t.topic_id} variants={staggerItem}>
-                    <Link
-                      href={hasContent ? `/alumno/materia/${subjectId}/tema/${t.topic_id}` : "#"}
-                      aria-disabled={!hasContent}
-                      className={`flex items-center gap-4 rounded-2xl bg-white p-4 shadow transition-transform ${
-                        hasContent ? "hover:-translate-y-0.5" : "pointer-events-none opacity-50"
-                      } ${
-                        recommendedTopicIds.has(t.topic_id) ? "ring-2 ring-purple-400" : ""
-                      }`}
-                    >
-                      <span className="text-3xl">
-                        {t.passed ? "🏆" : hasContent ? "📖" : "🔒"}
+              {groupedByModule.map((group) => (
+                <motion.div key={group.age ?? "sin-edad"} variants={staggerItem}>
+                  <div className="mb-2 flex items-center justify-between px-1">
+                    <h2 className="text-sm font-extrabold uppercase tracking-wide text-slate-400">
+                      🧩 Módulo{group.age != null ? ` · ${group.age} años` : ""}
+                    </h2>
+                    {group.total > 0 && (
+                      <span className="text-xs font-semibold text-slate-400">
+                        {group.passedCount}/{group.total} completados
                       </span>
-                      <div className="flex-1">
-                        <p className="font-bold text-slate-800">
-                          {t.name}
-                          {recommendedTopicIds.has(t.topic_id) && (
-                            <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">
-                              👉 Recomendado por tu profe
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    {group.items.map((t) => {
+                      const hasContent = t.practice_count + t.exam_count > 0;
+                      return (
+                        <Link
+                          key={t.topic_id}
+                          href={hasContent ? `/alumno/materia/${subjectId}/tema/${t.topic_id}` : "#"}
+                          aria-disabled={!hasContent}
+                          className={`flex items-center gap-4 rounded-2xl bg-white p-4 shadow transition-transform ${
+                            hasContent ? "hover:-translate-y-0.5" : "pointer-events-none opacity-50"
+                          } ${
+                            recommendedTopicIds.has(t.topic_id) ? "ring-2 ring-purple-400" : ""
+                          }`}
+                        >
+                          <span className="text-3xl">
+                            {t.passed ? "🏆" : hasContent ? "📖" : "🔒"}
+                          </span>
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-800">
+                              {t.name}
+                              {recommendedTopicIds.has(t.topic_id) && (
+                                <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">
+                                  👉 Recomendado por tu profe
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {hasContent
+                                ? `${t.practice_count} ejercicios + Test final`
+                                : "Próximamente"}
+                            </p>
+                          </div>
+                          {t.exam_best_stars > 0 ? (
+                            <div className="flex gap-0.5 text-lg">
+                              {[1, 2, 3].map((n) => (
+                                <span key={n} className={n <= t.exam_best_stars ? "" : "opacity-25"}>
+                                  ⭐
+                                </span>
+                              ))}
+                            </div>
+                          ) : hasContent ? (
+                            <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600">
+                              Empezar
                             </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          {hasContent
-                            ? `${t.practice_count} ejercicios + Test final`
-                            : "Próximamente"}
-                          {t.recommended_age != null && (
-                            <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-500">
-                              Recomendado: {t.recommended_age} años
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      {t.exam_best_stars > 0 ? (
-                        <div className="flex gap-0.5 text-lg">
-                          {[1, 2, 3].map((n) => (
-                            <span key={n} className={n <= t.exam_best_stars ? "" : "opacity-25"}>
-                              ⭐
-                            </span>
-                          ))}
-                        </div>
-                      ) : hasContent ? (
-                        <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600">
-                          Empezar
-                        </span>
-                      ) : null}
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                          ) : null}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </motion.div>
         )}

@@ -21,6 +21,7 @@ type Stage =
   | "intro"
   | "playing"
   | "feedback"
+  | "lesson_intro"
   | "exam_intro"
   | "summary"
   | "empty"
@@ -56,6 +57,7 @@ export default function TemaPage() {
   const [showTranslation, setShowTranslation] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [promptSpeaking, setPromptSpeaking] = useState(false);
+  const [pendingLessonName, setPendingLessonName] = useState<string | null>(null);
 
   const NEUTRAL_ES_VOICE = "es-ES-ElviraNeural";
 
@@ -73,6 +75,7 @@ export default function TemaPage() {
   const examList = exercises.filter((e) => e.is_exam);
   const currentList = phase === "practice" ? practiceList : examList;
   const current = currentList[index];
+  const lessonCount = new Set(practiceList.map((e) => e.lesson_id).filter(Boolean)).size;
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc("playable_topic_exercises", {
@@ -181,11 +184,22 @@ export default function TemaPage() {
     const isLastOfPhase = index + 1 >= currentList.length;
 
     if (!isLastOfPhase) {
+      const next = currentList[index + 1];
+      const changingLesson =
+        phase === "practice" &&
+        !!current?.lesson_id &&
+        !!next?.lesson_id &&
+        next.lesson_id !== current.lesson_id;
       setIndex((i) => i + 1);
       setTextValue("");
       setResult(null);
       setStartedAt(Date.now());
-      setStage("playing");
+      if (changingLesson) {
+        setPendingLessonName(next.lesson_name);
+        setStage("lesson_intro");
+      } else {
+        setStage("playing");
+      }
       return;
     }
 
@@ -196,6 +210,10 @@ export default function TemaPage() {
 
     // Ultima pregunta (de practica sin examen, o del examen) -> cerrar tema
     finishTopic(practiceCorrect, examCorrect);
+  }
+
+  function continueLesson() {
+    setStage("playing");
   }
 
   function greetingText(): string {
@@ -337,6 +355,7 @@ export default function TemaPage() {
                 <span className="text-5xl">📖</span>
                 <p className="mt-2 text-white/80">
                   {practiceList.length} ejercicio{practiceList.length !== 1 ? "s" : ""} de práctica
+                  {lessonCount > 1 && <> en {lessonCount} lecciones</>}
                   {examList.length > 0 && (
                     <>
                       {" "}
@@ -401,6 +420,38 @@ export default function TemaPage() {
                 className="mt-2 rounded-xl bg-white px-8 py-3 text-lg font-bold text-orange-600 shadow-lg"
               >
                 Empezar el Test 🏆
+              </motion.button>
+            </motion.div>
+          )}
+
+          {stage === "lesson_intro" && (
+            <motion.div
+              key="lesson_intro"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={fadeSlideUp}
+              className="mt-10 flex flex-col items-center gap-4 rounded-3xl bg-white/10 p-8 text-center text-white backdrop-blur"
+            >
+              <motion.span
+                animate={{ rotate: [0, -8, 8, -6, 6, 0] }}
+                transition={{ duration: 0.8 }}
+                className="text-6xl"
+              >
+                📘
+              </motion.span>
+              <h1 className="text-2xl font-bold">¡Muy bien!</h1>
+              <p className="text-white/80">
+                Ahora sigue: <span className="font-semibold">{pendingLessonName}</span>
+              </p>
+              <motion.button
+                onClick={continueLesson}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={SPRING_PLAYFUL}
+                className="mt-2 rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-600 shadow-lg"
+              >
+                Continuar →
               </motion.button>
             </motion.div>
           )}
