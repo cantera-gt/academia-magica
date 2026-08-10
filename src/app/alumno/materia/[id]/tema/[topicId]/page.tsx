@@ -106,6 +106,10 @@ export default function TemaPage() {
     setTextValue("");
     setStartedAt(Date.now());
     setStage(practiceList.length > 0 ? "playing" : "exam_intro");
+    // No bloqueamos la UI por esto: solo deja constancia de "aca me quede"
+    // para que el profesor pueda recomendar retomarlo despues, aunque el
+    // alumno no llegue a terminar la practica+examen en esta sesion.
+    supabase.rpc("mark_topic_started", { p_topic_id: topicId }).then(() => {});
   }
 
   function startExam() {

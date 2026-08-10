@@ -83,6 +83,7 @@ export interface SubjectTopic {
   exam_best_stars: number;
   exam_attempts: number;
   passed: boolean;
+  last_played_at: string | null;
 }
 
 export interface SubjectTeacher {

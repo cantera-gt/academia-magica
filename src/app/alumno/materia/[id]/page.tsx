@@ -1,12 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { Subject, SubjectTopic, SubjectTeacher, MySubjectTeacher } from "@/types/database";
+import type {
+  Subject,
+  SubjectTopic,
+  SubjectTeacher,
+  MySubjectTeacher,
+  MyProfile,
+} from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
+import { speakText, stopSpeaking } from "@/lib/speech";
+import { computeTeacherRecommendation } from "@/lib/teacher-recommendation";
 
 type Stage = "loading" | "choose_teacher" | "ready" | "empty" | "error";
 
@@ -22,6 +30,8 @@ export default function MateriaTopicsPage() {
   const [myTeacher, setMyTeacher] = useState<MySubjectTeacher | null>(null);
   const [choosingId, setChoosingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [speaking, setSpeaking] = useState(false);
 
   const loadTopics = useCallback(async () => {
     const { data, error } = await supabase.rpc("subject_topics", {
@@ -44,6 +54,9 @@ export default function MateriaTopicsPage() {
       .eq("id", subjectId)
       .maybeSingle();
     setSubject((subjectData as Subject) ?? null);
+
+    const { data: profileData } = await supabase.rpc("my_profile").maybeSingle();
+    setProfile((profileData as MyProfile) ?? null);
 
     const { data: teachersData } = await supabase.rpc("subject_teachers", {
       p_subject_id: subjectId,
@@ -69,6 +82,35 @@ export default function MateriaTopicsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    return () => stopSpeaking();
+  }, []);
+
+  const recommendation = useMemo(() => {
+    if (topics.length === 0 || !subject) return null;
+    return computeTeacherRecommendation(
+      topics,
+      profile?.display_name ?? "",
+      subject.name
+    );
+  }, [topics, profile, subject]);
+
+  const recommendedTopicIds = useMemo(
+    () => new Set((recommendation?.options ?? []).map((o) => o.topic.topic_id)),
+    [recommendation]
+  );
+
+  function speakRecommendation() {
+    if (!recommendation) return;
+    speakText(
+      recommendation.message,
+      "es-ES",
+      [],
+      () => setSpeaking(true),
+      () => setSpeaking(false)
+    );
+  }
 
   async function chooseTeacher(teacherId: string) {
     if (choosingId) return;
@@ -209,6 +251,53 @@ export default function MateriaTopicsPage() {
           </motion.div>
         )}
 
+        {stage === "ready" && recommendation && myTeacher && (
+          <motion.div
+            initial="initial"
+            animate="animate"
+            variants={fadeSlideUp}
+            className="mb-5 flex items-start gap-3"
+          >
+            <motion.div
+              animate={speaking ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+              transition={{ duration: 0.5, repeat: speaking ? Infinity : 0 }}
+              className="shrink-0"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={myTeacher.image_url}
+                alt={myTeacher.name}
+                className="h-16 w-16 rounded-full border-4 border-white object-cover shadow"
+              />
+            </motion.div>
+            <div className="flex-1 rounded-2xl rounded-tl-none bg-white p-4 shadow">
+              <p className="text-sm text-slate-700">{recommendation.message}</p>
+              <button
+                onClick={speakRecommendation}
+                className="mt-2 rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 hover:bg-purple-200"
+              >
+                {speaking ? "🔊 Hablando..." : "🔊 Escuchar"}
+              </button>
+              {recommendation.options.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {recommendation.options.map((opt) => (
+                    <Link
+                      key={opt.topic.topic_id}
+                      href={`/alumno/materia/${subjectId}/tema/${opt.topic.topic_id}`}
+                      className="rounded-xl border border-purple-200 bg-purple-50 px-3 py-2 text-xs font-semibold text-purple-700 hover:border-purple-400 hover:bg-purple-100"
+                    >
+                      {opt.label}
+                      <span className="ml-1 block text-[10px] font-normal text-purple-400">
+                        {opt.reason}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {stage === "ready" && (
           <motion.div
             initial="initial"
@@ -226,13 +315,22 @@ export default function MateriaTopicsPage() {
                       aria-disabled={!hasContent}
                       className={`flex items-center gap-4 rounded-2xl bg-white p-4 shadow transition-transform ${
                         hasContent ? "hover:-translate-y-0.5" : "pointer-events-none opacity-50"
+                      } ${
+                        recommendedTopicIds.has(t.topic_id) ? "ring-2 ring-purple-400" : ""
                       }`}
                     >
                       <span className="text-3xl">
                         {t.passed ? "🏆" : hasContent ? "📖" : "🔒"}
                       </span>
                       <div className="flex-1">
-                        <p className="font-bold text-slate-800">{t.name}</p>
+                        <p className="font-bold text-slate-800">
+                          {t.name}
+                          {recommendedTopicIds.has(t.topic_id) && (
+                            <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">
+                              👉 Recomendado por tu profe
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs text-slate-400">
                           {hasContent
                             ? `${t.practice_count} ejercicios + Test final`
