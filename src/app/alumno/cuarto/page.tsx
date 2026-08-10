@@ -50,6 +50,7 @@ export default function CuartoPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [zone, setZone] = useState<ItemZone>("habitacion");
+  const [reading, setReading] = useState<InventoryItem | null>(null);
 
   const load = useCallback(async () => {
     const {
@@ -121,9 +122,14 @@ export default function CuartoPage() {
     );
   }
 
-  const zoneInventory = inventory.filter((i) => i.store_items.zone === zone);
+  const zoneInventory = inventory.filter(
+    (i) => i.store_items.zone === zone && i.store_items.category !== "extra"
+  );
   const placed = zoneInventory.filter((i) => i.placed_in_room);
   const available = zoneInventory.filter((i) => !i.placed_in_room);
+  const extras = inventory.filter(
+    (i) => i.store_items.zone === zone && i.store_items.category === "extra"
+  );
   const bgGradient = (ROOM_BG[profile.gender] ?? ROOM_BG.girl)[zone];
 
   return (
@@ -251,8 +257,81 @@ export default function CuartoPage() {
               </motion.div>
             )}
           </div>
+
+          {/* Biblioteca: libros, stickers y diplomas — se leen, no se colocan */}
+          {extras.length > 0 && (
+            <div className="mt-8">
+              <h2 className="mb-3 text-lg font-bold text-slate-800">
+                Tu biblioteca 📚
+              </h2>
+              <motion.div
+                initial="initial"
+                animate="animate"
+                variants={staggerContainer(0.05)}
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+              >
+                {extras.map((inv) => (
+                  <motion.button
+                    key={inv.id}
+                    variants={staggerItem}
+                    onClick={() => setReading(inv)}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={SPRING_PLAYFUL}
+                    className="flex flex-col items-center gap-1 rounded-xl bg-white p-3 text-center shadow"
+                    title="Leer"
+                  >
+                    <span className="text-3xl">📖</span>
+                    <span className="text-xs font-medium text-slate-600">
+                      {inv.store_items.name}
+                    </span>
+                    <span className="mt-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      Leer
+                    </span>
+                  </motion.button>
+                ))}
+              </motion.div>
+            </div>
+          )}
         </LayoutGroup>
       </div>
+
+      <AnimatePresence>
+        {reading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+            onClick={() => setReading(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={SPRING_PLAYFUL}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-3xl bg-amber-50 p-6 shadow-xl"
+            >
+              <h3 className="mb-3 text-lg font-bold text-slate-800">
+                {reading.store_items.name}
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                {(reading.store_items.content_url ?? "").replaceAll(
+                  "{name}",
+                  profile.display_name
+                )}
+              </p>
+              <button
+                onClick={() => setReading(null)}
+                className="mt-5 w-full rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white"
+              >
+                Cerrar
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
