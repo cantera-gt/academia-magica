@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, Subject, Character, CharacterGender, AgeBracket } from "@/types/database";
+import type { MyProfile, Subject, Character, CharacterGender, AgeBracket, SubjectScore } from "@/types/database";
 import {
   staggerContainer,
   staggerItem,
@@ -18,6 +18,7 @@ export default function AlumnoInicioPage() {
   const supabase = createClient();
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [scores, setScores] = useState<Record<string, SubjectScore>>({});
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,6 +41,13 @@ export default function AlumnoInicioPage() {
         p_student_id: user.id,
       });
       setSubjects((subs as Subject[]) ?? []);
+
+      const { data: subjectScores } = await supabase.rpc("my_subject_scores");
+      const scoreMap: Record<string, SubjectScore> = {};
+      for (const sc of (subjectScores as SubjectScore[]) ?? []) {
+        scoreMap[sc.subject_id] = sc;
+      }
+      setScores(scoreMap);
 
       const { data: chars } = await supabase
         .from("characters")
@@ -306,6 +314,14 @@ export default function AlumnoInicioPage() {
                   <span className="text-sm font-semibold text-slate-700">
                     {s.name}
                   </span>
+                  {scores[s.id] && scores[s.id].topics_total > 0 && (
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-600">
+                      {scores[s.id].topics_passed}/{scores[s.id].topics_total} temas
+                      {scores[s.id].avg_exam_pct !== null
+                        ? ` · ${scores[s.id].avg_exam_pct}%`
+                        : ""}
+                    </span>
+                  )}
                 </motion.div>
               </Link>
             </motion.div>

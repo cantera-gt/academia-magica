@@ -68,6 +68,50 @@ export interface PlayableExercise {
   diamond_reward: number;
 }
 
+// Un tema/subtema de una materia, para el nivel de edad del alumno, con su
+// progreso (practica + examen final, estilo Anton "Test" con trofeos)
+export interface SubjectTopic {
+  topic_id: string;
+  name: string;
+  sort_order: number;
+  practice_count: number;
+  exam_count: number;
+  practice_best_pct: number | null;
+  exam_best_pct: number | null;
+  exam_best_stars: number;
+  exam_attempts: number;
+  passed: boolean;
+}
+
+export interface PlayableTopicExercise {
+  id: string;
+  type: ExerciseType;
+  difficulty: number;
+  prompt: { text: string; hint?: string };
+  options: string[] | null;
+  diamond_reward: number;
+  is_exam: boolean;
+}
+
+export interface FinishTopicResult {
+  practice_pct: number | null;
+  exam_pct: number | null;
+  stars: number;
+  passed: boolean;
+  is_first_pass: boolean;
+  bonus_diamonds: number;
+  total_diamonds: number;
+}
+
+export interface SubjectScore {
+  subject_id: string;
+  subject_name: string;
+  subject_icon: string | null;
+  topics_total: number;
+  topics_passed: number;
+  avg_exam_pct: number | null;
+}
+
 export interface AttemptResult {
   is_correct: boolean;
   diamonds_earned: number;
