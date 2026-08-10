@@ -6,6 +6,9 @@
   --color-magic-gold: #ffd93d;
   --color-hero-blue: #0984e3;
   --color-hero-red: #d63031;
+  --color-magic-cream: #fff8ec;
+  --color-magic-ink: #3b2a55;
+  --color-magic-mint: #7fe7c4;
 }
 
 html,
@@ -14,5 +17,9 @@ body {
 }
 
 body {
-  font-family: "Baloo 2", "Poppins", ui-rounded, system-ui, sans-serif;
+  font-family: var(--font-body), "Nunito", ui-rounded, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, system-ui, sans-serif;
 }
