@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { MyProfile, Subject, CharacterType } from "@/types/database";
+import {
+  staggerContainer,
+  staggerItem,
+  SPRING_PLAYFUL,
+} from "@/lib/motion";
+import DiamondCounter from "@/components/diamond-counter";
 
 const CHARACTERS: { type: CharacterType; label: string; emoji: string; gradient: string }[] = [
   {
@@ -79,22 +86,36 @@ export default function AlumnoInicioPage() {
   if (!profile.active_character) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-gradient-to-br from-indigo-500 to-purple-600 p-6">
-        <h1 className="text-center text-3xl font-bold text-white">
+        <motion.h1
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center text-3xl font-bold text-white"
+        >
           ¡Hola, {profile.display_name}! Elegí tu personaje
-        </h1>
-        <div className="flex flex-wrap justify-center gap-6">
+        </motion.h1>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer(0.15, 0.1)}
+          className="flex flex-wrap justify-center gap-6"
+        >
           {CHARACTERS.map((c) => (
-            <button
+            <motion.button
               key={c.type}
+              variants={staggerItem}
               disabled={saving}
               onClick={() => chooseCharacter(c.type)}
-              className={`flex w-48 flex-col items-center gap-3 rounded-3xl bg-gradient-to-br ${c.gradient} p-8 text-white shadow-xl transition hover:scale-105 disabled:opacity-50`}
+              whileHover={{ scale: 1.08, y: -4 }}
+              whileTap={{ scale: 0.95 }}
+              transition={SPRING_PLAYFUL}
+              className={`flex w-48 flex-col items-center gap-3 rounded-3xl bg-gradient-to-br ${c.gradient} p-8 text-white shadow-xl disabled:opacity-50`}
             >
               <span className="text-6xl">{c.emoji}</span>
               <span className="text-lg font-bold">{c.label}</span>
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -103,7 +124,10 @@ export default function AlumnoInicioPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <header
+      <motion.header
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className={`flex items-center justify-between bg-gradient-to-r ${character.gradient} px-6 py-6 text-white`}
       >
         <div>
@@ -114,33 +138,43 @@ export default function AlumnoInicioPage() {
             ¡Hola, {profile.display_name}! Vamos a aprender jugando 🎉
           </h1>
         </div>
-        <div className="rounded-full bg-white/20 px-4 py-2 text-lg font-bold backdrop-blur">
-          💎 {profile.diamonds}
-        </div>
-      </header>
+        <DiamondCounter value={profile.diamonds} />
+      </motion.header>
 
       <div className="mx-auto max-w-5xl p-6">
         <h2 className="text-xl font-bold text-slate-800">Tus materias</h2>
         {subjects.length === 0 && (
-          <p className="mt-4 rounded-xl bg-white p-5 text-sm text-slate-500 shadow">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 rounded-xl bg-white p-5 text-sm text-slate-500 shadow"
+          >
             Todavía no tenés materias asignadas. Pedile a tu administrador
             que te asigne algunas desde su panel.
-          </p>
+          </motion.p>
         )}
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer(0.05, 0.15)}
+          className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
+        >
           {subjects.map((s) => (
-            <div
+            <motion.div
               key={s.id}
-              className="flex flex-col items-center gap-2 rounded-2xl bg-white p-5 text-center shadow transition hover:scale-105"
+              variants={staggerItem}
+              whileHover={{ scale: 1.06, y: -3 }}
+              transition={SPRING_PLAYFUL}
+              className="flex flex-col items-center gap-2 rounded-2xl bg-white p-5 text-center shadow"
               style={{ borderTop: `4px solid ${s.color ?? "#a855f7"}` }}
             >
               <span className="text-4xl">{s.icon}</span>
               <span className="text-sm font-semibold text-slate-700">
                 {s.name}
               </span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         <p className="mt-6 text-sm text-slate-400">
           Los ejercicios jugables llegan en el próximo paso — por ahora podés
           ver tus materias y tu personaje.

@@ -3,8 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { ActiveStudent } from "@/types/database";
+import {
+  staggerContainer,
+  staggerItem,
+  fadeSlideUp,
+  SPRING_PLAYFUL,
+} from "@/lib/motion";
 
 const CHARACTER_EMOJI: Record<string, string> = {
   princess: "👑",
@@ -62,52 +69,82 @@ export default function AlumnoLoginPage() {
   if (selected) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gradient-to-br from-indigo-500 to-purple-600 p-6">
-        <div className="text-7xl">
-          {CHARACTER_EMOJI[selected.active_character ?? ""] ?? "⭐"}
-        </div>
-        <h1 className="text-2xl font-bold text-white">
-          ¡Hola, {selected.display_name}!
-        </h1>
-        <p className="text-white/80">Ingresá tu PIN secreto</p>
-
-        <form
-          onSubmit={handlePinSubmit}
-          className="flex flex-col items-center gap-4"
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer(0.08)}
+          className="flex flex-col items-center gap-6"
         >
-          <input
-            autoFocus
-            required
-            type="password"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={6}
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-            className="w-48 rounded-xl border-4 border-white/40 bg-white/20 px-4 py-3 text-center text-3xl tracking-[0.5em] text-white placeholder-white/40 outline-none focus:border-white"
-            placeholder="••••••"
-          />
-
-          {error && <p className="text-sm text-yellow-200">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={submitting || pin.length !== 6}
-            className="rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-700 shadow-lg disabled:opacity-50"
+          <motion.div
+            variants={staggerItem}
+            className="text-7xl"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           >
-            {submitting ? "Entrando..." : "Entrar 🚀"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSelected(null);
-              setPin("");
-              setError(null);
-            }}
-            className="text-sm text-white/70 underline"
+            {CHARACTER_EMOJI[selected.active_character ?? ""] ?? "⭐"}
+          </motion.div>
+          <motion.h1 variants={staggerItem} className="text-2xl font-bold text-white">
+            ¡Hola, {selected.display_name}!
+          </motion.h1>
+          <motion.p variants={staggerItem} className="text-white/80">
+            Ingresá tu PIN secreto
+          </motion.p>
+
+          <motion.form
+            variants={staggerItem}
+            onSubmit={handlePinSubmit}
+            className="flex flex-col items-center gap-4"
           >
-            No soy yo
-          </button>
-        </form>
+            <input
+              autoFocus
+              required
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+              className="w-48 rounded-xl border-4 border-white/40 bg-white/20 px-4 py-3 text-center text-3xl tracking-[0.5em] text-white placeholder-white/40 outline-none transition-colors focus:border-white"
+              placeholder="••••••"
+            />
+
+            <AnimatePresence>
+              {error && (
+                <motion.p
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={fadeSlideUp}
+                  className="text-sm text-yellow-200"
+                >
+                  {error}
+                </motion.p>
+              )}
+            </AnimatePresence>
+
+            <motion.button
+              type="submit"
+              disabled={submitting || pin.length !== 6}
+              whileHover={{ scale: submitting ? 1 : 1.05 }}
+              whileTap={{ scale: submitting ? 1 : 0.95 }}
+              transition={SPRING_PLAYFUL}
+              className="rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-700 shadow-lg disabled:opacity-50"
+            >
+              {submitting ? "Entrando..." : "Entrar 🚀"}
+            </motion.button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelected(null);
+                setPin("");
+                setError(null);
+              }}
+              className="text-sm text-white/70 underline"
+            >
+              No soy yo
+            </button>
+          </motion.form>
+        </motion.div>
       </main>
     );
   }
@@ -121,7 +158,14 @@ export default function AlumnoLoginPage() {
         ← Volver
       </Link>
 
-      <h1 className="text-3xl font-bold text-white">¿Quién sos?</h1>
+      <motion.h1
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="text-3xl font-bold text-white"
+      >
+        ¿Quién sos?
+      </motion.h1>
 
       {students.length === 0 ? (
         <p className="max-w-sm text-center text-white/80">
@@ -129,12 +173,21 @@ export default function AlumnoLoginPage() {
           registre en el panel de administración.
         </p>
       ) : (
-        <div className="flex flex-wrap justify-center gap-6">
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer(0.08)}
+          className="flex flex-wrap justify-center gap-6"
+        >
           {students.map((s) => (
-            <button
+            <motion.button
               key={s.username}
+              variants={staggerItem}
               onClick={() => setSelected(s)}
-              className="flex w-32 flex-col items-center gap-2 rounded-2xl bg-white/15 p-4 backdrop-blur transition hover:scale-105 hover:bg-white/25"
+              whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
+              whileTap={{ scale: 0.95 }}
+              transition={SPRING_PLAYFUL}
+              className="flex w-32 flex-col items-center gap-2 rounded-2xl bg-white/15 p-4 backdrop-blur hover:bg-white/25"
             >
               <span className="text-5xl">
                 {CHARACTER_EMOJI[s.active_character ?? ""] ?? "⭐"}
@@ -142,9 +195,9 @@ export default function AlumnoLoginPage() {
               <span className="font-semibold text-white">
                 {s.display_name}
               </span>
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       )}
     </main>
   );

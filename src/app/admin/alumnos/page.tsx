@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject } from "@/types/database";
+import { collapseExpand, fadeSlideUp, staggerItemUi, SPRING_UI } from "@/lib/motion";
 
 interface StudentRow {
   id: string;
@@ -135,22 +137,38 @@ export default function AlumnosPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Alumnos</h1>
-        <button
+        <motion.button
           onClick={() => setShowForm((v) => !v)}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          transition={SPRING_UI}
           className="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white hover:bg-purple-700"
         >
           {showForm ? "Cancelar" : "+ Nuevo alumno"}
-        </button>
+        </motion.button>
       </div>
 
-      {success && (
-        <p className="mt-4 rounded-lg bg-green-100 p-3 text-green-800">
-          {success}
-        </p>
-      )}
+      <AnimatePresence>
+        {success && (
+          <motion.p
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={fadeSlideUp}
+            className="mt-4 rounded-lg bg-green-100 p-3 text-green-800"
+          >
+            {success}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
-      {showForm && (
-        <form
+      <AnimatePresence initial={false}>
+        {showForm && (
+        <motion.form
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={collapseExpand}
           onSubmit={handleCreate}
           className="mt-6 grid grid-cols-1 gap-4 rounded-xl bg-white p-6 shadow sm:grid-cols-2"
         >
@@ -245,17 +263,26 @@ export default function AlumnosPage() {
             <p className="sm:col-span-2 text-sm text-red-600">{error}</p>
           )}
 
-          <button
+          <motion.button
             type="submit"
             disabled={submitting}
+            whileHover={{ scale: submitting ? 1 : 1.02 }}
+            whileTap={{ scale: submitting ? 1 : 0.98 }}
+            transition={SPRING_UI}
             className="sm:col-span-2 rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
           >
             {submitting ? "Creando..." : "Crear alumno"}
-          </button>
-        </form>
-      )}
+          </motion.button>
+        </motion.form>
+        )}
+      </AnimatePresence>
 
-      <div className="mt-6 overflow-hidden rounded-xl bg-white shadow">
+      <motion.div
+        initial="initial"
+        animate="animate"
+        variants={staggerItemUi}
+        className="mt-6 overflow-hidden rounded-xl bg-white shadow"
+      >
         {loading ? (
           <p className="p-6 text-slate-500">Cargando...</p>
         ) : students.length === 0 ? (
@@ -299,7 +326,7 @@ export default function AlumnosPage() {
             </tbody>
           </table>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

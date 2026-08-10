@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject } from "@/types/database";
+import { fadeSlideUp, SPRING_UI } from "@/lib/motion";
 
 interface StudentDetail {
   id: string;
@@ -166,29 +168,48 @@ export default function EditarAlumnoPage() {
           <h2 className="text-lg font-semibold text-slate-800">
             Materias asignadas ({assigned.size})
           </h2>
-          <button
+          <motion.button
             onClick={handleSave}
             disabled={saving}
+            whileHover={{ scale: saving ? 1 : 1.03 }}
+            whileTap={{ scale: saving ? 1 : 0.97 }}
+            transition={SPRING_UI}
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
           >
             {saving ? "Guardando..." : "Guardar cambios"}
-          </button>
+          </motion.button>
         </div>
         <p className="mt-1 text-sm text-slate-400">
           Solo las materias que marques acá le van a aparecer a{" "}
           {student?.display_name} en su panel.
         </p>
 
-        {success && (
-          <p className="mt-3 rounded-lg bg-green-100 p-2 text-sm text-green-800">
-            {success}
-          </p>
-        )}
-        {error && (
-          <p className="mt-3 rounded-lg bg-red-100 p-2 text-sm text-red-800">
-            {error}
-          </p>
-        )}
+        <AnimatePresence>
+          {success && (
+            <motion.p
+              key="success"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={fadeSlideUp}
+              className="mt-3 rounded-lg bg-green-100 p-2 text-sm text-green-800"
+            >
+              {success}
+            </motion.p>
+          )}
+          {error && (
+            <motion.p
+              key="error"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={fadeSlideUp}
+              className="mt-3 rounded-lg bg-red-100 p-2 text-sm text-red-800"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         <div className="mt-4">
           {Object.entries(subjectsByCategory).map(([category, subs]) => (

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { MyProfile } from "@/types/database";
+import StatCard from "@/components/stat-card";
 
 export default async function AdminHome() {
   const supabase = await createClient();
@@ -24,28 +24,18 @@ export default async function AdminHome() {
       <p className="mt-1 text-slate-600">Panel de Academia Mágica</p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Link
+        <StatCard
           href="/admin/alumnos"
-          className="rounded-xl bg-white p-5 shadow transition hover:shadow-md"
-        >
-          <p className="text-sm text-slate-500">Alumnos</p>
-          <p className="text-3xl font-bold text-purple-700">
-            {studentCount ?? 0}
-          </p>
-          <p className="mt-1 text-sm text-purple-600">Gestionar →</p>
-        </Link>
-
-        <Link
+          label="Alumnos"
+          value={studentCount ?? 0}
+          cta="Gestionar →"
+        />
+        <StatCard
           href="/admin/ejercicios"
-          className="rounded-xl bg-white p-5 shadow transition hover:shadow-md"
-        >
-          <p className="text-sm text-slate-500">Ejercicios</p>
-          <p className="text-3xl font-bold text-purple-700">
-            {exerciseCount ?? 0}
-          </p>
-          <p className="mt-1 text-sm text-purple-600">Gestionar →</p>
-        </Link>
-
+          label="Ejercicios"
+          value={exerciseCount ?? 0}
+          cta="Gestionar →"
+        />
         <div className="rounded-xl bg-white p-5 shadow">
           <p className="text-sm text-slate-500">Plataforma</p>
           <p className="text-lg font-bold text-slate-800">Academia Mágica</p>
