@@ -83,7 +83,10 @@ export type ItemCategory =
   | "accesorio"
   | "fondo"
   | "color_ropa"
-  | "extra";
+  | "extra"
+  | "deporte";
+
+export type ItemZone = "habitacion" | "estudio" | "jardin";
 
 export type GarmentSlot = "chaqueta" | "pantalon" | "gorro";
 
@@ -108,6 +111,8 @@ export interface StoreItem {
   content_url: string | null;
   // Solo aplica a objetos de la habitacion 3D (decoracion/mueble/fondo/mascota)
   placement: RoomPlacement;
+  // A que espacio 2D pertenece este item (Habitacion / Estudio / Jardin)
+  zone: ItemZone;
 }
 
 // Posicion 3D dentro de la habitacion (grid). rotationY en radianes.

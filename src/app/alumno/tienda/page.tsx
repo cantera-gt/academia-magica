@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, StoreItem, ItemCategory } from "@/types/database";
+import type { MyProfile, StoreItem, ItemCategory, ItemZone } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
 
@@ -18,7 +18,16 @@ const CATEGORY_ICON: Record<ItemCategory, string> = {
   fondo: "🖼️",
   color_ropa: "🎨",
   extra: "📖",
+  deporte: "⚽",
 };
+
+const ZONE_LABEL: Record<ItemZone, string> = {
+  habitacion: "Habitación 🏠",
+  estudio: "Zona de estudio 📚",
+  jardin: "Jardín 🌳",
+};
+
+const ZONE_TABS: ItemZone[] = ["habitacion", "estudio", "jardin"];
 
 const CATEGORY_LABEL: Record<ItemCategory, string> = {
   decoracion: "Decoración",
@@ -29,6 +38,7 @@ const CATEGORY_LABEL: Record<ItemCategory, string> = {
   fondo: "Fondos",
   color_ropa: "Colores de ropa",
   extra: "Extras",
+  deporte: "Deporte",
 };
 
 export default function TiendaPage() {
@@ -36,6 +46,7 @@ export default function TiendaPage() {
   const supabase = createClient();
 
   const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [zone, setZone] = useState<ItemZone>("habitacion");
   const [items, setItems] = useState<StoreItem[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<Set<string>>(new Set());
@@ -66,7 +77,7 @@ export default function TiendaPage() {
     const { data: storeData } = await supabase
       .from("store_items")
       .select(
-        "id, gender, name, description, category, price_diamonds, image_url, sort_order, garment_slot, color_hex, model_url, bone_target, content_url, placement"
+        "id, gender, name, description, category, price_diamonds, image_url, sort_order, garment_slot, color_hex, model_url, bone_target, content_url, placement, zone"
       )
       .eq("gender", myProfile.gender)
       .eq("active", true)
@@ -99,11 +110,12 @@ export default function TiendaPage() {
   const grouped = useMemo(() => {
     const groups: Record<string, StoreItem[]> = {};
     for (const item of items) {
+      if (item.zone !== zone) continue;
       if (!groups[item.category]) groups[item.category] = [];
       groups[item.category].push(item);
     }
     return groups;
-  }, [items]);
+  }, [items, zone]);
 
   async function buy(item: StoreItem) {
     if (buyingId) return;
@@ -214,6 +226,22 @@ export default function TiendaPage() {
       </header>
 
       <div className="mx-auto max-w-5xl p-6">
+        <div className="mb-6 flex gap-2 overflow-x-auto">
+          {ZONE_TABS.map((z) => (
+            <button
+              key={z}
+              onClick={() => setZone(z)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                zone === z
+                  ? "bg-purple-600 text-white"
+                  : "bg-white text-slate-500 shadow"
+              }`}
+            >
+              {ZONE_LABEL[z]}
+            </button>
+          ))}
+        </div>
+
         <AnimatePresence>
           {errorMsg && (
             <motion.p
@@ -228,9 +256,9 @@ export default function TiendaPage() {
           )}
         </AnimatePresence>
 
-        {items.length === 0 && (
+        {Object.keys(grouped).length === 0 && (
           <p className="rounded-xl bg-white p-6 text-center text-slate-500 shadow">
-            Todavía no hay items en la tienda para tu personaje.
+            Todavía no hay items en esta zona para tu personaje.
           </p>
         )}
 

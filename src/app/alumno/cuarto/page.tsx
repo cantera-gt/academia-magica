@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, InventoryItem, ItemCategory } from "@/types/database";
+import type { MyProfile, InventoryItem, ItemCategory, ItemZone } from "@/types/database";
 import { staggerContainer, staggerItem, SPRING_PLAYFUL } from "@/lib/motion";
 
 const CATEGORY_ICON: Record<ItemCategory, string> = {
@@ -17,11 +17,28 @@ const CATEGORY_ICON: Record<ItemCategory, string> = {
   fondo: "🖼️",
   color_ropa: "🎨",
   extra: "📖",
+  deporte: "⚽",
 };
 
-const ROOM_BG: Record<string, string> = {
-  girl: "from-pink-300 via-fuchsia-200 to-purple-200",
-  boy: "from-sky-300 via-cyan-200 to-blue-200",
+const ZONE_LABEL: Record<ItemZone, string> = {
+  habitacion: "Habitación 🏠",
+  estudio: "Zona de estudio 📚",
+  jardin: "Jardín 🌳",
+};
+
+const ZONE_TABS: ItemZone[] = ["habitacion", "estudio", "jardin"];
+
+const ROOM_BG: Record<string, Record<ItemZone, string>> = {
+  girl: {
+    habitacion: "from-pink-300 via-fuchsia-200 to-purple-200",
+    estudio: "from-amber-200 via-orange-100 to-yellow-100",
+    jardin: "from-lime-300 via-green-200 to-emerald-200",
+  },
+  boy: {
+    habitacion: "from-sky-300 via-cyan-200 to-blue-200",
+    estudio: "from-amber-200 via-orange-100 to-yellow-100",
+    jardin: "from-lime-300 via-green-200 to-emerald-200",
+  },
 };
 
 export default function CuartoPage() {
@@ -32,6 +49,7 @@ export default function CuartoPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [zone, setZone] = useState<ItemZone>("habitacion");
 
   const load = useCallback(async () => {
     const {
@@ -48,7 +66,7 @@ export default function CuartoPage() {
     const { data } = await supabase
       .from("student_inventory")
       .select(
-        "id, item_id, placed_in_room, position, store_items(id, gender, name, description, category, price_diamonds, image_url, sort_order)"
+        "id, item_id, placed_in_room, position, store_items(id, gender, name, description, category, price_diamonds, image_url, sort_order, zone)"
       )
       .eq("student_id", user.id);
 
@@ -103,9 +121,10 @@ export default function CuartoPage() {
     );
   }
 
-  const placed = inventory.filter((i) => i.placed_in_room);
-  const available = inventory.filter((i) => !i.placed_in_room);
-  const bgGradient = ROOM_BG[profile.gender] ?? ROOM_BG.girl;
+  const zoneInventory = inventory.filter((i) => i.store_items.zone === zone);
+  const placed = zoneInventory.filter((i) => i.placed_in_room);
+  const available = zoneInventory.filter((i) => !i.placed_in_room);
+  const bgGradient = (ROOM_BG[profile.gender] ?? ROOM_BG.girl)[zone];
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -127,6 +146,21 @@ export default function CuartoPage() {
       </header>
 
       <div className="mx-auto max-w-4xl p-6">
+        <div className="mb-6 flex gap-2 overflow-x-auto">
+          {ZONE_TABS.map((z) => (
+            <button
+              key={z}
+              onClick={() => setZone(z)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                zone === z
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-slate-500 shadow"
+              }`}
+            >
+              {ZONE_LABEL[z]}
+            </button>
+          ))}
+        </div>
         <LayoutGroup>
           {/* La habitacion */}
           <div
@@ -136,7 +170,7 @@ export default function CuartoPage() {
               <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center text-slate-500">
                 <p className="text-5xl">🪄</p>
                 <p className="mt-2 font-medium">
-                  Tu cuarto está vacío. Elegí items de abajo para decorarlo.
+                  Esta zona está vacía. Elegí items de abajo para decorarla.
                 </p>
               </div>
             ) : (
@@ -179,9 +213,9 @@ export default function CuartoPage() {
             </h2>
             {available.length === 0 ? (
               <p className="rounded-xl bg-white p-5 text-sm text-slate-500 shadow">
-                {inventory.length === 0
-                  ? "Todavía no compraste nada. Andá a la tienda a gastar tus diamantes."
-                  : "Ya colocaste todo lo que tenés en tu cuarto."}
+                {zoneInventory.length === 0
+                  ? "Todavía no compraste nada para esta zona. Andá a la tienda a gastar tus diamantes."
+                  : "Ya colocaste todo lo que tenés para esta zona."}
               </p>
             ) : (
               <motion.div
