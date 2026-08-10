@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { MyProfile, Subject, Character, CharacterGender } from "@/types/database";
+import type { AccessoryAttachment } from "@/components/character-viewer";
 import {
   staggerContainer,
   staggerItem,
@@ -20,6 +21,7 @@ export default function AlumnoInicioPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [equippedAccessories, setEquippedAccessories] = useState<AccessoryAttachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +49,19 @@ export default function AlumnoInicioPage() {
         .select("*")
         .order("sort_order");
       setCharacters((chars as Character[]) ?? []);
+
+      const { data: equipped } = await supabase
+        .from("student_inventory")
+        .select("store_items(model_url, bone_target)")
+        .eq("student_id", user.id)
+        .eq("equipped", true);
+
+      type EquippedRow = { store_items: { model_url: string | null; bone_target: string | null } | { model_url: string | null; bone_target: string | null }[] | null };
+      const accessories = ((equipped as unknown as EquippedRow[]) ?? [])
+        .map((row) => (Array.isArray(row.store_items) ? row.store_items[0] : row.store_items))
+        .filter((si): si is { model_url: string; bone_target: string } => !!si?.model_url && !!si?.bone_target)
+        .map((si) => ({ modelUrl: si.model_url, boneTarget: si.bone_target }));
+      setEquippedAccessories(accessories);
 
       setLoading(false);
     }
@@ -193,6 +208,7 @@ export default function AlumnoInicioPage() {
               heightM={character.height_m}
               autoRotate
               fit="bust"
+              accessories={equippedAccessories}
               className="h-20 w-20"
             />
           )}

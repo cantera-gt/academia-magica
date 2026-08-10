@@ -29,16 +29,80 @@ const FIT_CONFIG = {
 
 type Fit = keyof typeof FIT_CONFIG;
 
+export interface AccessoryAttachment {
+  /** URL del .glb del accesorio (solo la pieza, sin personaje ni esqueleto propio). */
+  modelUrl: string;
+  /**
+   * Substring (sin distinguir mayusculas) para encontrar el hueso al que
+   * engancharse dentro del esqueleto Mixamo del personaje, ej. "head",
+   * "spine2". Todos los personajes comparten los mismos nombres de hueso
+   * (prefijo "mixamorig:"), asi que un mismo accesorio sirve para los 6.
+   */
+  boneTarget: string;
+}
+
+/**
+ * Busca, dentro de un objeto 3D ya montado, el primer hueso cuyo nombre
+ * contenga `boneTarget` (sin importar mayusculas). Devuelve null si no lo
+ * encuentra (por ejemplo, mientras el modelo todavia no termino de montar).
+ */
+function findBone(root: THREE.Object3D, boneTarget: string): THREE.Bone | null {
+  const needle = boneTarget.toLowerCase();
+  let found: THREE.Bone | null = null;
+  root.traverse((obj) => {
+    if (!found && (obj as THREE.Bone).isBone && obj.name.toLowerCase().includes(needle)) {
+      found = obj as THREE.Bone;
+    }
+  });
+  return found;
+}
+
+/**
+ * Carga un accesorio (.glb) y lo engancha como hijo del hueso indicado del
+ * personaje ya montado. Al ser hijo del hueso en el scene graph de
+ * Three.js, sigue automaticamente la animacion sin ningun calculo manual
+ * de posicion por frame.
+ */
+function Accessory({
+  modelUrl,
+  boneTarget,
+  characterGroup,
+}: AccessoryAttachment & { characterGroup: React.RefObject<THREE.Group | null> }) {
+  const { scene: accessoryScene } = useGLTF(modelUrl);
+
+  useEffect(() => {
+    const root = characterGroup.current;
+    if (!root) return;
+
+    const bone = findBone(root, boneTarget);
+    if (!bone) {
+      console.warn(`[Accessory] No se encontro hueso "${boneTarget}" para ${modelUrl}`);
+      return;
+    }
+
+    const instance = accessoryScene.clone(true);
+    bone.add(instance);
+
+    return () => {
+      bone.remove(instance);
+    };
+  }, [accessoryScene, boneTarget, characterGroup, modelUrl]);
+
+  return null;
+}
+
 function Model({
   modelUrl,
   heightM,
   autoRotate,
   fit,
+  accessories,
 }: {
   modelUrl: string;
   heightM: number;
   autoRotate: boolean;
   fit: Fit;
+  accessories: AccessoryAttachment[];
 }) {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(modelUrl);
@@ -64,6 +128,9 @@ function Model({
   return (
     <group ref={group} scale={scale} position={[0, groupOffsetY, 0]}>
       <primitive object={scene} />
+      {accessories.map((acc) => (
+        <Accessory key={acc.modelUrl + acc.boneTarget} {...acc} characterGroup={group} />
+      ))}
     </group>
   );
 }
@@ -75,6 +142,8 @@ export interface CharacterViewerProps {
   interactive?: boolean;
   /** "full" = cuerpo entero (selector de personaje). "bust" = cabeza y hombros (avatar chico). */
   fit?: Fit;
+  /** Accesorios equipados (gorro, mochila, etc.) enganchados al esqueleto. */
+  accessories?: AccessoryAttachment[];
   className?: string;
 }
 
@@ -84,6 +153,7 @@ export default function CharacterViewer({
   autoRotate = true,
   interactive = false,
   fit = "full",
+  accessories = [],
   className,
 }: CharacterViewerProps) {
   const { cameraDistance, fov } = FIT_CONFIG[fit];
@@ -99,7 +169,13 @@ export default function CharacterViewer({
         <directionalLight position={[2, 3, 2]} intensity={1.6} />
         <directionalLight position={[-2, 1, -2]} intensity={0.4} />
         <Suspense fallback={null}>
-          <Model modelUrl={modelUrl} heightM={heightM} autoRotate={autoRotate} fit={fit} />
+          <Model
+            modelUrl={modelUrl}
+            heightM={heightM}
+            autoRotate={autoRotate}
+            fit={fit}
+            accessories={accessories}
+          />
           {fit === "full" && (
             <ContactShadows
               position={[0, -TARGET_HEIGHT / 2, 0]}

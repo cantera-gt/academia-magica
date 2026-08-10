@@ -38,8 +38,10 @@ export default function TiendaPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [items, setItems] = useState<StoreItem[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
+  const [equipped, setEquipped] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [equippingId, setEquippingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [justBought, setJustBought] = useState<string | null>(null);
 
@@ -63,18 +65,28 @@ export default function TiendaPage() {
 
     const { data: storeData } = await supabase
       .from("store_items")
-      .select("id, gender, name, description, category, price_diamonds, image_url, sort_order")
+      .select(
+        "id, gender, name, description, category, price_diamonds, image_url, sort_order, garment_slot, color_hex, model_url, bone_target, content_url, placement"
+      )
       .eq("gender", myProfile.gender)
       .eq("active", true)
+      // "color_ropa" todavia no se ve reflejado en el personaje 3D (pendiente
+      // de separar los materiales de ropa en Blender para 5 de los 6
+      // personajes) -> se oculta de la tienda hasta que este wireado de
+      // verdad, para no vender algo que visualmente no hace nada.
+      .neq("category", "color_ropa")
       .order("category")
       .order("sort_order");
     setItems((storeData as StoreItem[]) ?? []);
 
     const { data: invData } = await supabase
       .from("student_inventory")
-      .select("item_id")
+      .select("item_id, equipped")
       .eq("student_id", user.id);
     setOwned(new Set((invData ?? []).map((r: { item_id: string }) => r.item_id)));
+    setEquipped(
+      new Set((invData ?? []).filter((r: { equipped: boolean }) => r.equipped).map((r: { item_id: string }) => r.item_id))
+    );
 
     setLoading(false);
   }, [supabase, router]);
@@ -113,6 +125,50 @@ export default function TiendaPage() {
     setJustBought(item.id);
     setTimeout(() => setJustBought(null), 1600);
     setBuyingId(null);
+  }
+
+  const EQUIPPABLE: ItemCategory[] = ["accesorio", "color_ropa"];
+
+  async function toggleEquip(item: StoreItem) {
+    if (equippingId) return;
+    setErrorMsg(null);
+    setEquippingId(item.id);
+    const nextEquipped = !equipped.has(item.id);
+
+    const { error } = await supabase.rpc("set_item_equipped", {
+      p_item_id: item.id,
+      p_equipped: nextEquipped,
+    });
+
+    if (error) {
+      setErrorMsg(error.message.replace(/^.*: /, ""));
+      setEquippingId(null);
+      return;
+    }
+
+    setEquipped((prev) => {
+      const next = new Set(prev);
+      if (nextEquipped) {
+        // Un color de ropa solo puede tener uno equipado por slot: desequipa
+        // en el estado local cualquier otro color del mismo garment_slot.
+        if (item.category === "color_ropa") {
+          for (const other of items) {
+            if (
+              other.category === "color_ropa" &&
+              other.garment_slot === item.garment_slot &&
+              other.id !== item.id
+            ) {
+              next.delete(other.id);
+            }
+          }
+        }
+        next.add(item.id);
+      } else {
+        next.delete(item.id);
+      }
+      return next;
+    });
+    setEquippingId(null);
   }
 
   if (loading) {
@@ -191,9 +247,12 @@ export default function TiendaPage() {
             >
               {catItems.map((item) => {
                 const isOwned = owned.has(item.id);
+                const isEquipped = equipped.has(item.id);
                 const canAfford = profile.diamonds >= item.price_diamonds;
                 const isBuying = buyingId === item.id;
+                const isEquipping = equippingId === item.id;
                 const bought = justBought === item.id;
+                const isEquippable = EQUIPPABLE.includes(item.category);
 
                 return (
                   <motion.div
@@ -202,7 +261,14 @@ export default function TiendaPage() {
                     whileHover={!isOwned ? { y: -3 } : undefined}
                     className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center shadow"
                   >
-                    <span className="text-4xl">{CATEGORY_ICON[item.category]}</span>
+                    {item.category === "color_ropa" && item.color_hex ? (
+                      <span
+                        className="h-10 w-10 rounded-full border border-slate-200 shadow-inner"
+                        style={{ backgroundColor: item.color_hex }}
+                      />
+                    ) : (
+                      <span className="text-4xl">{CATEGORY_ICON[item.category]}</span>
+                    )}
                     <span className="text-sm font-semibold text-slate-700">
                       {item.name}
                     </span>
@@ -211,7 +277,23 @@ export default function TiendaPage() {
                     )}
 
                     <AnimatePresence mode="wait">
-                      {isOwned ? (
+                      {isOwned && isEquippable ? (
+                        <motion.button
+                          key="equip"
+                          onClick={() => toggleEquip(item)}
+                          disabled={isEquipping}
+                          whileHover={{ scale: isEquipping ? 1 : 1.05 }}
+                          whileTap={{ scale: isEquipping ? 1 : 0.95 }}
+                          transition={SPRING_PLAYFUL}
+                          className={`mt-1 w-full rounded-lg px-3 py-2 text-sm font-bold disabled:opacity-60 ${
+                            isEquipped
+                              ? "bg-emerald-500 text-white"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {isEquipping ? "..." : isEquipped ? "Puesto ✓" : "Ponérselo"}
+                        </motion.button>
+                      ) : isOwned ? (
                         <motion.span
                           key="owned"
                           initial={{ opacity: 0, scale: 0.8 }}
