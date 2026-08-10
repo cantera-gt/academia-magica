@@ -13,11 +13,6 @@ import {
   SPRING_PLAYFUL,
 } from "@/lib/motion";
 
-const CHARACTER_EMOJI: Record<string, string> = {
-  princess: "👑",
-  superhero: "🦸",
-};
-
 export default function AlumnoLoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -77,11 +72,20 @@ export default function AlumnoLoginPage() {
         >
           <motion.div
             variants={staggerItem}
-            className="text-7xl"
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-white/20"
           >
-            {CHARACTER_EMOJI[selected.active_character ?? ""] ?? "⭐"}
+            {selected.thumbnail_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={selected.thumbnail_url}
+                alt={selected.display_name}
+                className="h-full w-full object-cover object-top"
+              />
+            ) : (
+              <span className="text-6xl">⭐</span>
+            )}
           </motion.div>
           <motion.h1 variants={staggerItem} className="text-2xl font-bold text-white">
             ¡Hola, {selected.display_name}!
@@ -189,8 +193,17 @@ export default function AlumnoLoginPage() {
               transition={SPRING_PLAYFUL}
               className="flex w-32 flex-col items-center gap-2 rounded-2xl bg-white/15 p-4 backdrop-blur hover:bg-white/25"
             >
-              <span className="text-5xl">
-                {CHARACTER_EMOJI[s.active_character ?? ""] ?? "⭐"}
+              <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white/20">
+                {s.thumbnail_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={s.thumbnail_url}
+                    alt={s.display_name}
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <span className="text-4xl">⭐</span>
+                )}
               </span>
               <span className="font-semibold text-white">
                 {s.display_name}

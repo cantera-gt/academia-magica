@@ -13,7 +13,7 @@ interface StudentDetail {
   display_name: string;
   username: string | null;
   diamonds: number;
-  active_character: string | null;
+  gender: string | null;
 }
 
 export default function EditarAlumnoPage() {
@@ -44,7 +44,7 @@ export default function EditarAlumnoPage() {
 
     const { data: studentData, error: studentErr } = await supabase
       .from("profiles")
-      .select("id, display_name, username, diamonds, active_character")
+      .select("id, display_name, username, diamonds, gender")
       .eq("id", studentId)
       .eq("role", "student")
       .maybeSingle();

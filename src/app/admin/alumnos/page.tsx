@@ -13,7 +13,7 @@ interface StudentRow {
   display_name: string;
   birthdate: string | null;
   diamonds: number;
-  active_character: string | null;
+  gender: string | null;
   is_active: boolean;
 }
 
@@ -59,7 +59,7 @@ export default function AlumnosPage() {
     setLoading(true);
     const { data } = await supabase
       .from("profiles")
-      .select("id, username, display_name, birthdate, diamonds, active_character, is_active")
+      .select("id, username, display_name, birthdate, diamonds, gender, is_active")
       .eq("role", "student")
       .order("display_name");
     setStudents((data as StudentRow[]) ?? []);
@@ -308,7 +308,7 @@ export default function AlumnosPage() {
                   </td>
                   <td className="px-4 py-3 text-slate-500">{s.username}</td>
                   <td className="px-4 py-3 text-slate-500">
-                    {s.active_character ?? "Sin elegir"}
+                    {s.gender === "girl" ? "Nena" : s.gender === "boy" ? "Nene" : "Sin elegir"}
                   </td>
                   <td className="px-4 py-3 text-slate-500">
                     💎 {s.diamonds}

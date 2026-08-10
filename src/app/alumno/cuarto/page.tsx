@@ -18,8 +18,8 @@ const CATEGORY_ICON: Record<ItemCategory, string> = {
 };
 
 const ROOM_BG: Record<string, string> = {
-  princess: "from-pink-300 via-fuchsia-200 to-purple-200",
-  superhero: "from-sky-300 via-cyan-200 to-blue-200",
+  girl: "from-pink-300 via-fuchsia-200 to-purple-200",
+  boy: "from-sky-300 via-cyan-200 to-blue-200",
 };
 
 export default function CuartoPage() {
@@ -46,7 +46,7 @@ export default function CuartoPage() {
     const { data } = await supabase
       .from("student_inventory")
       .select(
-        "id, item_id, placed_in_room, position, store_items(id, character_type, name, description, category, price_diamonds, image_url, sort_order)"
+        "id, item_id, placed_in_room, position, store_items(id, gender, name, description, category, price_diamonds, image_url, sort_order)"
       )
       .eq("student_id", user.id);
 
@@ -88,7 +88,7 @@ export default function CuartoPage() {
     );
   }
 
-  if (!profile?.active_character) {
+  if (!profile?.gender) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
@@ -103,7 +103,7 @@ export default function CuartoPage() {
 
   const placed = inventory.filter((i) => i.placed_in_room);
   const available = inventory.filter((i) => !i.placed_in_room);
-  const bgGradient = ROOM_BG[profile.active_character] ?? ROOM_BG.princess;
+  const bgGradient = ROOM_BG[profile.gender] ?? ROOM_BG.girl;
 
   return (
     <main className="min-h-screen bg-slate-50">

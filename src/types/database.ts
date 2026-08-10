@@ -1,5 +1,15 @@
 export type UserRole = "admin" | "student";
-export type CharacterType = "princess" | "superhero";
+export type CharacterGender = "girl" | "boy";
+
+export interface Character {
+  id: string;
+  gender: CharacterGender;
+  display_name: string;
+  model_url: string;
+  thumbnail_url: string;
+  height_m: number;
+  sort_order: number;
+}
 
 export interface MyProfile {
   id: string;
@@ -7,7 +17,8 @@ export interface MyProfile {
   display_name: string;
   username: string | null;
   avatar_url: string | null;
-  active_character: CharacterType | null;
+  gender: CharacterGender | null;
+  character_id: string | null;
   diamonds: number;
   household_id: string;
 }
@@ -16,7 +27,9 @@ export interface ActiveStudent {
   username: string;
   display_name: string;
   avatar_url: string | null;
-  active_character: CharacterType | null;
+  gender: CharacterGender | null;
+  character_id: string | null;
+  thumbnail_url: string | null;
 }
 
 export interface Subject {
@@ -67,7 +80,7 @@ export type ItemCategory =
 
 export interface StoreItem {
   id: string;
-  character_type: CharacterType;
+  gender: CharacterGender;
   name: string;
   description: string | null;
   category: ItemCategory;

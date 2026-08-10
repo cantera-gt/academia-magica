@@ -52,15 +52,15 @@ export default function TiendaPage() {
     const myProfile = p as MyProfile | null;
     setProfile(myProfile);
 
-    if (!myProfile?.active_character) {
+    if (!myProfile?.gender) {
       setLoading(false);
       return;
     }
 
     const { data: storeData } = await supabase
       .from("store_items")
-      .select("id, character_type, name, description, category, price_diamonds, image_url, sort_order")
-      .eq("character_type", myProfile.active_character)
+      .select("id, gender, name, description, category, price_diamonds, image_url, sort_order")
+      .eq("gender", myProfile.gender)
       .eq("active", true)
       .order("category")
       .order("sort_order");
@@ -119,7 +119,7 @@ export default function TiendaPage() {
     );
   }
 
-  if (!profile?.active_character) {
+  if (!profile?.gender) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
