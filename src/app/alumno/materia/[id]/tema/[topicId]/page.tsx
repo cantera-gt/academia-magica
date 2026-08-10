@@ -55,6 +55,19 @@ export default function TemaPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [promptSpeaking, setPromptSpeaking] = useState(false);
+
+  const NEUTRAL_ES_VOICE = "es-ES-ElviraNeural";
+
+  function speakPrompt() {
+    if (!current) return;
+    speakText(
+      current.prompt.text,
+      teacher?.voice_name ?? NEUTRAL_ES_VOICE,
+      () => setPromptSpeaking(true),
+      () => setPromptSpeaking(false)
+    );
+  }
 
   const practiceList = exercises.filter((e) => !e.is_exam);
   const examList = exercises.filter((e) => e.is_exam);
@@ -192,13 +205,17 @@ export default function TemaPage() {
     return raw.replace("{name}", profile?.display_name ?? "");
   }
 
+  // Voz neutra en espanol para cuando se muestra la traduccion de un
+  // profesor que da su materia en otro idioma (ej. James en Ingles).
+  const FALLBACK_ES_VOICE = "es-ES-AlvaroNeural";
+
   function handleSpeak() {
     if (!teacher) return;
-    const lang = showTranslation && teacher.greeting_es ? "es-ES" : teacher.speak_lang;
+    const voice =
+      showTranslation && teacher.greeting_es ? FALLBACK_ES_VOICE : teacher.voice_name;
     speakText(
       greetingText(),
-      lang,
-      teacher.voice_name_hints,
+      voice,
       () => setSpeaking(true),
       () => setSpeaking(false)
     );
@@ -418,7 +435,16 @@ export default function TemaPage() {
                     💡 {current.prompt.hint}
                   </p>
                 )}
-                <h2 className="text-xl font-bold text-slate-800">{current.prompt.text}</h2>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-xl font-bold text-slate-800">{current.prompt.text}</h2>
+                  <button
+                    onClick={speakPrompt}
+                    aria-label="Escuchar enunciado"
+                    className="shrink-0 rounded-full bg-purple-100 p-2 text-purple-700 hover:bg-purple-200"
+                  >
+                    {promptSpeaking ? "🔊" : "🔈"}
+                  </button>
+                </div>
 
                 {current.options ? (
                   <motion.div

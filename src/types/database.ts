@@ -98,8 +98,7 @@ export interface SubjectTeacher {
 
 export interface MySubjectTeacher extends SubjectTeacher {
   body_image_url: string | null;
-  speak_lang: string;
-  voice_name_hints: string[];
+  voice_name: string;
   greeting_template: string;
   greeting_es: string | null;
 }

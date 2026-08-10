@@ -1,0 +1,67 @@
+import { NextRequest, NextResponse } from "next/server";
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+
+// Genera audio con voces neuronales gratuitas (motor "Leer en voz alta" de
+// Microsoft Edge, sin necesidad de API key ni registro). Corre en Node.js
+// (no en el runtime "edge" de Vercel) porque msedge-tts usa APIs de Node.
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
+// Lista blanca de voces validas que usamos en la app, para no dejar que
+// cualquiera use este endpoint como proxy de texto-a-voz libre.
+const ALLOWED_VOICES = new Set([
+  "es-ES-ElviraNeural",
+  "es-ES-AlvaroNeural",
+  "en-GB-RyanNeural",
+  "es-AR-ElenaNeural",
+  "es-MX-JorgeNeural",
+  "es-US-PalomaNeural",
+  "es-GT-MartaNeural",
+  "es-CL-LorenzoNeural",
+]);
+
+function stripUnspeakable(text: string): string {
+  // Saca emojis y simbolos raros: algunos motores de voz los "leen" en
+  // vez de ignorarlos (ej: 🚀 -> "cohete"). Tambien recorta espacios extra
+  // que quedan despues de sacar los emojis.
+  return text
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}️]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { text, voice } = (await req.json()) as { text?: string; voice?: string };
+
+    if (!text || !voice || !ALLOWED_VOICES.has(voice)) {
+      return NextResponse.json({ error: "Parametros invalidos" }, { status: 400 });
+    }
+
+    const clean = stripUnspeakable(text).slice(0, 600);
+    if (!clean) {
+      return NextResponse.json({ error: "Nada para leer" }, { status: 400 });
+    }
+
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    const { audioStream } = tts.toStream(clean);
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of audioStream as AsyncIterable<Buffer>) {
+      chunks.push(chunk);
+    }
+    const audio = Buffer.concat(chunks);
+
+    return new NextResponse(audio, {
+      status: 200,
+      headers: {
+        "Content-Type": "audio/mpeg",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error("TTS error", err);
+    return NextResponse.json({ error: "No se pudo generar el audio" }, { status: 500 });
+  }
+}

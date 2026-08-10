@@ -102,11 +102,10 @@ export default function MateriaTopicsPage() {
   );
 
   function speakRecommendation() {
-    if (!recommendation) return;
+    if (!recommendation || !myTeacher) return;
     speakText(
       recommendation.message,
-      "es-ES",
-      [],
+      myTeacher.voice_name,
       () => setSpeaking(true),
       () => setSpeaking(false)
     );

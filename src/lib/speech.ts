@@ -1,50 +1,59 @@
 "use client";
 
-// Utilidad chica para hablar texto con la Web Speech API del navegador.
-// No es un servicio de voces "premium": depende de las voces instaladas en
-// el dispositivo/navegador del alumno. Buscamos primero por nombre (hints
-// tipo "Mónica", "Google español") y si no hay ninguna, caemos a cualquier
-// voz que matchee el idioma, y si no hay ninguna del idioma, a la voz por
-// defecto del navegador.
-export function speakText(
+// TTS server-side (voces neuronales de Microsoft Edge, via /api/tts) en vez
+// de la Web Speech API del navegador: mas natural, no lee emojis (se sacan
+// en el servidor), y siempre es la MISMA voz para el mismo profesor (no
+// depende de que voces tenga instaladas el dispositivo del alumno).
+
+let currentAudio: HTMLAudioElement | null = null;
+
+export async function speakText(
   text: string,
-  lang: string,
-  voiceHints: string[],
+  voiceName: string,
   onStart?: () => void,
   onEnd?: () => void
 ) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+  stopSpeaking();
+
+  try {
+    const res = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: voiceName }),
+    });
+
+    if (!res.ok) {
+      onEnd?.();
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+
+    audio.onplay = () => onStart?.();
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      if (currentAudio === audio) currentAudio = null;
+      onEnd?.();
+    };
+    audio.onerror = () => {
+      URL.revokeObjectURL(url);
+      if (currentAudio === audio) currentAudio = null;
+      onEnd?.();
+    };
+
+    await audio.play();
+  } catch {
     onEnd?.();
-    return;
   }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
-  utterance.rate = 0.95;
-  utterance.pitch = 1;
-
-  const voices = window.speechSynthesis.getVoices();
-  const baseLang = lang.split("-")[0];
-
-  let chosen =
-    voices.find((v) => voiceHints.some((h) => v.name.includes(h))) ??
-    voices.find((v) => v.lang === lang) ??
-    voices.find((v) => v.lang.startsWith(baseLang)) ??
-    null;
-
-  if (chosen) utterance.voice = chosen;
-
-  utterance.onstart = () => onStart?.();
-  utterance.onend = () => onEnd?.();
-  utterance.onerror = () => onEnd?.();
-
-  window.speechSynthesis.speak(utterance);
 }
 
 export function stopSpeaking() {
-  if (typeof window !== "undefined" && "speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
 }
