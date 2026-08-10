@@ -9,8 +9,12 @@ import type {
   PlayableTopicExercise,
   AttemptResult,
   FinishTopicResult,
+  MySubjectTeacher,
+  TopicDetail,
+  MyProfile,
 } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
+import { speakText, stopSpeaking } from "@/lib/speech";
 
 type Stage =
   | "loading"
@@ -46,6 +50,12 @@ export default function TemaPage() {
   const [diamondsThisRound, setDiamondsThisRound] = useState(0);
   const [finishResult, setFinishResult] = useState<FinishTopicResult | null>(null);
 
+  const [topicDetail, setTopicDetail] = useState<TopicDetail | null>(null);
+  const [teacher, setTeacher] = useState<MySubjectTeacher | null>(null);
+  const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+
   const practiceList = exercises.filter((e) => !e.is_exam);
   const examList = exercises.filter((e) => e.is_exam);
   const currentList = phase === "practice" ? practiceList : examList;
@@ -62,10 +72,25 @@ export default function TemaPage() {
       return;
     }
 
+    const { data: topicRow } = await supabase
+      .from("topics")
+      .select("id, subject_id, name, recommended_age, prerequisites")
+      .eq("id", topicId)
+      .maybeSingle();
+    setTopicDetail((topicRow as TopicDetail) ?? null);
+
+    const { data: teacherData } = await supabase.rpc("my_subject_teacher", {
+      p_subject_id: subjectId,
+    });
+    setTeacher(((teacherData as MySubjectTeacher[]) ?? [])[0] ?? null);
+
+    const { data: profileData } = await supabase.rpc("my_profile").maybeSingle();
+    setProfile((profileData as MyProfile) ?? null);
+
     const list = (data as PlayableTopicExercise[]) ?? [];
     setExercises(list);
     setStage(list.length === 0 ? "empty" : "intro");
-  }, [supabase, topicId]);
+  }, [supabase, topicId, subjectId]);
 
   useEffect(() => {
     load();
@@ -156,6 +181,29 @@ export default function TemaPage() {
     finishTopic(practiceCorrect, examCorrect);
   }
 
+  function greetingText(): string {
+    if (!teacher) return "";
+    const raw =
+      showTranslation && teacher.greeting_es ? teacher.greeting_es : teacher.greeting_template;
+    return raw.replace("{name}", profile?.display_name ?? "");
+  }
+
+  function handleSpeak() {
+    if (!teacher) return;
+    const lang = showTranslation && teacher.greeting_es ? "es-ES" : teacher.speak_lang;
+    speakText(
+      greetingText(),
+      lang,
+      teacher.voice_name_hints,
+      () => setSpeaking(true),
+      () => setSpeaking(false)
+    );
+  }
+
+  useEffect(() => {
+    return () => stopSpeaking();
+  }, []);
+
   const isExamPhase = phase === "exam" && stage !== "exam_intro";
   const bg = isExamPhase
     ? "bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500"
@@ -219,28 +267,83 @@ export default function TemaPage() {
               animate="animate"
               exit="exit"
               variants={fadeSlideUp}
-              className="mt-10 flex flex-col items-center gap-4 rounded-3xl bg-white/10 p-8 text-center text-white backdrop-blur"
+              className="mt-6 flex flex-col items-center gap-4"
             >
-              <span className="text-6xl">📖</span>
-              <p className="text-white/80">
-                {practiceList.length} ejercicio{practiceList.length !== 1 ? "s" : ""} de práctica
-                {examList.length > 0 && (
-                  <>
-                    {" "}
-                    + un Test final de {examList.length} pregunta
-                    {examList.length !== 1 ? "s" : ""} 🏆
-                  </>
+              {teacher && (
+                <div className="flex w-full items-start gap-3">
+                  <motion.div
+                    animate={speaking ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.5, repeat: speaking ? Infinity : 0 }}
+                    className="shrink-0"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={teacher.image_url}
+                      alt={teacher.name}
+                      className="h-20 w-20 rounded-full border-4 border-white/40 object-cover"
+                    />
+                  </motion.div>
+                  <div className="flex-1 rounded-2xl rounded-tl-none bg-white p-4 text-left shadow-xl">
+                    <p className="text-sm font-bold text-purple-700">
+                      {teacher.name} {teacher.flag_emoji}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700">{greetingText()}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button
+                        onClick={handleSpeak}
+                        className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 hover:bg-purple-200"
+                      >
+                        {speaking ? "🔊 Hablando..." : "🔊 Escuchar"}
+                      </button>
+                      {teacher.greeting_es && (
+                        <button
+                          onClick={() => setShowTranslation((v) => !v)}
+                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200"
+                        >
+                          {showTranslation ? "🔁 Ver en original" : "🔁 Traducir al español"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="w-full rounded-2xl bg-white/10 p-6 text-center text-white backdrop-blur">
+                <span className="text-5xl">📖</span>
+                <p className="mt-2 text-white/80">
+                  {practiceList.length} ejercicio{practiceList.length !== 1 ? "s" : ""} de práctica
+                  {examList.length > 0 && (
+                    <>
+                      {" "}
+                      + un Test final de {examList.length} pregunta
+                      {examList.length !== 1 ? "s" : ""} 🏆
+                    </>
+                  )}
+                </p>
+
+                {topicDetail?.recommended_age != null && (
+                  <p className="mt-2 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+                    Recomendado desde los {topicDetail.recommended_age} años
+                  </p>
                 )}
-              </p>
-              <motion.button
-                onClick={startRound}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={SPRING_PLAYFUL}
-                className="mt-2 rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-700 shadow-lg"
-              >
-                Empezar 🚀
-              </motion.button>
+
+                {topicDetail?.prerequisites && (
+                  <div className="mt-4 rounded-xl bg-black/15 p-4 text-left text-sm text-white/90">
+                    <p className="mb-1 font-bold">💡 Para esta lección conviene:</p>
+                    <p>{topicDetail.prerequisites}</p>
+                  </div>
+                )}
+
+                <motion.button
+                  onClick={startRound}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={SPRING_PLAYFUL}
+                  className="mt-4 rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-700 shadow-lg"
+                >
+                  Empezar 🚀
+                </motion.button>
+              </div>
             </motion.div>
           )}
 

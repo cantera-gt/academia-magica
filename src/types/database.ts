@@ -74,6 +74,8 @@ export interface SubjectTopic {
   topic_id: string;
   name: string;
   sort_order: number;
+  recommended_age: number | null;
+  prerequisites: string | null;
   practice_count: number;
   exam_count: number;
   practice_best_pct: number | null;
@@ -81,6 +83,31 @@ export interface SubjectTopic {
   exam_best_stars: number;
   exam_attempts: number;
   passed: boolean;
+}
+
+export interface SubjectTeacher {
+  teacher_id: string;
+  name: string;
+  gender: "mujer" | "hombre";
+  nationality: string;
+  flag_emoji: string;
+  age: number | null;
+  image_url: string;
+}
+
+export interface MySubjectTeacher extends SubjectTeacher {
+  speak_lang: string;
+  voice_name_hints: string[];
+  greeting_template: string;
+  greeting_es: string | null;
+}
+
+export interface TopicDetail {
+  id: string;
+  subject_id: string;
+  name: string;
+  recommended_age: number | null;
+  prerequisites: string | null;
 }
 
 export interface PlayableTopicExercise {
