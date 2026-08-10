@@ -5,15 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, Subject, Character, CharacterGender } from "@/types/database";
-import type { AccessoryAttachment } from "@/components/character-viewer";
+import type { MyProfile, Subject, Character, CharacterGender, AgeBracket } from "@/types/database";
 import {
   staggerContainer,
   staggerItem,
   SPRING_PLAYFUL,
 } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
-import CharacterViewer from "@/components/character-viewer";
 
 export default function AlumnoInicioPage() {
   const router = useRouter();
@@ -21,7 +19,6 @@ export default function AlumnoInicioPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [equippedAccessories, setEquippedAccessories] = useState<AccessoryAttachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -47,21 +44,9 @@ export default function AlumnoInicioPage() {
       const { data: chars } = await supabase
         .from("characters")
         .select("*")
+        .eq("active", true)
         .order("sort_order");
       setCharacters((chars as Character[]) ?? []);
-
-      const { data: equipped } = await supabase
-        .from("student_inventory")
-        .select("store_items(model_url, bone_target)")
-        .eq("student_id", user.id)
-        .eq("equipped", true);
-
-      type EquippedRow = { store_items: { model_url: string | null; bone_target: string | null } | { model_url: string | null; bone_target: string | null }[] | null };
-      const accessories = ((equipped as unknown as EquippedRow[]) ?? [])
-        .map((row) => (Array.isArray(row.store_items) ? row.store_items[0] : row.store_items))
-        .filter((si): si is { model_url: string; bone_target: string } => !!si?.model_url && !!si?.bone_target)
-        .map((si) => ({ modelUrl: si.model_url, boneTarget: si.bone_target }));
-      setEquippedAccessories(accessories);
 
       setLoading(false);
     }
@@ -72,6 +57,13 @@ export default function AlumnoInicioPage() {
     setSaving(true);
     await supabase.from("profiles").update({ gender: g }).eq("id", profile!.id);
     setProfile((p) => (p ? { ...p, gender: g } : p));
+    setSaving(false);
+  }
+
+  async function chooseAge(a: AgeBracket) {
+    setSaving(true);
+    await supabase.from("profiles").update({ age_bracket: a }).eq("id", profile!.id);
+    setProfile((p) => (p ? { ...p, age_bracket: a } : p));
     setSaving(false);
   }
 
@@ -142,9 +134,55 @@ export default function AlumnoInicioPage() {
     );
   }
 
-  // Paso 2: elegir personaje (3D) segun el genero
+  // Paso 2: elegir edad
+  if (!profile.age_bracket) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-10 bg-gradient-to-br from-indigo-500 to-purple-600 p-6">
+        <motion.h1
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center text-3xl font-bold text-white"
+        >
+          ¿Cuántos años tenés?
+        </motion.h1>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer(0.15, 0.1)}
+          className="flex flex-wrap justify-center gap-6"
+        >
+          {(
+            [
+              { a: "4-7" as const, label: "4 a 7 años", emoji: "🧸" },
+              { a: "7-10" as const, label: "7 a 10 años", emoji: "🎈" },
+              { a: "10-12" as const, label: "10 a 12 años", emoji: "🚀" },
+            ]
+          ).map((opt) => (
+            <motion.button
+              key={opt.a}
+              variants={staggerItem}
+              disabled={saving}
+              onClick={() => chooseAge(opt.a)}
+              whileHover={{ scale: 1.08, y: -4 }}
+              whileTap={{ scale: 0.95 }}
+              transition={SPRING_PLAYFUL}
+              className="flex w-44 flex-col items-center gap-3 rounded-3xl bg-white/15 p-8 text-white shadow-xl backdrop-blur disabled:opacity-50"
+            >
+              <span className="text-5xl">{opt.emoji}</span>
+              <span className="text-lg font-bold">{opt.label}</span>
+            </motion.button>
+          ))}
+        </motion.div>
+      </main>
+    );
+  }
+
+  // Paso 3: elegir personaje (2D fijo) segun genero + edad
   if (!profile.character_id) {
-    const options = characters.filter((c) => c.gender === profile.gender);
+    const options = characters.filter(
+      (c) => c.gender === profile.gender && c.age_min === Number(profile.age_bracket!.split("-")[0])
+    );
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-gradient-to-br from-indigo-500 to-purple-600 p-6">
         <motion.h1
@@ -170,13 +208,13 @@ export default function AlumnoInicioPage() {
               whileHover={{ scale: 1.05, y: -4 }}
               whileTap={{ scale: 0.95 }}
               transition={SPRING_PLAYFUL}
-              className="flex w-56 flex-col items-center gap-2 rounded-3xl bg-white/15 p-4 text-white shadow-xl backdrop-blur disabled:opacity-50"
+              className="flex w-48 flex-col items-center gap-2 rounded-3xl bg-white/15 p-4 text-white shadow-xl backdrop-blur disabled:opacity-50"
             >
-              <CharacterViewer
-                modelUrl={c.model_url}
-                heightM={c.height_m}
-                autoRotate
-                className="h-64 w-full"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.image_url}
+                alt={c.display_name}
+                className="h-64 w-auto object-contain drop-shadow-xl"
               />
               <span className="text-lg font-bold">{c.display_name}</span>
             </motion.button>
@@ -203,14 +241,14 @@ export default function AlumnoInicioPage() {
       >
         <div className="flex items-center gap-3">
           {character && (
-            <CharacterViewer
-              modelUrl={character.model_url}
-              heightM={character.height_m}
-              autoRotate
-              fit="bust"
-              accessories={equippedAccessories}
-              className="h-20 w-20"
-            />
+            <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-white/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={character.thumbnail_url}
+                alt={character.display_name}
+                className="h-full w-full object-cover object-top"
+              />
+            </span>
           )}
           <div>
             <p className="text-sm opacity-90">{character?.display_name}</p>

@@ -1,13 +1,17 @@
 export type UserRole = "admin" | "student";
 export type CharacterGender = "girl" | "boy";
+export type AgeBracket = "4-7" | "7-10" | "10-12";
 
+// Personajes fijos en 2D (imagen unica por personaje, sin personalizacion
+// de ropa/color). Se filtran por gender + age_bracket del alumno.
 export interface Character {
   id: string;
   gender: CharacterGender;
   display_name: string;
-  model_url: string;
+  image_url: string;
   thumbnail_url: string;
-  height_m: number;
+  age_min: number;
+  age_max: number;
   sort_order: number;
 }
 
@@ -18,6 +22,7 @@ export interface MyProfile {
   username: string | null;
   avatar_url: string | null;
   gender: CharacterGender | null;
+  age_bracket: AgeBracket | null;
   character_id: string | null;
   diamonds: number;
   household_id: string;

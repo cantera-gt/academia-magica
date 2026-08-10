@@ -70,11 +70,12 @@ export default function TiendaPage() {
       )
       .eq("gender", myProfile.gender)
       .eq("active", true)
-      // "color_ropa" todavia no se ve reflejado en el personaje 3D (pendiente
-      // de separar los materiales de ropa en Blender para 5 de los 6
-      // personajes) -> se oculta de la tienda hasta que este wireado de
-      // verdad, para no vender algo que visualmente no hace nada.
+      // El personaje ahora es una imagen 2D fija (decision 10/08/2026, ya
+      // no hay personalizacion 3D de ropa ni accesorios enganchados a hueso)
+      // -> se ocultan "color_ropa" y "accesorio" (pensados para el sistema
+      // 3D) hasta que exista el sistema de accesorios superpuestos en 2D.
       .neq("category", "color_ropa")
+      .neq("category", "accesorio")
       .order("category")
       .order("sort_order");
     setItems((storeData as StoreItem[]) ?? []);
