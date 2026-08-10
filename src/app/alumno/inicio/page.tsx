@@ -192,6 +192,7 @@ export default function AlumnoInicioPage() {
               modelUrl={character.model_url}
               heightM={character.height_m}
               autoRotate
+              fit="bust"
               className="h-20 w-20"
             />
           )}
