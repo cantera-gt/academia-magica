@@ -274,20 +274,24 @@ export default function TemaPage() {
               className="mt-6 flex flex-col items-center gap-4"
             >
               {teacher && (
-                <div className="flex w-full items-start gap-3">
+                <div className="flex w-full items-end gap-2">
                   <motion.div
-                    animate={speaking ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-                    transition={{ duration: 0.5, repeat: speaking ? Infinity : 0 }}
-                    className="shrink-0"
+                    animate={
+                      speaking
+                        ? { y: [0, -6, 0], rotate: [0, -2, 2, 0] }
+                        : { y: 0, rotate: 0 }
+                    }
+                    transition={{ duration: 0.6, repeat: speaking ? Infinity : 0 }}
+                    className="w-24 shrink-0 sm:w-28"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={teacher.image_url}
+                      src={teacher.body_image_url ?? teacher.image_url}
                       alt={teacher.name}
-                      className="h-20 w-20 rounded-full border-4 border-white/40 object-cover"
+                      className="w-full drop-shadow-xl"
                     />
                   </motion.div>
-                  <div className="flex-1 rounded-2xl rounded-tl-none bg-white p-4 text-left shadow-xl">
+                  <div className="mb-4 flex-1 rounded-2xl rounded-bl-none bg-white p-4 text-left shadow-xl">
                     <p className="text-sm font-bold text-purple-700">
                       {teacher.name} {teacher.flag_emoji}
                     </p>

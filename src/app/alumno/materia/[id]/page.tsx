@@ -120,8 +120,11 @@ export default function MateriaTopicsPage() {
       p_teacher_id: teacherId,
     });
     if (!error) {
-      const picked = teachers.find((t) => t.teacher_id === teacherId) ?? null;
-      setMyTeacher(picked as MySubjectTeacher | null);
+      const { data: myTeacherData } = await supabase.rpc("my_subject_teacher", {
+        p_subject_id: subjectId,
+      });
+      setMyTeacher(((myTeacherData as MySubjectTeacher[]) ?? [])[0] ?? null);
+      setStage("ready");
       await loadTopics();
     }
     setChoosingId(null);
@@ -259,18 +262,20 @@ export default function MateriaTopicsPage() {
             className="mb-5 flex items-start gap-3"
           >
             <motion.div
-              animate={speaking ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-              transition={{ duration: 0.5, repeat: speaking ? Infinity : 0 }}
-              className="shrink-0"
+              animate={
+                speaking ? { y: [0, -6, 0], rotate: [0, -2, 2, 0] } : { y: 0, rotate: 0 }
+              }
+              transition={{ duration: 0.6, repeat: speaking ? Infinity : 0 }}
+              className="w-16 shrink-0 sm:w-20"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={myTeacher.image_url}
+                src={myTeacher.body_image_url ?? myTeacher.image_url}
                 alt={myTeacher.name}
-                className="h-16 w-16 rounded-full border-4 border-white object-cover shadow"
+                className="w-full drop-shadow-lg"
               />
             </motion.div>
-            <div className="flex-1 rounded-2xl rounded-tl-none bg-white p-4 shadow">
+            <div className="mb-2 flex-1 rounded-2xl rounded-bl-none bg-white p-4 shadow">
               <p className="text-sm text-slate-700">{recommendation.message}</p>
               <button
                 onClick={speakRecommendation}

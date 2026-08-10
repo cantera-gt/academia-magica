@@ -97,6 +97,7 @@ export interface SubjectTeacher {
 }
 
 export interface MySubjectTeacher extends SubjectTeacher {
+  body_image_url: string | null;
   speak_lang: string;
   voice_name_hints: string[];
   greeting_template: string;
