@@ -15,6 +15,14 @@ import type {
 } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
+import TeacherChatWidget from "@/components/teacher-chat-widget";
+
+function approxAgeFromBracket(bracket: string | null | undefined): number | null {
+  if (bracket === "4-7") return 5;
+  if (bracket === "7-10") return 8;
+  if (bracket === "10-12") return 11;
+  return null;
+}
 
 type Stage =
   | "loading"
@@ -53,6 +61,7 @@ export default function TemaPage() {
 
   const [topicDetail, setTopicDetail] = useState<TopicDetail | null>(null);
   const [teacher, setTeacher] = useState<MySubjectTeacher | null>(null);
+  const [subjectName, setSubjectName] = useState<string>("esta materia");
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -94,6 +103,13 @@ export default function TemaPage() {
       .eq("id", topicId)
       .maybeSingle();
     setTopicDetail((topicRow as TopicDetail) ?? null);
+
+    const { data: subjectRow } = await supabase
+      .from("subjects")
+      .select("name")
+      .eq("id", subjectId)
+      .maybeSingle();
+    if (subjectRow?.name) setSubjectName(subjectRow.name);
 
     const { data: teacherData } = await supabase.rpc("my_subject_teacher", {
       p_subject_id: subjectId,
@@ -687,6 +703,25 @@ export default function TemaPage() {
           )}
         </AnimatePresence>
       </div>
+
+      <TeacherChatWidget
+        subjectId={subjectId}
+        subjectName={subjectName}
+        topicName={topicDetail?.name ?? undefined}
+        teacher={teacher}
+        studentName={profile?.display_name}
+        studentAge={approxAgeFromBracket(profile?.age_bracket)}
+        exercise={
+          stage === "playing" && current
+            ? {
+                prompt: current.prompt.text,
+                hint: current.prompt.hint,
+                type: current.type,
+                options: current.options,
+              }
+            : null
+        }
+      />
     </main>
   );
 }

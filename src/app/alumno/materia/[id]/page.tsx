@@ -15,6 +15,14 @@ import type {
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
 import { computeTeacherRecommendation } from "@/lib/teacher-recommendation";
+import TeacherChatWidget from "@/components/teacher-chat-widget";
+
+function approxAgeFromBracket(bracket: string | null | undefined): number | null {
+  if (bracket === "4-7") return 5;
+  if (bracket === "7-10") return 8;
+  if (bracket === "10-12") return 11;
+  return null;
+}
 
 type Stage = "loading" | "choose_teacher" | "ready" | "empty" | "error";
 
@@ -395,6 +403,16 @@ export default function MateriaTopicsPage() {
           </motion.div>
         )}
       </div>
+
+      {subject && (
+        <TeacherChatWidget
+          subjectId={subjectId}
+          subjectName={subject.name}
+          teacher={myTeacher}
+          studentName={profile?.display_name}
+          studentAge={approxAgeFromBracket(profile?.age_bracket)}
+        />
+      )}
     </main>
   );
 }
