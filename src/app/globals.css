@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+:root {
+  --color-magic-pink: #ff6b9d;
+  --color-magic-purple: #6c5ce7;
+  --color-magic-gold: #ffd93d;
+  --color-hero-blue: #0984e3;
+  --color-hero-red: #d63031;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: "Baloo 2", "Poppins", ui-rounded, system-ui, sans-serif;
+}
