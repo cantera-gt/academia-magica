@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject } from "@/types/database";
-import { collapseExpand, fadeSlideUp, staggerItemUi, SPRING_UI } from "@/lib/motion";
+import { collapseExpand, fadeSlideUp, staggerItemUi, SPRING_UI, SPRING_PLAYFUL } from "@/lib/motion";
 
 interface StudentRow {
   id: string;
@@ -36,6 +36,14 @@ export default function AlumnosPage() {
   const [selectedSubjects, setSelectedSubjects] = useState<Set<string>>(
     new Set()
   );
+
+  // Activar/desactivar (por ejemplo, si alguien no paga).
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  // Eliminar alumno: confirmación + backup.
+  const [studentToDelete, setStudentToDelete] = useState<StudentRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const subjectsByCategory = useMemo(() => {
     const groups: Record<string, Subject[]> = {};
@@ -131,6 +139,60 @@ export default function AlumnosPage() {
     setSubmitting(false);
     setShowForm(false);
     loadStudents();
+  }
+
+  async function handleToggleActive(student: StudentRow) {
+    setTogglingId(student.id);
+    const nextActive = !student.is_active;
+    const { error: updateErr } = await supabase
+      .from("profiles")
+      .update({ is_active: nextActive })
+      .eq("id", student.id);
+
+    if (!updateErr) {
+      setStudents((prev) =>
+        prev.map((s) => (s.id === student.id ? { ...s, is_active: nextActive } : s))
+      );
+    }
+    setTogglingId(null);
+  }
+
+  async function handleDeleteConfirm() {
+    if (!studentToDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setDeleteError("Tu sesión expiró, volvé a ingresar.");
+      setDeleting(false);
+      return;
+    }
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-student`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ studentId: studentToDelete.id }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      setDeleteError(result.error ?? "No se pudo eliminar el alumno");
+      setDeleting(false);
+      return;
+    }
+
+    setStudents((prev) => prev.filter((s) => s.id !== studentToDelete.id));
+    setSuccess(`Se eliminó a ${studentToDelete.display_name}. Guardamos una copia de sus datos por si querés restablecerlo más adelante.`);
+    setDeleting(false);
+    setStudentToDelete(null);
   }
 
   return (
@@ -297,12 +359,13 @@ export default function AlumnosPage() {
                 <th className="px-4 py-3">Usuario</th>
                 <th className="px-4 py-3">Personaje</th>
                 <th className="px-4 py-3">Diamantes</th>
+                <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {students.map((s) => (
-                <tr key={s.id}>
+                <tr key={s.id} className={s.is_active ? "" : "bg-slate-50/70"}>
                   <td className="px-4 py-3 font-medium text-slate-800">
                     {s.display_name}
                   </td>
@@ -313,13 +376,46 @@ export default function AlumnosPage() {
                   <td className="px-4 py-3 text-slate-500">
                     💎 {s.diamonds}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/alumnos/${s.id}`}
-                      className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        s.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
                     >
-                      Materias →
-                    </Link>
+                      {s.is_active ? "Activo" : "Desactivado"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-3 whitespace-nowrap">
+                      <Link
+                        href={`/admin/alumnos/${s.id}`}
+                        className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                      >
+                        Materias →
+                      </Link>
+                      <button
+                        onClick={() => handleToggleActive(s)}
+                        disabled={togglingId === s.id}
+                        className="text-sm font-medium text-slate-500 hover:text-slate-800 disabled:opacity-50"
+                      >
+                        {togglingId === s.id
+                          ? "..."
+                          : s.is_active
+                          ? "Desactivar"
+                          : "Activar"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeleteError(null);
+                          setStudentToDelete(s);
+                        }}
+                        className="text-sm font-medium text-red-500 hover:text-red-700"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -327,6 +423,60 @@ export default function AlumnosPage() {
           </table>
         )}
       </motion.div>
+
+      <AnimatePresence>
+        {studentToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => !deleting && setStudentToDelete(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              transition={SPRING_PLAYFUL}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+            >
+              <h2 className="text-lg font-bold text-slate-900">
+                ¿Eliminar a {studentToDelete.display_name}?
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Esta acción no se puede deshacer desde la app. Antes de borrar nada,
+                guardamos una copia completa de sus datos (progreso, diamantes, tienda,
+                materias) por si más adelante querés restablecerlo.
+              </p>
+              {deleteError && (
+                <p className="mt-3 rounded-lg bg-red-100 p-2 text-sm text-red-800">
+                  {deleteError}
+                </p>
+              )}
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  onClick={() => setStudentToDelete(null)}
+                  disabled={deleting}
+                  className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <motion.button
+                  onClick={handleDeleteConfirm}
+                  disabled={deleting}
+                  whileHover={{ scale: deleting ? 1 : 1.03 }}
+                  whileTap={{ scale: deleting ? 1 : 0.97 }}
+                  transition={SPRING_UI}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleting ? "Eliminando..." : "Sí, eliminar y guardar copia"}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

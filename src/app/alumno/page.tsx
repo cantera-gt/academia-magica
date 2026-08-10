@@ -50,6 +50,18 @@ export default function AlumnoLoginPage() {
       return;
     }
 
+    // La cuenta puede estar desactivada (por ejemplo, si no se pagó ese mes)
+    // aunque el PIN sea correcto. list_active_students ya la oculta del
+    // selector, pero esto cierra el acceso directo tambien.
+    const { data: isActive } = await supabase.rpc("my_is_active");
+    if (isActive === false) {
+      await supabase.auth.signOut();
+      setError("Esta cuenta está desactivada. Pedile a un adulto que hable con el administrador.");
+      setSubmitting(false);
+      setPin("");
+      return;
+    }
+
     router.push("/alumno/inicio");
   }
 
