@@ -16,6 +16,8 @@ const CATEGORY_ICON: Record<ItemCategory, string> = {
   traje: "👗",
   accesorio: "✨",
   fondo: "🖼️",
+  color_ropa: "🎨",
+  extra: "📖",
 };
 
 const CATEGORY_LABEL: Record<ItemCategory, string> = {
@@ -25,6 +27,8 @@ const CATEGORY_LABEL: Record<ItemCategory, string> = {
   traje: "Trajes",
   accesorio: "Accesorios",
   fondo: "Fondos",
+  color_ropa: "Colores de ropa",
+  extra: "Extras",
 };
 
 export default function TiendaPage() {

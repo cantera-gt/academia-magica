@@ -15,6 +15,8 @@ const CATEGORY_ICON: Record<ItemCategory, string> = {
   traje: "👗",
   accesorio: "✨",
   fondo: "🖼️",
+  color_ropa: "🎨",
+  extra: "📖",
 };
 
 const ROOM_BG: Record<string, string> = {

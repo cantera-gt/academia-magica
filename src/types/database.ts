@@ -76,7 +76,13 @@ export type ItemCategory =
   | "mascota"
   | "traje"
   | "accesorio"
-  | "fondo";
+  | "fondo"
+  | "color_ropa"
+  | "extra";
+
+export type GarmentSlot = "chaqueta" | "pantalon" | "gorro";
+
+export type RoomPlacement = "floor" | "wall";
 
 export interface StoreItem {
   id: string;
@@ -87,12 +93,32 @@ export interface StoreItem {
   price_diamonds: number;
   image_url: string | null;
   sort_order: number;
+  // Solo aplica cuando category === "color_ropa"
+  garment_slot: GarmentSlot | null;
+  color_hex: string | null;
+  // Solo aplica cuando category === "accesorio" (pieza 3D enganchada al esqueleto)
+  model_url: string | null;
+  bone_target: string | null;
+  // Solo aplica cuando category === "extra" (mini-visor, ej. libro)
+  content_url: string | null;
+  // Solo aplica a objetos de la habitacion 3D (decoracion/mueble/fondo/mascota)
+  placement: RoomPlacement;
+}
+
+// Posicion 3D dentro de la habitacion (grid). rotationY en radianes.
+export interface RoomPosition3D {
+  x: number;
+  y: number;
+  z: number;
+  rotationY?: number;
 }
 
 export interface InventoryItem {
   id: string;
   item_id: string;
   placed_in_room: boolean;
-  position: { x: number; y: number } | null;
+  // true si es una prenda (color_ropa) o accesorio actualmente puesto en el personaje
+  equipped: boolean;
+  position: RoomPosition3D | null;
   store_items: StoreItem;
 }
