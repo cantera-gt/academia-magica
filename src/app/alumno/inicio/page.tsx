@@ -42,11 +42,9 @@ export default function AlumnoInicioPage() {
       const { data: p } = await supabase.rpc("my_profile").maybeSingle();
       setProfile(p as MyProfile);
 
-      const { data: subs } = await supabase
-        .from("subjects")
-        .select("id, slug, name, category, icon, color, sort_order, active")
-        .eq("active", true)
-        .order("sort_order");
+      const { data: subs } = await supabase.rpc("assigned_subjects", {
+        p_student_id: user.id,
+      });
       setSubjects((subs as Subject[]) ?? []);
 
       setLoading(false);
@@ -123,6 +121,12 @@ export default function AlumnoInicioPage() {
 
       <div className="mx-auto max-w-5xl p-6">
         <h2 className="text-xl font-bold text-slate-800">Tus materias</h2>
+        {subjects.length === 0 && (
+          <p className="mt-4 rounded-xl bg-white p-5 text-sm text-slate-500 shadow">
+            Todavía no tenés materias asignadas. Pedile a tu administrador
+            que te asigne algunas desde su panel.
+          </p>
+        )}
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {subjects.map((s) => (
             <div

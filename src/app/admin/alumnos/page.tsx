@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import type { Subject } from "@/types/database";
 
 interface StudentRow {
   id: string;
@@ -18,6 +20,7 @@ const SUPABASE_URL = "https://wlxgvbabljflvhtxuzue.supabase.co";
 export default function AlumnosPage() {
   const supabase = createClient();
   const [students, setStudents] = useState<StudentRow[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -28,6 +31,27 @@ export default function AlumnosPage() {
   const [username, setUsername] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [pin, setPin] = useState("");
+  const [selectedSubjects, setSelectedSubjects] = useState<Set<string>>(
+    new Set()
+  );
+
+  const subjectsByCategory = useMemo(() => {
+    const groups: Record<string, Subject[]> = {};
+    for (const s of subjects) {
+      if (!groups[s.category]) groups[s.category] = [];
+      groups[s.category].push(s);
+    }
+    return groups;
+  }, [subjects]);
+
+  function toggleSubject(id: string) {
+    setSelectedSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const loadStudents = useCallback(async () => {
     setLoading(true);
@@ -40,9 +64,19 @@ export default function AlumnosPage() {
     setLoading(false);
   }, [supabase]);
 
+  const loadSubjects = useCallback(async () => {
+    const { data } = await supabase
+      .from("subjects")
+      .select("id, slug, name, category, icon, color, sort_order, active")
+      .eq("active", true)
+      .order("sort_order");
+    setSubjects((data as Subject[]) ?? []);
+  }, [supabase]);
+
   useEffect(() => {
     loadStudents();
-  }, [loadStudents]);
+    loadSubjects();
+  }, [loadStudents, loadSubjects]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +102,13 @@ export default function AlumnosPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ displayName, username, birthdate, pin }),
+        body: JSON.stringify({
+          displayName,
+          username,
+          birthdate,
+          pin,
+          subjectIds: Array.from(selectedSubjects),
+        }),
       }
     );
 
@@ -85,6 +125,7 @@ export default function AlumnosPage() {
     setUsername("");
     setBirthdate("");
     setPin("");
+    setSelectedSubjects(new Set());
     setSubmitting(false);
     setShowForm(false);
     loadStudents();
@@ -164,6 +205,42 @@ export default function AlumnosPage() {
             />
           </div>
 
+          <div className="sm:col-span-2">
+            <label className="text-sm text-slate-600">
+              Materias asignadas ({selectedSubjects.size} seleccionadas)
+            </label>
+            <p className="mt-1 text-xs text-slate-400">
+              Elegí qué materias va a poder estudiar este alumno. Podés
+              cambiarlo después desde su ficha.
+            </p>
+            <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-slate-200 p-3">
+              {Object.entries(subjectsByCategory).map(([category, subs]) => (
+                <div key={category} className="mb-3 last:mb-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {category}
+                  </p>
+                  <div className="mt-1 grid grid-cols-2 gap-1 sm:grid-cols-3">
+                    {subs.map((s) => (
+                      <label
+                        key={s.id}
+                        className="flex items-center gap-2 rounded px-2 py-1 text-sm text-slate-700 hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedSubjects.has(s.id)}
+                          onChange={() => toggleSubject(s.id)}
+                          className="rounded border-slate-300 text-purple-600"
+                        />
+                        {s.icon ? `${s.icon} ` : ""}
+                        {s.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {error && (
             <p className="sm:col-span-2 text-sm text-red-600">{error}</p>
           )}
@@ -193,6 +270,7 @@ export default function AlumnosPage() {
                 <th className="px-4 py-3">Usuario</th>
                 <th className="px-4 py-3">Personaje</th>
                 <th className="px-4 py-3">Diamantes</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -207,6 +285,14 @@ export default function AlumnosPage() {
                   </td>
                   <td className="px-4 py-3 text-slate-500">
                     💎 {s.diamonds}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/admin/alumnos/${s.id}`}
+                      className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                    >
+                      Materias →
+                    </Link>
                   </td>
                 </tr>
               ))}
