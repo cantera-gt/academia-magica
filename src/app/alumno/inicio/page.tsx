@@ -278,6 +278,12 @@ export default function AlumnoInicioPage() {
           >
             Mi cuarto 🏠
           </Link>
+          <Link
+            href="/alumno/juegos"
+            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
+          >
+            Juegos 🎮
+          </Link>
           <DiamondCounter value={profile.diamonds} />
         </div>
       </motion.header>
