@@ -20,11 +20,43 @@ const ALLOWED_VOICES = new Set([
   "es-CL-LorenzoNeural",
 ]);
 
+const SUPERSCRIPT_DIGITS: Record<string, string> = {
+  "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
+  "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+};
+
+function mathify(text: string): string {
+  // Convierte notacion matematica en frases que un motor de voz lee bien.
+  // Sin esto, simbolos como ÷, la barra de fracciones o los exponentes se
+  // leen literalmente (o se saltean raro) en vez de sonar como una frase.
+  let out = text;
+
+  // Exponentes con digitos en superindice: "10⁴" -> "10 a la 4"
+  out = out.replace(/(\d)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_m, base: string, sup: string) => {
+    const digits = sup.split("").map((ch) => SUPERSCRIPT_DIGITS[ch] ?? "").join("");
+    return `${base} a la ${digits}`;
+  });
+
+  // Division: 23 ÷ 5 -> 23 dividido por 5
+  out = out.replace(/÷/g, " dividido por ");
+
+  // Multiplicacion escrita como "x" entre numeros: 5 x 10 -> 5 por 10
+  out = out.replace(/(\d)\s*x\s*(\d)/gi, "$1 por $2");
+
+  // Fracciones simples tipo 1/2, 3/4 -> 1 sobre 2, 3 sobre 4
+  out = out.replace(/(\d+)\/(\d+)/g, "$1 sobre $2");
+
+  // Igual: lo hacemos explicito para que no se coma el simbolo
+  out = out.replace(/=/g, " igual a ");
+
+  return out;
+}
+
 function stripUnspeakable(text: string): string {
   // Saca emojis y simbolos raros: algunos motores de voz los "leen" en
   // vez de ignorarlos (ej: 🚀 -> "cohete"). Tambien recorta espacios extra
   // que quedan despues de sacar los emojis.
-  return text
+  return mathify(text)
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}️]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
