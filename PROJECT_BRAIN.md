@@ -127,4 +127,4 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 
 - `20260811190000_enrollment_pipeline.sql`
 - `20260811190500_enrollment_terms_consent.sql`
-- `20260811191000_enrollment_function_privileges.sql`\n- `20260811200000_enrollment_subject_pricing.sql`
+- `20260811191000_enrollment_function_privileges.sql`\n- `20260811200000_enrollment_subject_pricing.sql`\n- `20260811201000_public_enrollment_subject_catalog.sql`
