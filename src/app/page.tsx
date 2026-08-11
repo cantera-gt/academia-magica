@@ -43,6 +43,28 @@ const FEATURES = [
 export default function Home() {
   return (
     <main className="font-body">
+      {/* HEADER FIJO: se mantiene visible en toda la pagina, no solo en el hero */}
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-[#3b2a55]/80 px-4 py-3 backdrop-blur-md sm:px-8">
+        <Link href="/" className="font-display text-lg font-bold text-white sm:text-xl">
+          ✨ Academia Mágica
+        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/alumno"
+            className="rounded-full bg-[#ffd93d] px-3 py-1.5 text-sm font-bold text-[#3b2a55] sm:px-4 sm:py-2"
+          >
+            Alumno 🧒
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-bold text-white ring-1 ring-white/40 hover:bg-white/25 sm:px-4 sm:py-2"
+          >
+            Admin 🔐
+          </Link>
+          <AmbientMusicToggle />
+        </div>
+      </header>
+
       {/* HERO */}
       <section className="relative flex min-h-screen flex-col overflow-hidden">
         <div className="absolute inset-0">
@@ -58,25 +80,18 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#3b2a55] via-transparent to-transparent" />
         </div>
 
-        <div className="relative z-10 flex items-center justify-between px-6 pt-6 sm:px-10">
-          <p className="font-display text-xl font-bold text-white drop-shadow">
-            ✨ Academia Mágica
-          </p>
-          <AmbientMusicToggle />
-        </div>
-
         <motion.div
           initial="initial"
           animate="animate"
           variants={staggerContainer(0.12, 0.15)}
-          className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-6 pb-24 text-center"
+          className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-6 pb-24 pt-24 text-center"
         >
           <motion.div variants={staggerItemUi}>
-            <h1 className="font-display text-5xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-7xl">
-              Academia Mágica
+            <h1 className="font-display text-balance text-5xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-7xl">
+              Academia Mágica
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-lg font-semibold text-white/95 drop-shadow sm:text-2xl">
-              Aprender Jugando es Posible en Academia Mágica
+            <p className="mx-auto mt-4 max-w-xl text-pretty text-lg font-semibold text-white/95 drop-shadow sm:text-2xl">
+              Aprender Jugando es Posible en Academia Mágica
             </p>
           </motion.div>
 
@@ -95,7 +110,7 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
               <Link
                 href="/login"
-                className="block rounded-2xl bg-white/15 px-10 py-6 text-xl font-bold text-white shadow-xl ring-1 ring-white/40 backdrop-blur-md hover:bg-white/25"
+                className="block rounded-2xl bg-black/35 px-10 py-6 text-xl font-bold text-white shadow-xl ring-2 ring-white/70 backdrop-blur-md hover:bg-black/45"
               >
                 Soy Administrador 🔐
               </Link>
@@ -145,7 +160,7 @@ export default function Home() {
         >
           <motion.h2
             variants={staggerItemUi}
-            className="font-display text-center text-3xl font-extrabold text-[#3b2a55] sm:text-4xl"
+            className="font-display text-balance text-center text-3xl font-extrabold text-[#3b2a55] sm:text-4xl"
           >
             ¿Cómo funciona la magia?
           </motion.h2>
@@ -160,7 +175,7 @@ export default function Home() {
                 <h3 className="font-display mt-3 text-lg font-bold text-[#3b2a55]">
                   {f.title}
                 </h3>
-                <p className="mt-2 text-sm text-[#3b2a55]/70">{f.text}</p>
+                <p className="mt-2 text-sm text-[#3b2a55]/80">{f.text}</p>
               </motion.div>
             ))}
           </div>
@@ -187,7 +202,7 @@ export default function Home() {
           variants={staggerContainer(0.06, 0)}
           className="relative z-10 mx-auto max-w-5xl text-center"
         >
-          <motion.h2 variants={staggerItemUi} className="font-display text-3xl font-extrabold text-white sm:text-4xl">
+          <motion.h2 variants={staggerItemUi} className="font-display text-balance text-3xl font-extrabold text-white sm:text-4xl">
             Profesores de verdad, listos para ayudar
           </motion.h2>
           <motion.p variants={staggerItemUi} className="mx-auto mt-3 max-w-xl text-white/85">
@@ -220,7 +235,7 @@ export default function Home() {
             <p className="font-display text-sm font-bold uppercase tracking-wide text-[#ff6b9d]">
               Aprender jugando
             </p>
-            <h2 className="font-display mt-2 text-3xl font-extrabold text-[#3b2a55] sm:text-4xl">
+            <h2 className="font-display mt-2 text-balance text-3xl font-extrabold text-[#3b2a55] sm:text-4xl">
               Cada ejercicio bien hecho suma diamantes de verdad
             </h2>
             <p className="mt-4 text-[#3b2a55]/70">
@@ -262,23 +277,47 @@ export default function Home() {
         >
           <motion.div variants={staggerItemUi} className="grid grid-cols-2 gap-4">
             <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image src="/classroom/tutoria-nino-profesor.jpg" alt="" fill sizes="(min-width: 1024px) 250px, 45vw" className="object-cover" />
+              <Image
+                src="/classroom/tutoria-nino-profesor.jpg"
+                alt="Un profesor ayuda a un alumno a resolver un ejercicio en su tablet"
+                fill
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="object-cover"
+              />
             </div>
             <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image src="/classroom/tutoria-profesora-nina.jpg" alt="" fill sizes="(min-width: 1024px) 250px, 45vw" className="object-cover" />
+              <Image
+                src="/classroom/tutoria-profesora-nina.jpg"
+                alt="Una profesora guía a una alumna paso a paso en su cuaderno"
+                fill
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="object-cover"
+              />
             </div>
             <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image src="/classroom/tutoria-profesor-nino-2.jpg" alt="" fill sizes="(min-width: 1024px) 250px, 45vw" className="object-cover" />
+              <Image
+                src="/classroom/tutoria-profesor-nino-2.jpg"
+                alt="Un profesor acompaña a un alumno mientras escribe en su cuaderno"
+                fill
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="object-cover"
+              />
             </div>
             <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image src="/classroom/tutoria-profesora-nina-2.jpg" alt="" fill sizes="(min-width: 1024px) 250px, 45vw" className="object-cover" />
+              <Image
+                src="/classroom/tutoria-profesora-nina-2.jpg"
+                alt="Una profesora señala algo en la tablet mientras una alumna mira y sonríe"
+                fill
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="object-cover"
+              />
             </div>
           </motion.div>
           <motion.div variants={staggerItemUi}>
             <p className="font-display text-sm font-bold uppercase tracking-wide text-[#7fe7c4]">
               Acompañamiento real
             </p>
-            <h2 className="font-display mt-2 text-3xl font-extrabold text-white sm:text-4xl">
+            <h2 className="font-display mt-2 text-balance text-3xl font-extrabold text-white sm:text-4xl">
               Nunca le damos la respuesta. Le enseñamos el camino.
             </h2>
             <p className="mt-4 text-white/70">
@@ -297,7 +336,7 @@ export default function Home() {
           viewport={{ once: true, amount: 0.4 }}
           variants={staggerContainer(0.1, 0)}
         >
-          <motion.h2 variants={staggerItemUi} className="font-display text-3xl font-extrabold text-white drop-shadow sm:text-4xl">
+          <motion.h2 variants={staggerItemUi} className="font-display text-balance text-3xl font-extrabold text-white drop-shadow sm:text-4xl">
             ¿Empezamos a jugar y aprender?
           </motion.h2>
           <motion.div variants={staggerItemUi} className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
@@ -322,7 +361,7 @@ export default function Home() {
       </section>
 
       <footer className="bg-[#3b2a55] px-6 py-6 text-center text-xs text-white/50">
-        Academia Mágica · Aprender Jugando es Posible ✨
+        Academia Mágica · Aprender Jugando es Posible ✨
       </footer>
     </main>
   );
