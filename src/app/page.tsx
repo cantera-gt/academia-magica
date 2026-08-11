@@ -66,13 +66,14 @@ export default function Home() {
       {/* HERO — portada tipo caja de videojuego: el elenco de personajes es el protagonista,
           no una foto de fondo. El diamante flotando sobre la protagonista es el gesto central:
           asi entiende cualquiera, de un vistazo, de que va el juego. */}
-      <section className="relative isolate flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-[#8676f2] via-[#6c5ce7] to-[#2f2049]">
-        {/* Fondo mágico: resplandores de color + estrellitas, sin foto */}
+      <section className="relative isolate flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-[#fffaf3] via-[#f9f1e7] to-[#f5ece5]">
+        {/* Fondo claro: el mismo tono crema con el que se generaron los personajes 2D,
+            para que cualquier resto de su fondo original quede camuflado en vez de
+            notarse (antes, sobre morado, se veia clarisimo). Resplandores de color suaves. */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[6%] top-[16%] h-40 w-40 rounded-full bg-[#ffd93d]/25 blur-3xl sm:h-64 sm:w-64" />
-          <div className="absolute right-[8%] top-[26%] h-48 w-48 rounded-full bg-[#7fe7c4]/20 blur-3xl sm:h-72 sm:w-72" />
-          <div className="absolute bottom-[6%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#ff6b9d]/20 blur-3xl" />
-          <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(1.5px_1.5px_at_10%_20%,white,transparent),radial-gradient(1.5px_1.5px_at_80%_15%,white,transparent),radial-gradient(1px_1px_at_60%_35%,white,transparent),radial-gradient(1px_1px_at_25%_55%,white,transparent),radial-gradient(1.5px_1.5px_at_90%_60%,white,transparent),radial-gradient(1px_1px_at_45%_75%,white,transparent)] [background-size:100%_100%]" />
+          <div className="absolute right-[8%] top-[26%] h-48 w-48 rounded-full bg-[#7fe7c4]/25 blur-3xl sm:h-72 sm:w-72" />
+          <div className="absolute bottom-[6%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#ff6b9d]/15 blur-3xl" />
         </div>
 
         {/* Snapshots reales, como en la caja de un juego: una pequeña columna de
@@ -81,48 +82,48 @@ export default function Home() {
           initial={{ opacity: 0, y: -16, rotate: -10 }}
           animate={{ opacity: 1, y: 0, rotate: -6 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.65 }}
-          className="absolute left-3 top-24 z-20 hidden w-28 rounded-lg bg-white p-1.5 pb-3 shadow-xl sm:block sm:left-6 sm:top-28 sm:w-36"
+          className="absolute left-10 top-24 z-20 hidden w-32 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-16 sm:top-28 sm:w-44"
         >
-          <div className="relative h-20 w-full overflow-hidden rounded sm:h-24">
-            <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="150px" className="object-cover" />
+          <div className="relative h-24 w-full overflow-hidden rounded sm:h-32">
+            <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="180px" className="object-cover" />
           </div>
-          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">¡Lo logré! 🎉</p>
+          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡Lo logré! 🎉</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: 8 }}
           animate={{ opacity: 1, y: 0, rotate: 9 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.0 }}
-          className="absolute left-2 top-56 z-10 hidden w-24 rounded-lg bg-white p-1.5 pb-3 shadow-xl lg:block lg:left-8 lg:top-64 lg:w-28"
+          className="absolute left-6 top-60 z-10 hidden w-28 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-20 lg:top-72 lg:w-36"
         >
-          <div className="relative h-16 w-full overflow-hidden rounded lg:h-20">
-            <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="130px" className="object-cover" />
+          <div className="relative h-20 w-full overflow-hidden rounded lg:h-28">
+            <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="160px" className="object-cover" />
           </div>
-          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">¡A jugar! ⚽</p>
+          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡A jugar! ⚽</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: 10 }}
           animate={{ opacity: 1, y: 0, rotate: 5 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.8 }}
-          className="absolute right-3 top-24 z-20 hidden w-28 rounded-lg bg-white p-1.5 pb-3 shadow-xl sm:block sm:right-6 sm:top-28 sm:w-36"
+          className="absolute right-10 top-24 z-20 hidden w-32 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-16 sm:top-28 sm:w-44"
         >
-          <div className="relative h-20 w-full overflow-hidden rounded sm:h-24">
-            <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="150px" className="object-cover" />
+          <div className="relative h-24 w-full overflow-hidden rounded sm:h-32">
+            <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="180px" className="object-cover" />
           </div>
-          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">Aprendiendo 📚</p>
+          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Aprendiendo 📚</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: -8 }}
           animate={{ opacity: 1, y: 0, rotate: -9 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.1 }}
-          className="absolute right-2 top-56 z-10 hidden w-24 rounded-lg bg-white p-1.5 pb-3 shadow-xl lg:block lg:right-8 lg:top-64 lg:w-28"
+          className="absolute right-6 top-60 z-10 hidden w-28 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-20 lg:top-72 lg:w-36"
         >
-          <div className="relative h-16 w-full overflow-hidden rounded lg:h-20">
-            <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="130px" className="object-cover" />
+          <div className="relative h-20 w-full overflow-hidden rounded lg:h-28">
+            <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="160px" className="object-cover" />
           </div>
-          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">Con la profe 🌟</p>
+          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Con la profe 🌟</p>
         </motion.div>
 
         <motion.div
@@ -132,10 +133,10 @@ export default function Home() {
           className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-2 pt-28 text-center"
         >
           <motion.div variants={staggerItemUi}>
-            <h1 className="font-display text-balance text-5xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-7xl">
+            <h1 className="font-display text-balance text-5xl font-extrabold leading-tight text-[#3b2a55] sm:text-7xl">
               Academia Mágica
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-pretty text-lg font-semibold text-white/95 drop-shadow sm:text-2xl">
+            <p className="mx-auto mt-4 max-w-xl text-pretty text-lg font-semibold text-[#3b2a55]/80 sm:text-2xl">
               Aprender Jugando es Posible en Academia Mágica
             </p>
           </motion.div>
@@ -156,26 +157,22 @@ export default function Home() {
             con un diamante flotando sobre su cabeza (como el "plumbob" de Los Sims), y
             compañeros a los lados para mostrar que es para todas las edades. */}
         <div className="relative z-10 mx-auto flex w-full max-w-4xl items-end justify-center px-2">
+          {/* Extremo: 10-12 */}
           <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
             <Image src="/personajes2d/girl_10-12_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
 
+          {/* Al lado: 7-10 */}
           <motion.div
             initial={{ opacity: 0, y: 40, x: -10 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
             className="relative -mr-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
           >
-            <Image src="/personajes2d/girl_4-7_3.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -left-2 top-2 hidden items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-[#3b2a55] shadow-lg ring-1 ring-[#3b2a55]/10 sm:flex"
-            >
-              🎨 +10💎
-            </motion.div>
+            <Image src="/personajes2d/boy_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
           </motion.div>
 
+          {/* Protagonista: 4-7, al centro y al frente, con el diamante flotando arriba */}
           <motion.div
             initial={{ opacity: 0, y: 60, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -191,7 +188,7 @@ export default function Home() {
             </motion.div>
             <div className="absolute -top-10 left-1/2 h-16 w-16 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-2xl sm:h-20 sm:w-20" />
             <Image
-              src="/personajes2d/girl_7-10_1.webp"
+              src="/personajes2d/girl_4-7_1.webp"
               alt="Personaje principal de Academia Mágica, ganando diamantes al aprender"
               fill
               sizes="280px"
@@ -200,24 +197,19 @@ export default function Home() {
             />
           </motion.div>
 
+          {/* Al lado: 7-10 */}
           <motion.div
             initial={{ opacity: 0, y: 40, x: 10 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
             className="relative -ml-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
           >
-            <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-              className="absolute -right-2 top-6 hidden items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-[#3b2a55] shadow-lg ring-1 ring-[#3b2a55]/10 sm:flex"
-            >
-              🔢 +10💎
-            </motion.div>
+            <Image src="/personajes2d/girl_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
           </motion.div>
 
+          {/* Extremo: 10-12 */}
           <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
-            <Image src="/personajes2d/boy_7-10_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
+            <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
         </div>
 
@@ -234,7 +226,7 @@ export default function Home() {
 
         {/* Divisor ondulado */}
         <svg
-          className="absolute -bottom-1 left-0 z-0 h-16 w-full text-[#fff8ec]"
+          className="absolute -bottom-1 left-0 z-0 h-16 w-full text-[#6c5ce7]"
           viewBox="0 0 1440 100"
           preserveAspectRatio="none"
         >
@@ -245,8 +237,9 @@ export default function Home() {
         </svg>
       </section>
 
-      {/* COMO FUNCIONA */}
-      <section className="bg-[#fff8ec] px-6 py-20 sm:px-10">
+      {/* COMO FUNCIONA — ahora es la seccion morada (antes lo era el hero); el hero
+          paso a un fondo claro para que no se note el resto de fondo de los personajes 2D */}
+      <section className="bg-gradient-to-b from-[#6c5ce7] to-[#5847b8] px-6 py-20 sm:px-10">
         <motion.div
           initial="initial"
           whileInView="animate"
@@ -256,7 +249,7 @@ export default function Home() {
         >
           <motion.h2
             variants={staggerItemUi}
-            className="font-display text-balance text-center text-3xl font-extrabold text-[#3b2a55] sm:text-4xl"
+            className="font-display text-balance text-center text-3xl font-extrabold text-white drop-shadow sm:text-4xl"
           >
             ¿Cómo funciona la magia?
           </motion.h2>
