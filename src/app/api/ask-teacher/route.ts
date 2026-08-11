@@ -124,7 +124,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ answer: text.trim() });
   } catch (err) {
-    console.error("ask-teacher error", err);
+    // Log con detalle para poder diagnosticar desde los Runtime Logs de
+    // Vercel (ej: sin credito en AI Gateway, modelo invalido, etc.) sin
+    // exponer detalles internos al alumno.
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[ask-teacher] fallo generateText:", message, err);
     return NextResponse.json(
       { error: "No se pudo generar la respuesta" },
       { status: 500 }

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItemUi, SPRING_UI, SPRING_PLAYFUL, popIn } from "@/lib/motion";
-import AmbientMusicToggle from "@/components/ambient-music-toggle";
 
 const TEACHERS = [
   { name: "Amara", img: "/profesores/amara.webp" },
@@ -61,7 +60,6 @@ export default function Home() {
           >
             Admin 🔐
           </Link>
-          <AmbientMusicToggle />
         </div>
       </header>
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import MotionProvider from "@/components/motion-provider";
+import AmbientMusicToggle from "@/components/ambient-music-toggle";
 
 const baloo = Baloo_2({
   subsets: ["latin"],
@@ -28,7 +29,13 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${baloo.variable} ${nunito.variable}`}>
       <body className="antialiased">
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          {children}
+          {/* Instancia unica y persistente: no se desmonta al navegar entre
+              paginas, asi que el boton para apagar la musica esta siempre
+              disponible sin importar en que pantalla este el alumno. */}
+          <AmbientMusicToggle />
+        </MotionProvider>
       </body>
     </html>
   );

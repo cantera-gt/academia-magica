@@ -81,7 +81,7 @@ export default function AmbientMusicToggle() {
       transition={SPRING_UI}
       aria-label={playing ? "Pausar música" : "Reproducir música"}
       title={playing ? "Pausar música" : "Reproducir música"}
-      className="flex h-11 w-11 items-center justify-center rounded-full bg-white/25 text-xl text-white backdrop-blur-md transition-colors hover:bg-white/35"
+      className="fixed bottom-5 left-5 z-[70] flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl text-[#6c5ce7] shadow-xl ring-1 ring-black/5 transition-colors hover:bg-white/90"
     >
       {playing ? "🎵" : "🔇"}
     </motion.button>
