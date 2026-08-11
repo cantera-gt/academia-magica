@@ -194,7 +194,7 @@ export interface StoreItem {
 export interface RoomPosition3D {
   x: number;
   y: number;
-  z: number;
+  z?: number;
   rotationY?: number;
 }
 
