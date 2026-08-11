@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       p_paypal_capture_id: capture.id,
       p_captured_amount: capture.amount,
       p_currency: capture.currency,
+      p_server_secret: serverSecret,
     });
     if (error) throw error;
 
