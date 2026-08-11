@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/admin", label: "Resumen", icon: "▦", exact: true },
   { href: "/admin/alumnos", label: "Alumnos", icon: "♟" },
+  { href: "/admin/matriculas", label: "Matrículas", icon: "✍" },
   { href: "/admin/comunicacion", label: "Comunicación", icon: "✉" },
   { href: "/admin/actividad", label: "Registro", icon: "◷" },
   { href: "/admin/ejercicios", label: "Contenido", icon: "✦" },
