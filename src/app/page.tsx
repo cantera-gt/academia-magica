@@ -236,7 +236,7 @@ export default async function Home() {
               </article>
             ))}
           </div>
-          {activeSubjects.length > 0 && (
+          {activeSubjects.length > 0 ? (
             <div className="mt-10 rounded-[2rem] border border-[#6c5ce7]/15 bg-[#f2e9ff] p-5 sm:p-8">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -260,8 +260,9 @@ export default async function Home() {
                 ))}
               </div>
             </div>
+          ) : (
+            <p className="mt-7 text-center text-sm font-bold text-[#3b2a55]/55">Consulta las materias disponibles dentro del formulario de matrícula.</p>
           )}
-          {activeSubjects.length === 0 && <p className="mt-7 text-center text-sm font-bold text-[#3b2a55]/55">Consulta las materias disponibles dentro del formulario de matrícula.</p>}
         </div>
       </section>
 
