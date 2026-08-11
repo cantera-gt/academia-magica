@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { SPRING_UI } from "@/lib/motion";
 
@@ -10,6 +11,7 @@ import { SPRING_UI } from "@/lib/motion";
 // registro). Los navegadores bloquean el audio automático, así que el
 // motor de sonido recién se arma cuando el usuario toca el botón.
 export default function AmbientMusicToggle() {
+  const pathname = usePathname();
   const [playing, setPlaying] = useState(false);
   const initializedRef = useRef(false);
 
@@ -72,6 +74,8 @@ export default function AmbientMusicToggle() {
       setPlaying(true);
     }
   }
+
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <motion.button

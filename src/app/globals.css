@@ -20,6 +20,28 @@ body {
   font-family: var(--font-body), "Nunito", ui-rounded, system-ui, sans-serif;
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-contrast: more) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    outline-offset: 3px;
+  }
+}
+
 .font-display {
   font-family: var(--font-display), "Baloo 2", ui-rounded, system-ui, sans-serif;
 }
