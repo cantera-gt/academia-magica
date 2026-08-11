@@ -710,6 +710,7 @@ export default function TemaPage() {
         subjectId={subjectId}
         subjectName={subjectName}
         subjectSlug={subjectSlug}
+        topicId={topicId}
         topicName={topicDetail?.name ?? undefined}
         teacher={teacher}
         studentName={profile?.display_name}

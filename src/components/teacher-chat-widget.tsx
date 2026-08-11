@@ -27,6 +27,7 @@ interface TeacherChatWidgetProps {
   subjectId: string;
   subjectName: string;
   subjectSlug?: string;
+  topicId?: string;
   topicName?: string;
   teacher: MySubjectTeacher | null;
   studentName?: string;
@@ -77,6 +78,7 @@ export default function TeacherChatWidget({
   subjectId,
   subjectName,
   subjectSlug,
+  topicId,
   topicName,
   teacher,
   studentName,
@@ -88,6 +90,10 @@ export default function TeacherChatWidget({
   const [inputValue, setInputValue] = useState("");
   const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Distinto de "loading": loading cubre toda la espera (incluido el
+  // "Pensando..."), streaming indica que ya empezo a llegar texto real y
+  // hay que mostrar la burbuja creciendo en vez del indicador de espera.
+  const [streaming, setStreaming] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [micSupported, setMicSupported] = useState(true);
 
@@ -151,10 +157,12 @@ export default function TeacherChatWidget({
     const question = rawText.trim();
     if (!question || loading) return;
 
+    const FALLBACK = "Uy, se me trabó la lengua. ¿Me lo podés preguntar de nuevo?";
     const nextMessages = [...messages, { role: "user" as const, content: question }];
     setMessages(nextMessages);
     setInputValue("");
     setLoading(true);
+    setStreaming(false);
     stopSpeaking();
 
     try {
@@ -166,6 +174,7 @@ export default function TeacherChatWidget({
           subjectId,
           subjectName,
           subjectSlug,
+          topicId,
           topicName,
           teacherName: teacher?.name ?? "tu profe",
           teacherNationality: teacher?.nationality,
@@ -175,25 +184,67 @@ export default function TeacherChatWidget({
           history: nextMessages.slice(-6),
         }),
       });
-      const data = (await res.json()) as { answer?: string; error?: string };
-      const answer =
-        res.ok && data.answer
-          ? data.answer
-          : "Uy, se me trabó la lengua. ¿Me lo podés preguntar de nuevo?";
-      setMessages((m) => [...m, { role: "assistant", content: answer }]);
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        void data; // el detalle queda en los logs del servidor, al alumno solo le mostramos el mensaje generico
+        setMessages((m) => [...m, { role: "assistant", content: FALLBACK }]);
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      let finalText = "";
+
+      if (reader) {
+        const decoder = new TextDecoder();
+        const first = await reader.read();
+        if (!first.done && first.value) finalText += decoder.decode(first.value, { stream: true });
+
+        setStreaming(true);
+        setMessages((m) => [...m, { role: "assistant", content: finalText }]);
+
+        if (!first.done) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) {
+              finalText += decoder.decode(value, { stream: true });
+              setMessages((m) => {
+                const copy = [...m];
+                copy[copy.length - 1] = { role: "assistant", content: finalText };
+                return copy;
+              });
+            }
+          }
+        }
+      } else {
+        // Fallback si el navegador no soporta streaming de fetch (raro):
+        // se lee todo de una vez, igual que antes.
+        finalText = await res.text();
+        setMessages((m) => [...m, { role: "assistant", content: finalText }]);
+      }
+
+      finalText = finalText.trim();
+      if (!finalText) {
+        finalText = FALLBACK;
+        setMessages((m) => {
+          const copy = [...m];
+          copy[copy.length - 1] = { role: "assistant", content: finalText };
+          return copy;
+        });
+      }
+
       speakText(
-        answer,
+        finalText,
         teacher?.voice_name ?? NEUTRAL_VOICE,
         () => setSpeaking(true),
         () => setSpeaking(false)
       );
     } catch {
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: "Uy, se me trabó la lengua. ¿Me lo podés preguntar de nuevo?" },
-      ]);
+      setMessages((m) => [...m, { role: "assistant", content: FALLBACK }]);
     } finally {
       setLoading(false);
+      setStreaming(false);
     }
   }
 
@@ -289,7 +340,7 @@ export default function TeacherChatWidget({
                   </div>
                 </div>
               ))}
-              {loading && (
+              {loading && !streaming && (
                 <div className="flex justify-start">
                   <div className="rounded-2xl rounded-bl-none bg-slate-100 px-3 py-2 text-sm text-slate-400">
                     Pensando...
