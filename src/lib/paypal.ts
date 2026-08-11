@@ -116,3 +116,41 @@ export function completedCapture(order: PayPalOrder) {
     currency: capture.amount.currency_code,
   };
 }
+
+
+export async function verifyPayPalWebhookSignature(
+  headers: {
+    authAlgo: string;
+    certUrl: string;
+    transmissionId: string;
+    transmissionSig: string;
+    transmissionTime: string;
+  },
+  webhookEvent: unknown,
+) {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) throw new Error("El webhook de PayPal no está configurado");
+
+  const { token, baseUrl } = await accessToken();
+  const response = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      auth_algo: headers.authAlgo,
+      cert_url: headers.certUrl,
+      transmission_id: headers.transmissionId,
+      transmission_sig: headers.transmissionSig,
+      transmission_time: headers.transmissionTime,
+      webhook_id: webhookId,
+      webhook_event: webhookEvent,
+    }),
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => ({})) as { verification_status?: string };
+  if (!response.ok) throw new Error("No se pudo verificar la firma del webhook de PayPal");
+  return data.verification_status === "SUCCESS";
+}
