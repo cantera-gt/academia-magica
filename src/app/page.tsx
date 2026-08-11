@@ -8,7 +8,7 @@ const ENROLLMENT_EMAIL =
   "mailto:businesscatserrano@gmail.com?subject=Quiero%20matricularme%20en%20Academia%20M%C3%A1gica&body=Hola%2C%20quiero%20informaci%C3%B3n%20para%20matricular%20a%20mi%20hijo%2Fa.%0A%0AEdad%3A%0ANombre%20del%20adulto%3A%0ATel%C3%A9fono%20(opcional)%3A";
 
 export const metadata: Metadata = {
-  title: "Aprender jugando para niños de 4 a 10 años",
+  title: "Aprender jugando para niños de 4 a 10 años | Academia Mágica",
   description:
     "Plataforma educativa gamificada para niños de 4 a 10 años: matemáticas, español y cuerpo humano, profesores con voz, progreso visible y diamantes por aprender.",
   alternates: { canonical: "/" },
