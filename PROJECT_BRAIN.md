@@ -114,8 +114,17 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 - SEO: metadatos específicos, canonical, Open Graph, Twitter Card, datos estructurados de organización/aplicación/FAQ, robots.txt y sitemap.xml.
 
 
+## Modelo comercial de matrícula
+
+- El comprador selecciona las materias activas directamente desde Supabase.
+- El acceso dura 3 meses y se factura en USD.
+- Tarifas por volumen: 1–3 materias a $10 cada una; 4–6 a $8; 7–10 a $7; 11 o más a $6.
+- La tarifa del tramo se aplica a todas las materias seleccionadas, por lo que existen saltos favorables en 4, 7 y 11 materias (por ejemplo, 10 cuestan $70 y 11 cuestan $66).
+- El navegador muestra una estimación, pero la función SQL valida materias activas y recalcula el precio. La solicitud guarda una fotografía inmutable de materias, nombres, tarifa, total, moneda y duración.
+- PayPal debe operar primero en Sandbox. Sus secretos solo se guardan como variables cifradas de Vercel; nunca en Git, Obsidian ni conversaciones.
+
 ## Migraciones de captación
 
 - `20260811190000_enrollment_pipeline.sql`
 - `20260811190500_enrollment_terms_consent.sql`
-- `20260811191000_enrollment_function_privileges.sql`
+- `20260811191000_enrollment_function_privileges.sql`\n- `20260811200000_enrollment_subject_pricing.sql`
