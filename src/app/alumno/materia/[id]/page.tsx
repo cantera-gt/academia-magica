@@ -408,6 +408,7 @@ export default function MateriaTopicsPage() {
         <TeacherChatWidget
           subjectId={subjectId}
           subjectName={subject.name}
+          subjectSlug={subject.slug}
           teacher={myTeacher}
           studentName={profile?.display_name}
           studentAge={approxAgeFromBracket(profile?.age_bracket)}

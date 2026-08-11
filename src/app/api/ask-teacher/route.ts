@@ -27,6 +27,7 @@ interface AskTeacherBody {
   question?: string;
   subjectId?: string;
   subjectName?: string;
+  subjectSlug?: string;
   topicName?: string;
   teacherName?: string;
   teacherNationality?: string;
@@ -45,7 +46,7 @@ function buildSystemPrompt(body: AskTeacherBody): string {
   const exercise = body.exercise;
 
   const teacherProfile = getTeacherProfile(body.teacherName);
-  const subjectGuidance = getSubjectGuidance(body.subjectName);
+  const subjectGuidance = getSubjectGuidance(body.subjectSlug);
 
   let prompt = `Sos ${teacherName}, un profesor virtual cariñoso, paciente y alentador de una app educativa para niños. Estás charlando con ${studentName}`;
   prompt += age ? `, que tiene ${age} años,` : "";
@@ -120,19 +121,49 @@ export async function POST(req: NextRequest) {
     const history = Array.isArray(body.history) ? body.history.slice(-6) : [];
     const systemPrompt = buildSystemPrompt(body);
 
-    const { text } = await generateText({
-      model: "anthropic/claude-haiku-4-5",
-      system: systemPrompt,
-      messages: [
-        ...history.map((h) => ({
-          role: h.role,
-          content: String(h.content ?? "").slice(0, 400),
-        })),
-        { role: "user" as const, content: question },
-      ],
-      maxOutputTokens: 220,
-      temperature: 0.6,
-    });
+    const gatewayMessages = [
+      ...history.map((h) => ({
+        role: h.role,
+        content: String(h.content ?? "").slice(0, 400),
+      })),
+      { role: "user" as const, content: question },
+    ];
+
+    // Reintento simple: un fallo transitorio de red o del proveedor no
+    // deberia mostrarle un error al alumno a la primera. No reintentamos
+    // si el motivo es de credito/facturacion, porque ahi un segundo intento
+    // va a fallar exactamente igual.
+    let text: string | undefined;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const result = await generateText({
+          model: "anthropic/claude-haiku-4-5",
+          system: systemPrompt,
+          messages: gatewayMessages,
+          maxOutputTokens: 220,
+          temperature: 0.6,
+        });
+        text = result.text;
+        break;
+      } catch (err) {
+        lastErr = err;
+        const message = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+        const isBillingOrAuth =
+          message.includes("credit") ||
+          message.includes("quota") ||
+          message.includes("unauthorized") ||
+          message.includes("401") ||
+          message.includes("403");
+        if (attempt === 0 && !isBillingOrAuth) {
+          await new Promise((r) => setTimeout(r, 400));
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (text === undefined) throw lastErr ?? new Error("Sin respuesta del modelo");
 
     return NextResponse.json({ answer: text.trim() });
   } catch (err) {

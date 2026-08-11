@@ -59,30 +59,33 @@ export interface SubjectGuidance {
   approach: string;
 }
 
+// Clave = slug de la tabla `subjects` (estable aunque cambie el nombre
+// visible de la materia; matchear por nombre de texto se rompia en
+// silencio si alguien editaba el nombre en la base).
 export const SUBJECT_EXPERTISE: Record<string, SubjectGuidance> = {
-  "ciencias naturales": { approach: "Conectá con algo que pueda observar en su casa o el patio; preguntale qué ve, toca o huele antes de explicar." },
-  "física básica": { approach: "Pedile que imagine la situación como una escena real (una pelota cayendo, un carrito) y qué espera que pase, antes de calcular." },
-  "química básica": { approach: "Relacioná con algo de la cocina (mezclar, calentar, disolver). Empezá por la idea, no por los símbolos." },
-  "cuerpo humano": { approach: "Usá su propio cuerpo como ejemplo (ej: \"tocate la muñeca, ahí sentís el pulso\") para hacerlo concreto." },
-  "educación artística": { approach: "No hay una única respuesta correcta; preguntale qué quiso lograr y ayudalo a mirar su propio trabajo con otros ojos." },
-  "educación física": { approach: "Enfocate en el esfuerzo y la técnica, no solo el resultado; celebrá la mejora aunque sea chica." },
-  "música": { approach: "Pedile que escuche o tararee antes de explicar teoría; conectá los conceptos con canciones que ya conoce." },
-  "tecnología e informática": { approach: "Guialo a probar y observar qué pasa (ensayo y error guiado) en vez de explicarle el resultado directo." },
+  "ciencias-naturales": { approach: "Conectá con algo que pueda observar en su casa o el patio; preguntale qué ve, toca o huele antes de explicar." },
+  "fisica": { approach: "Pedile que imagine la situación como una escena real (una pelota cayendo, un carrito) y qué espera que pase, antes de calcular." },
+  "quimica": { approach: "Relacioná con algo de la cocina (mezclar, calentar, disolver). Empezá por la idea, no por los símbolos." },
+  "cuerpo-humano": { approach: "Usá su propio cuerpo como ejemplo (ej: \"tocate la muñeca, ahí sentís el pulso\") para hacerlo concreto." },
+  "arte": { approach: "No hay una única respuesta correcta; preguntale qué quiso lograr y ayudalo a mirar su propio trabajo con otros ojos." },
+  "educacion-fisica": { approach: "Enfocate en el esfuerzo y la técnica, no solo el resultado; celebrá la mejora aunque sea chica." },
+  "musica": { approach: "Pedile que escuche o tararee antes de explicar teoría; conectá los conceptos con canciones que ya conoce." },
+  "tecnologia": { approach: "Guialo a probar y observar qué pasa (ensayo y error guiado) en vez de explicarle el resultado directo." },
   "historia": { approach: "Preguntale \"¿por qué creés que pasó eso?\" antes de dar el dato; conectá causa y consecuencia." },
-  "geografía": { approach: "Usá referencias que ya conoce (su ciudad, su país) como punto de partida para ubicar lo nuevo." },
-  "educación cívica": { approach: "Llevalo a pensar en ejemplos de su propia vida en familia o en la escuela antes de dar la definición." },
-  "cultura y tradiciones": { approach: "Valorá la curiosidad; invitalo a comparar con lo que ya conoce de su propia cultura." },
-  "español": { approach: "Pedile que lea la palabra o frase en voz alta primero: muchas veces se autocorrige al escucharse." },
-  "inglés": { approach: "No traduzcas directo; ayudalo a asociar la palabra con una imagen, un gesto o un ejemplo." },
-  "alemán": { approach: "Igual que en inglés: priorizá el sonido y la repetición antes que la regla gramatical." },
-  "matemáticas (aritmética)": { approach: "Pedile que diga con sus palabras qué le están preguntando antes de operar; guialo a elegir la operación, nunca se la digas vos." },
-  "geometría": { approach: "Pedile que dibuje o imagine la figura antes de calcular nada." },
-  "fracciones y decimales": { approach: "Usá ejemplos físicos (una pizza, una barra de chocolate) para que visualice las partes." },
-  "lógica y razonamiento": { approach: "Hacé una pregunta a la vez y dejá que piense en voz alta el paso siguiente." },
-  "lectura comprensiva": { approach: "Pedile que cuente con sus palabras qué entendió antes de responder la pregunta del ejercicio." },
-  "escritura creativa": { approach: "Primero la idea, después la ortografía. No interrumpas la creatividad corrigiendo de entrada." },
-  "pensamiento crítico": { approach: "Preguntale \"¿por qué pensás eso?\" y \"¿qué otra explicación podría haber?\"." },
-  "resolución de problemas": { approach: "Ayudalo a separar el problema en pasos chicos, uno por vez, sin adelantarte." },
+  "geografia": { approach: "Usá referencias que ya conoce (su ciudad, su país) como punto de partida para ubicar lo nuevo." },
+  "civica": { approach: "Llevalo a pensar en ejemplos de su propia vida en familia o en la escuela antes de dar la definición." },
+  "cultura": { approach: "Valorá la curiosidad; invitalo a comparar con lo que ya conoce de su propia cultura." },
+  "espanol": { approach: "Pedile que lea la palabra o frase en voz alta primero: muchas veces se autocorrige al escucharse." },
+  "ingles": { approach: "No traduzcas directo; ayudalo a asociar la palabra con una imagen, un gesto o un ejemplo." },
+  "aleman": { approach: "Igual que en inglés: priorizá el sonido y la repetición antes que la regla gramatical." },
+  "matematicas": { approach: "Pedile que diga con sus palabras qué le están preguntando antes de operar; guialo a elegir la operación, nunca se la digas vos." },
+  "geometria": { approach: "Pedile que dibuje o imagine la figura antes de calcular nada." },
+  "fracciones": { approach: "Usá ejemplos físicos (una pizza, una barra de chocolate) para que visualice las partes." },
+  "logica": { approach: "Hacé una pregunta a la vez y dejá que piense en voz alta el paso siguiente." },
+  "lectura": { approach: "Pedile que cuente con sus palabras qué entendió antes de responder la pregunta del ejercicio." },
+  "escritura": { approach: "Primero la idea, después la ortografía. No interrumpas la creatividad corrigiendo de entrada." },
+  "pensamiento-critico": { approach: "Preguntale \"¿por qué pensás eso?\" y \"¿qué otra explicación podría haber?\"." },
+  "resolucion-problemas": { approach: "Ayudalo a separar el problema en pasos chicos, uno por vez, sin adelantarte." },
 };
 
 export const CONCENTRATION_TIPS: string[] = [
@@ -98,9 +101,9 @@ export function getTeacherProfile(teacherName: string | undefined): TeacherProfi
   return TEACHER_PERSONALITIES[teacherName.trim()] ?? DEFAULT_TEACHER_PROFILE;
 }
 
-export function getSubjectGuidance(subjectName: string | undefined): SubjectGuidance | null {
-  if (!subjectName) return null;
-  const key = subjectName.trim().toLowerCase();
+export function getSubjectGuidance(subjectSlug: string | undefined): SubjectGuidance | null {
+  if (!subjectSlug) return null;
+  const key = subjectSlug.trim().toLowerCase();
   return SUBJECT_EXPERTISE[key] ?? null;
 }
 

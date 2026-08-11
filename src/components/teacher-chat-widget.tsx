@@ -10,7 +10,13 @@ import { speakText, stopSpeaking } from "@/lib/speech";
 // (ej. Alemán, Arte, Música...) pero el alumno igual puede preguntar.
 const NEUTRAL_VOICE = "es-ES-ElviraNeural";
 
+// Respuestas rapidas para que arrancar la charla no dependa de escribir o
+// hablar — util sobre todo para los mas chicos (4-7) que recien aprenden
+// a escribir.
+const QUICK_REPLIES = ["No entiendo la pregunta", "Dame una pista", "¿Cómo empiezo?"];
+
 export interface TeacherChatExerciseContext {
+  id?: string;
   prompt: string;
   hint?: string;
   type?: string;
@@ -20,6 +26,7 @@ export interface TeacherChatExerciseContext {
 interface TeacherChatWidgetProps {
   subjectId: string;
   subjectName: string;
+  subjectSlug?: string;
   topicName?: string;
   teacher: MySubjectTeacher | null;
   studentName?: string;
@@ -69,6 +76,7 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
 export default function TeacherChatWidget({
   subjectId,
   subjectName,
+  subjectSlug,
   topicName,
   teacher,
   studentName,
@@ -89,6 +97,20 @@ export default function TeacherChatWidget({
   useEffect(() => {
     setMicSupported(!!getSpeechRecognition());
   }, []);
+
+  // Si el alumno pasa a otro ejercicio con el chat todavia abierto, la
+  // charla anterior ya no aplica (hablaba de un ejercicio distinto) — se
+  // reinicia para no confundir al profesor virtual con contexto viejo.
+  const prevExerciseIdRef = useRef<string | undefined>(exercise?.id);
+  useEffect(() => {
+    const prevId = prevExerciseIdRef.current;
+    const nextId = exercise?.id;
+    if (prevId && nextId && prevId !== nextId) {
+      setMessages([]);
+      stopSpeaking();
+    }
+    prevExerciseIdRef.current = nextId;
+  }, [exercise?.id]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -143,6 +165,7 @@ export default function TeacherChatWidget({
           question,
           subjectId,
           subjectName,
+          subjectSlug,
           topicName,
           teacherName: teacher?.name ?? "tu profe",
           teacherNationality: teacher?.nationality,
@@ -222,9 +245,24 @@ export default function TeacherChatWidget({
 
             <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-3">
               {messages.length === 0 && (
-                <div className="rounded-2xl rounded-bl-none bg-slate-100 p-3 text-sm text-slate-600">
-                  ¿Tenés una duda de {subjectName}? Preguntame por texto o con el micrófono 🎤 —
-                  te voy a ayudar a encontrar la respuesta vos mismo/a.
+                <div className="space-y-2">
+                  <div className="rounded-2xl rounded-bl-none bg-slate-100 p-3 text-sm text-slate-600">
+                    ¿Tenés una duda de {subjectName}? Preguntame por texto o con el micrófono 🎤 —
+                    te voy a ayudar a encontrar la respuesta vos mismo/a.
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_REPLIES.map((qr) => (
+                      <button
+                        key={qr}
+                        type="button"
+                        onClick={() => sendMessage(qr)}
+                        disabled={loading}
+                        className="rounded-full border border-purple-200 bg-white px-3 py-1.5 text-xs font-semibold text-purple-600 hover:bg-purple-50 disabled:opacity-40"
+                      >
+                        {qr}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {messages.map((m, i) => (

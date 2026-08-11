@@ -62,6 +62,7 @@ export default function TemaPage() {
   const [topicDetail, setTopicDetail] = useState<TopicDetail | null>(null);
   const [teacher, setTeacher] = useState<MySubjectTeacher | null>(null);
   const [subjectName, setSubjectName] = useState<string>("esta materia");
+  const [subjectSlug, setSubjectSlug] = useState<string | undefined>(undefined);
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -106,10 +107,11 @@ export default function TemaPage() {
 
     const { data: subjectRow } = await supabase
       .from("subjects")
-      .select("name")
+      .select("name, slug")
       .eq("id", subjectId)
       .maybeSingle();
     if (subjectRow?.name) setSubjectName(subjectRow.name);
+    if (subjectRow?.slug) setSubjectSlug(subjectRow.slug);
 
     const { data: teacherData } = await supabase.rpc("my_subject_teacher", {
       p_subject_id: subjectId,
@@ -707,6 +709,7 @@ export default function TemaPage() {
       <TeacherChatWidget
         subjectId={subjectId}
         subjectName={subjectName}
+        subjectSlug={subjectSlug}
         topicName={topicDetail?.name ?? undefined}
         teacher={teacher}
         studentName={profile?.display_name}
@@ -714,6 +717,7 @@ export default function TemaPage() {
         exercise={
           stage === "playing" && current
             ? {
+                id: current.id,
                 prompt: current.prompt.text,
                 hint: current.prompt.hint,
                 type: current.type,
