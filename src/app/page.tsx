@@ -81,8 +81,9 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: -10 }}
           animate={{ opacity: 1, y: 0, rotate: -6 }}
+          whileHover={{ scale: 1.12, rotate: 0, zIndex: 40 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.65 }}
-          className="absolute left-16 top-24 z-20 hidden w-[159px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-24 sm:top-28 sm:w-[218px]"
+          className="absolute left-16 top-24 z-20 hidden w-[159px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-24 sm:top-28 sm:w-[218px]"
         >
           <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
             <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="180px" className="object-cover" />
@@ -93,8 +94,9 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: 8 }}
           animate={{ opacity: 1, y: 0, rotate: 9 }}
+          whileHover={{ scale: 1.15, rotate: 0, zIndex: 40 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.0 }}
-          className="absolute left-10 top-60 z-10 hidden w-[139px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-28 lg:top-72 lg:w-[179px]"
+          className="absolute left-10 top-60 z-10 hidden w-[139px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-28 lg:top-72 lg:w-[179px]"
         >
           <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
             <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="160px" className="object-cover" />
@@ -105,8 +107,9 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: 10 }}
           animate={{ opacity: 1, y: 0, rotate: 5 }}
+          whileHover={{ scale: 1.12, rotate: 0, zIndex: 40 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.8 }}
-          className="absolute right-16 top-24 z-20 hidden w-[159px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-24 sm:top-28 sm:w-[218px]"
+          className="absolute right-16 top-24 z-20 hidden w-[159px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-24 sm:top-28 sm:w-[218px]"
         >
           <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
             <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="180px" className="object-cover" />
@@ -117,8 +120,9 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: -8 }}
           animate={{ opacity: 1, y: 0, rotate: -9 }}
+          whileHover={{ scale: 1.15, rotate: 0, zIndex: 40 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.1 }}
-          className="absolute right-10 top-60 z-10 hidden w-[139px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-28 lg:top-72 lg:w-[179px]"
+          className="absolute right-10 top-60 z-10 hidden w-[139px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-28 lg:top-72 lg:w-[179px]"
         >
           <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
             <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="160px" className="object-cover" />
