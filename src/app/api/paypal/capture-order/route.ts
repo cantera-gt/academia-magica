@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "PayPal todavía no ha confirmado el pago" }, { status: 409 });
     }
 
-    const supabase = await createClient();
+    const serverSecret = process.env.PAYMENT_SERVER_SECRET;\n    if (!serverSecret) throw new Error("Servidor de pagos no configurado");\n\n    const supabase = await createClient();
     const { error } = await supabase.rpc("complete_enrollment_paypal_order", {
       p_public_reference: reference,
       p_payment_token: paymentToken,
