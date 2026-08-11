@@ -75,7 +75,8 @@ export default function Home() {
           <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(1.5px_1.5px_at_10%_20%,white,transparent),radial-gradient(1.5px_1.5px_at_80%_15%,white,transparent),radial-gradient(1px_1px_at_60%_35%,white,transparent),radial-gradient(1px_1px_at_25%_55%,white,transparent),radial-gradient(1.5px_1.5px_at_90%_60%,white,transparent),radial-gradient(1px_1px_at_45%_75%,white,transparent)] [background-size:100%_100%]" />
         </div>
 
-        {/* Snapshots reales, como en la caja de un juego: la parte "de verdad" de la historia */}
+        {/* Snapshots reales, como en la caja de un juego: una pequeña columna de
+            recuerdos a cada lado, no dos fotos sueltas y perdidas en la esquina */}
         <motion.div
           initial={{ opacity: 0, y: -16, rotate: -10 }}
           animate={{ opacity: 1, y: 0, rotate: -6 }}
@@ -86,6 +87,18 @@ export default function Home() {
             <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="150px" className="object-cover" />
           </div>
           <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">¡Lo logré! 🎉</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: -16, rotate: 8 }}
+          animate={{ opacity: 1, y: 0, rotate: 9 }}
+          transition={{ ...SPRING_PLAYFUL, delay: 1.0 }}
+          className="absolute left-2 top-56 z-10 hidden w-24 rounded-lg bg-white p-1.5 pb-3 shadow-xl lg:block lg:left-8 lg:top-64 lg:w-28"
+        >
+          <div className="relative h-16 w-full overflow-hidden rounded lg:h-20">
+            <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="130px" className="object-cover" />
+          </div>
+          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">¡A jugar! ⚽</p>
         </motion.div>
 
         <motion.div
@@ -100,14 +113,16 @@ export default function Home() {
           <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">Aprendiendo 📚</p>
         </motion.div>
 
-        {/* HUD de diamantes: asi se ve una vez adentro del juego */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.7, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 0.4 }}
-          className="absolute right-4 top-20 z-20 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white ring-1 ring-white/30 backdrop-blur-md sm:right-8 sm:top-24 sm:px-4 sm:py-2 sm:text-sm"
+          initial={{ opacity: 0, y: -16, rotate: -8 }}
+          animate={{ opacity: 1, y: 0, rotate: -9 }}
+          transition={{ ...SPRING_PLAYFUL, delay: 1.1 }}
+          className="absolute right-2 top-56 z-10 hidden w-24 rounded-lg bg-white p-1.5 pb-3 shadow-xl lg:block lg:right-8 lg:top-64 lg:w-28"
         >
-          💎 <span>Gana diamantes de verdad</span>
+          <div className="relative h-16 w-full overflow-hidden rounded lg:h-20">
+            <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="130px" className="object-cover" />
+          </div>
+          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">Con la profe 🌟</p>
         </motion.div>
 
         <motion.div
@@ -125,24 +140,13 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <motion.div
-            variants={staggerItemUi}
-            className="flex flex-col gap-4 sm:flex-row"
-          >
+          <motion.div variants={staggerItemUi}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
               <Link
                 href="/alumno"
-                className="block rounded-2xl bg-[#ffd93d] px-10 py-6 text-xl font-bold text-[#3b2a55] shadow-xl"
+                className="block rounded-2xl bg-[#ffd93d] px-12 py-6 text-xl font-bold text-[#3b2a55] shadow-xl"
               >
-                Soy Alumno 🧒
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
-              <Link
-                href="/login"
-                className="block rounded-2xl bg-black/35 px-10 py-6 text-xl font-bold text-white shadow-xl ring-2 ring-white/70 backdrop-blur-md hover:bg-black/45"
-              >
-                Soy Administrador 🔐
+                Acceder a la Academia 🧒✨
               </Link>
             </motion.div>
           </motion.div>
@@ -217,14 +221,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Cinta con el lema, como el titulo en la caja de un juego */}
+        {/* Cinta con el lema, como el titulo en la caja de un juego — con aire de sobra
+            antes del divisor ondulado para que no quede pisada por el cambio de color */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING_UI, delay: 0.95 }}
-          className="relative z-10 mx-auto -mt-1 mb-6 w-fit rounded-full bg-[#ffd93d] px-5 py-1.5 text-xs font-bold uppercase tracking-wide text-[#3b2a55] shadow-lg sm:mb-8 sm:px-6 sm:py-2 sm:text-sm"
+          className="relative z-10 mx-auto -mt-1 mb-16 w-fit rounded-full bg-[#ffd93d] px-5 py-1.5 text-xs font-bold uppercase tracking-wide text-[#3b2a55] shadow-lg sm:mb-20 sm:px-6 sm:py-2 sm:text-sm"
         >
-          Estudia · Juega · Gana diamantes ✨
+          Estudia · Juega · Crea ✨
         </motion.div>
 
         {/* Divisor ondulado */}
@@ -430,21 +435,13 @@ export default function Home() {
           <motion.h2 variants={staggerItemUi} className="font-display text-balance text-3xl font-extrabold text-white drop-shadow sm:text-4xl">
             ¿Empezamos a jugar y aprender?
           </motion.h2>
-          <motion.div variants={staggerItemUi} className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+          <motion.div variants={staggerItemUi} className="mt-8 flex justify-center">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
               <Link
                 href="/alumno"
-                className="block rounded-2xl bg-white px-10 py-5 text-xl font-bold text-[#6c5ce7] shadow-xl"
+                className="block rounded-2xl bg-white px-12 py-5 text-xl font-bold text-[#6c5ce7] shadow-xl"
               >
-                Soy Alumno 🧒
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
-              <Link
-                href="/login"
-                className="block rounded-2xl bg-black/25 px-10 py-5 text-xl font-bold text-white shadow-xl backdrop-blur hover:bg-black/35"
-              >
-                Soy Administrador 🔐
+                Acceder a la Academia 🧒✨
               </Link>
             </motion.div>
           </motion.div>
