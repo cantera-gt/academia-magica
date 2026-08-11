@@ -82,9 +82,9 @@ export default function Home() {
           initial={{ opacity: 0, y: -16, rotate: -10 }}
           animate={{ opacity: 1, y: 0, rotate: -6 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.65 }}
-          className="absolute left-10 top-24 z-20 hidden w-32 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-16 sm:top-28 sm:w-44"
+          className="absolute left-16 top-24 z-20 hidden w-[159px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-24 sm:top-28 sm:w-[218px]"
         >
-          <div className="relative h-24 w-full overflow-hidden rounded sm:h-32">
+          <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
             <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="180px" className="object-cover" />
           </div>
           <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡Lo logré! 🎉</p>
@@ -94,9 +94,9 @@ export default function Home() {
           initial={{ opacity: 0, y: -16, rotate: 8 }}
           animate={{ opacity: 1, y: 0, rotate: 9 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.0 }}
-          className="absolute left-6 top-60 z-10 hidden w-28 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-20 lg:top-72 lg:w-36"
+          className="absolute left-10 top-60 z-10 hidden w-[139px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-28 lg:top-72 lg:w-[179px]"
         >
-          <div className="relative h-20 w-full overflow-hidden rounded lg:h-28">
+          <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
             <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="160px" className="object-cover" />
           </div>
           <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡A jugar! ⚽</p>
@@ -106,9 +106,9 @@ export default function Home() {
           initial={{ opacity: 0, y: -16, rotate: 10 }}
           animate={{ opacity: 1, y: 0, rotate: 5 }}
           transition={{ ...SPRING_PLAYFUL, delay: 0.8 }}
-          className="absolute right-10 top-24 z-20 hidden w-32 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-16 sm:top-28 sm:w-44"
+          className="absolute right-16 top-24 z-20 hidden w-[159px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-24 sm:top-28 sm:w-[218px]"
         >
-          <div className="relative h-24 w-full overflow-hidden rounded sm:h-32">
+          <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
             <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="180px" className="object-cover" />
           </div>
           <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Aprendiendo 📚</p>
@@ -118,9 +118,9 @@ export default function Home() {
           initial={{ opacity: 0, y: -16, rotate: -8 }}
           animate={{ opacity: 1, y: 0, rotate: -9 }}
           transition={{ ...SPRING_PLAYFUL, delay: 1.1 }}
-          className="absolute right-6 top-60 z-10 hidden w-28 rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-20 lg:top-72 lg:w-36"
+          className="absolute right-10 top-60 z-10 hidden w-[139px] rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-28 lg:top-72 lg:w-[179px]"
         >
-          <div className="relative h-20 w-full overflow-hidden rounded lg:h-28">
+          <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
             <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="160px" className="object-cover" />
           </div>
           <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Con la profe 🌟</p>
@@ -158,7 +158,7 @@ export default function Home() {
             compañeros a los lados para mostrar que es para todas las edades. */}
         <div className="relative z-10 mx-auto flex w-full max-w-4xl items-end justify-center px-2">
           {/* Extremo: 10-12 */}
-          <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+          <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
             <Image src="/personajes2d/girl_10-12_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
 
@@ -208,21 +208,20 @@ export default function Home() {
           </motion.div>
 
           {/* Extremo: 10-12 */}
-          <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+          <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
             <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
         </div>
 
-        {/* Cinta con el lema, como el titulo en la caja de un juego — con aire de sobra
-            antes del divisor ondulado para que no quede pisada por el cambio de color */}
-        <motion.div
+        {/* Subtitulo elegante debajo del elenco, no un boton — el lema de la caja de juego */}
+        <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING_UI, delay: 0.95 }}
-          className="relative z-10 mx-auto -mt-1 mb-16 w-fit rounded-full bg-[#ffd93d] px-5 py-1.5 text-xs font-bold uppercase tracking-wide text-[#3b2a55] shadow-lg sm:mb-20 sm:px-6 sm:py-2 sm:text-sm"
+          className="relative z-10 mx-auto -mt-1 mb-16 max-w-md text-balance px-6 text-center font-display text-2xl font-bold tracking-wide text-[#3b2a55] sm:mb-20 sm:text-4xl"
         >
-          Estudia · Juega · Crea ✨
-        </motion.div>
+          Estudia · Juega · Crea <span aria-hidden="true">✨</span>
+        </motion.p>
 
         {/* Divisor ondulado */}
         <svg
