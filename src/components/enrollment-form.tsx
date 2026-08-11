@@ -16,7 +16,10 @@ export default function EnrollmentForm({ subjects }: { subjects: Subject[] }) {
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
   const [applicantType, setApplicantType] = useState<ApplicantType>("legal_guardian");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const requestedSlugs = new Set(searchParams.getAll("materia"));
+    return new Set(subjects.filter((subject) => requestedSlugs.has(subject.slug)).map((subject) => subject.id));
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [startedAt] = useState(() => Date.now());
