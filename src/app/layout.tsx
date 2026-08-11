@@ -17,8 +17,17 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Academia Mágica",
-  description: "Plataforma educativa gamificada para aprender jugando",
+  metadataBase: new URL("https://academia-magica-oficial.vercel.app"),
+  title: {
+    default: "Academia Mágica | Aprender jugando",
+    template: "%s | Academia Mágica",
+  },
+  description: "Plataforma educativa gamificada para niños de 4 a 10 años.",
+  category: "education",
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
