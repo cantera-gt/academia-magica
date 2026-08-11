@@ -121,10 +121,13 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 - Tarifas por volumen: 1–3 materias a $10 cada una; 4–6 a $8; 7–10 a $7; 11 o más a $6.
 - La tarifa del tramo se aplica a todas las materias seleccionadas, por lo que existen saltos favorables en 4, 7 y 11 materias (por ejemplo, 10 cuestan $70 y 11 cuestan $66).
 - El navegador muestra una estimación, pero la función SQL valida materias activas y recalcula el precio. La solicitud guarda una fotografía inmutable de materias, nombres, tarifa, total, moneda y duración.
-- PayPal debe operar primero en Sandbox. Sus secretos solo se guardan como variables cifradas de Vercel; nunca en Git, Obsidian ni conversaciones.
+- PayPal opera primero en Sandbox mediante Orders v2. Sus secretos solo se guardan como variables cifradas de Vercel; nunca en Git, Obsidian ni conversaciones.
+- Cada matrícula recibe un token de pago UUID distinto de la referencia visible. La orden se crea en el servidor usando el total guardado por Supabase; la confirmación vuelve a validar orden, captura, importe y moneda antes de marcar el pago.
+- Las mutaciones de pago requieren además un secreto interno del servidor cuyo hash vive en el esquema privado de Postgres. El navegador no puede marcar una matrícula como pagada directamente.
+- Estado de validación: credenciales Sandbox autenticadas y creación/redirección de una orden de 10 USD comprobadas. Falta aprobar una compra con una cuenta Sandbox personal para validar la captura completa; no activar Live hasta completar esa prueba y registrar el webhook.
 
 ## Migraciones de captación
 
 - `20260811190000_enrollment_pipeline.sql`
 - `20260811190500_enrollment_terms_consent.sql`
-- `20260811191000_enrollment_function_privileges.sql`\n- `20260811200000_enrollment_subject_pricing.sql`\n- `20260811201000_public_enrollment_subject_catalog.sql`
+- `20260811191000_enrollment_function_privileges.sql`\n- `20260811200000_enrollment_subject_pricing.sql`\n- `20260811201000_public_enrollment_subject_catalog.sql`\n- `20260811202000_paypal_sandbox_checkout.sql`\n- `20260811202500_harden_paypal_server_mutations.sql`
