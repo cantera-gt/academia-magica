@@ -1,0 +1,10 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = { title: "Pago de matrícula | Academia Mágica", robots: { index: false, follow: false } };
+
+export default async function PaymentPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
+  const { ref } = await searchParams;
+  const safeReference = /^AM-[A-Z0-9]{8}$/.test(ref ?? "") ? ref : null;
+  return <main className="flex min-h-screen items-center justify-center bg-[#fffaf3] px-4 py-12 text-[#3b2a55]"><section className="w-full max-w-xl rounded-[2.5rem] bg-white p-7 text-center shadow-2xl sm:p-10"><div className="mx-auto flex size-20 items-center justify-center rounded-full bg-[#7fe7c4]/30 text-4xl">✓</div><p className="mt-6 text-sm font-extrabold uppercase tracking-[0.14em] text-[#6c5ce7]">Solicitud registrada</p><h1 className="font-display mt-2 text-3xl font-extrabold sm:text-4xl">Ya tenemos tu matrícula</h1>{safeReference && <p className="mt-4">Tu referencia es <strong className="rounded-lg bg-[#f2e9ff] px-2 py-1 text-[#6c5ce7]">{safeReference}</strong></p>}<div className="mt-8 rounded-3xl border-2 border-[#0070ba]/20 bg-[#f6fbff] p-6"><div className="text-3xl font-black italic text-[#003087]">Pay<span className="text-[#0070ba]">Pal</span></div><p className="mt-4 font-bold">Pago online de Academia Mágica</p><button disabled className="mt-5 min-h-12 w-full cursor-not-allowed rounded-full bg-[#ffc439] px-5 py-3 font-extrabold text-[#142c8e] opacity-65">Pago PayPal próximamente</button><p className="mt-3 text-sm text-[#3b2a55]/60">La cuenta de PayPal aún no está conectada, por lo que no se ha realizado ningún cargo. Contactaremos contigo para completar el proceso.</p></div><Link href="/" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-2xl px-6 py-3 font-extrabold text-[#6c5ce7] hover:bg-[#6c5ce7]/10">Volver a la página principal</Link></section></main>;
+}
