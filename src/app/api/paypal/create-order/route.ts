@@ -51,6 +51,7 @@ export async function POST(request: Request) {
       p_public_reference: reference,
       p_payment_token: paymentToken,
       p_paypal_order_id: order.id,
+      p_server_secret: serverSecret,
     });
     if (registerError) throw registerError;
 
