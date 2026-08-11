@@ -161,8 +161,16 @@ export default function Home() {
             con un diamante flotando sobre su cabeza (como el "plumbob" de Los Sims), y
             compañeros a los lados para mostrar que es para todas las edades. */}
         <div className="relative z-10 mx-auto flex w-full max-w-4xl items-end justify-center px-2">
-          {/* Extremo: 10-12 */}
+          {/* Extremo: 10-12 — mas chico y "lejano", diamante chico a juego */}
           <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+            <motion.div
+              animate={{ y: [0, -6, 0], rotate: [0, 8, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+              className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 text-lg drop-shadow-[0_0_8px_rgba(127,231,196,0.7)] sm:-top-5 sm:text-xl"
+            >
+              💎
+            </motion.div>
+            <div className="absolute -top-5 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-8 sm:w-8" />
             <Image src="/personajes2d/girl_10-12_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
 
@@ -173,6 +181,14 @@ export default function Home() {
             transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
             className="relative -mr-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
           >
+            <motion.div
+              animate={{ y: [0, -8, 0], rotate: [0, 8, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              className="absolute -top-6 left-1/2 z-20 -translate-x-1/2 text-2xl drop-shadow-[0_0_10px_rgba(127,231,196,0.75)] sm:-top-7 sm:text-3xl"
+            >
+              💎
+            </motion.div>
+            <div className="absolute -top-7 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-12 sm:w-12" />
             <Image src="/personajes2d/boy_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
           </motion.div>
 
@@ -208,11 +224,27 @@ export default function Home() {
             transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
             className="relative -ml-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
           >
+            <motion.div
+              animate={{ y: [0, -8, 0], rotate: [0, -8, 8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.65 }}
+              className="absolute -top-6 left-1/2 z-20 -translate-x-1/2 text-2xl drop-shadow-[0_0_10px_rgba(127,231,196,0.75)] sm:-top-7 sm:text-3xl"
+            >
+              💎
+            </motion.div>
+            <div className="absolute -top-7 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-12 sm:w-12" />
             <Image src="/personajes2d/girl_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
           </motion.div>
 
-          {/* Extremo: 10-12 */}
+          {/* Extremo: 10-12 — mas chico y "lejano", diamante chico a juego */}
           <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+            <motion.div
+              animate={{ y: [0, -6, 0], rotate: [0, -8, 8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.35 }}
+              className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 text-lg drop-shadow-[0_0_8px_rgba(127,231,196,0.7)] sm:-top-5 sm:text-xl"
+            >
+              💎
+            </motion.div>
+            <div className="absolute -top-5 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-8 sm:w-8" />
             <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
         </div>
