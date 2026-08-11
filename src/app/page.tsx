@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { createClient } from "@/lib/supabase/server";
+import type { Subject } from "@/types/database";
 
 const SITE_URL = "https://academia-magica-oficial.vercel.app";
 export const metadata: Metadata = {
   title: "Aprender jugando para niños de 4 a 10 años | Academia Mágica",
   description:
-    "Plataforma educativa gamificada para niños de 4 a 10 años: matemáticas, español y cuerpo humano, profesores con voz, progreso visible y diamantes por aprender.",
+    "Plataforma educativa gamificada para niños de 4 a 10 años con catálogo de materias, profesores con voz, progreso visible y diamantes por aprender.",
   alternates: { canonical: "/" },
   keywords: [
     "plataforma educativa para niños",
@@ -46,7 +48,7 @@ const BENEFITS = [
   { icon: "📈", title: "Tú ves el progreso", text: "El panel de administración permite seguir actividad, rendimiento y evolución para acompañar con información real." },
 ];
 
-const SUBJECTS = [
+const FEATURED_SUBJECTS = [
   { icon: "🔢", name: "Matemáticas", text: "Números, cálculo, geometría, medida, lógica y resolución de problemas con progresión por edad.", color: "bg-[#ffd93d]" },
   { icon: "📚", name: "Español", text: "Lectura, vocabulario, ortografía, gramática y comprensión para expresarse cada vez mejor.", color: "bg-[#ff9abd]" },
   { icon: "🫀", name: "Cuerpo humano", text: "Anatomía, sentidos, salud y hábitos explicados con curiosidad, ejemplos y actividades cercanas.", color: "bg-[#7fe7c4]" },
@@ -58,7 +60,7 @@ const FAQS = [
   { question: "¿El profesor le dice directamente la respuesta?", answer: "No. Está preparado para guiar con preguntas y pequeñas pistas. El objetivo es que el alumno comprenda y llegue a la solución por sí mismo." },
   { question: "¿Qué puede controlar la familia?", answer: "El administrador puede gestionar alumnos y asignaturas, consultar actividad y rendimiento, revisar el progreso y premiar logros con diamantes." },
   { question: "¿Dónde funciona?", answer: "Es una aplicación web. Se accede online desde un navegador moderno en ordenador, tableta o móvil, sin instalar un programa especial." },
-  { question: "¿Cómo puedo conocer el precio y matricularme?", answer: "Pulsa «Quiero matricularme» y cuéntanos la edad del niño o niña. Te responderemos personalmente con la modalidad disponible, el precio y los siguientes pasos." },
+  { question: "¿Cómo puedo conocer el precio y matricularme?", answer: "Pulsa «Quiero matricularme», elige las materias y verás el precio final al instante. El acceso dura 3 meses: 1–3 materias cuestan $10 cada una, 4–6 cuestan $8, 7–10 cuestan $7 y desde 11 cuestan $6. Después puedes continuar al pago seguro con PayPal." },
 ];
 
 const jsonLd = {
@@ -81,7 +83,7 @@ const jsonLd = {
       url: SITE_URL,
       audience: { "@type": "PeopleAudience", suggestedMinAge: 4, suggestedMaxAge: 10 },
       provider: { "@id": SITE_URL + "/#organization" },
-      description: "Aprendizaje gamificado de matemáticas, español y cuerpo humano con profesores por voz, ejercicios y recompensas.",
+      description: "Aprendizaje gamificado con un catálogo creciente de materias, profesores por voz, ejercicios y recompensas.",
     },
     {
       "@type": "FAQPage",
@@ -111,7 +113,11 @@ function EnrollmentLink({
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: catalogData } = await supabase.rpc("get_enrollment_subject_catalog");
+  const activeSubjects = (catalogData ?? []) as Subject[];
+
   return (
     <main className="overflow-hidden bg-[#fffaf3] text-[#3b2a55]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -142,7 +148,7 @@ export default function Home() {
               Que aprender deje de ser una pelea y se convierta en su <span className="text-[#6c5ce7]">aventura favorita</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg font-semibold leading-relaxed text-[#3b2a55]/75 sm:text-xl lg:mx-0">
-              Academia Mágica transforma matemáticas, español y cuerpo humano en retos, profesores que guían y diamantes que dan ganas de seguir. Tú ves cómo avanza. Tu hijo disfruta aprendiendo.
+              Academia Mágica transforma un catálogo creciente de materias en retos, profesores que guían y diamantes que dan ganas de seguir. Tú ves cómo avanza. Tu hijo disfruta aprendiendo.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <EnrollmentLink className="w-full text-lg sm:w-auto sm:px-9 sm:py-4">Quiero matricularme</EnrollmentLink>
@@ -223,14 +229,39 @@ export default function Home() {
             <p className="mt-5 text-lg text-[#3b2a55]/70">Temas, prácticas y evaluaciones organizados por edad para construir bases sólidas sin perder la diversión.</p>
           </div>
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {SUBJECTS.map((subject) => (
+            {FEATURED_SUBJECTS.map((subject) => (
               <article key={subject.name} className="overflow-hidden rounded-[2rem] border border-[#3b2a55]/10 bg-white shadow-lg">
                 <div className={subject.color + " flex h-28 items-center justify-center text-6xl"} aria-hidden="true">{subject.icon}</div>
                 <div className="p-7"><h3 className="font-display text-2xl font-extrabold">{subject.name}</h3><p className="mt-3 leading-relaxed text-[#3b2a55]/70">{subject.text}</p></div>
               </article>
             ))}
           </div>
-          <p className="mt-7 text-center text-sm font-bold text-[#3b2a55]/55">La plataforma está preparada para ampliar nuevas materias progresivamente.</p>
+          {activeSubjects.length > 0 && (
+            <div className="mt-10 rounded-[2rem] border border-[#6c5ce7]/15 bg-[#f2e9ff] p-5 sm:p-8">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="font-display text-sm font-extrabold uppercase tracking-[0.14em] text-[#6c5ce7]">Catálogo actualizado automáticamente</p>
+                  <h3 className="font-display mt-1 text-2xl font-extrabold">Todas las materias disponibles</h3>
+                </div>
+                <p className="font-bold text-[#3b2a55]/60">{activeSubjects.length} materias activas</p>
+              </div>
+              <p className="mt-3 text-[#3b2a55]/70">Pulsa una materia para abrir la matrícula con ella ya seleccionada. Si añadimos una materia nueva y la activamos, aparecerá aquí y en el selector de matrícula sin tocar esta página.</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {activeSubjects.map((subject) => (
+                  <Link
+                    key={subject.id}
+                    href={`/matricula?materia=${encodeURIComponent(subject.slug)}#materias`}
+                    className="group flex min-h-16 items-center gap-3 rounded-2xl border-2 border-white bg-white px-4 py-3 font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:border-[#6c5ce7]/40 hover:shadow-md focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#6c5ce7]"
+                  >
+                    <span className="text-2xl" aria-hidden="true">{subject.icon ?? "✨"}</span>
+                    <span>{subject.name}</span>
+                    <span className="ml-auto text-[#6c5ce7] transition group-hover:translate-x-1" aria-hidden="true">→</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {activeSubjects.length === 0 && <p className="mt-7 text-center text-sm font-bold text-[#3b2a55]/55">Consulta las materias disponibles dentro del formulario de matrícula.</p>}
         </div>
       </section>
 
