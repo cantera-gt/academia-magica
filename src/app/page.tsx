@@ -218,9 +218,9 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING_UI, delay: 0.95 }}
-          className="relative z-10 mx-auto -mt-1 mb-16 max-w-md text-balance px-6 text-center font-display text-2xl font-bold tracking-wide text-[#3b2a55] sm:mb-20 sm:text-4xl"
+          className="relative z-10 mx-auto -mt-1 mb-16 whitespace-nowrap px-6 text-center font-display text-xl font-bold tracking-wide text-[#3b2a55] sm:mb-20 sm:text-3xl"
         >
-          Estudia · Juega · Crea <span aria-hidden="true">✨</span>
+          <span aria-hidden="true">✨</span> Estudia · Juega · Crea <span aria-hidden="true">✨</span>
         </motion.p>
 
         {/* Divisor ondulado */}
