@@ -4,9 +4,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const SITE_URL = "https://academia-magica-oficial.vercel.app";
-const ENROLLMENT_EMAIL =
-  "mailto:businesscatserrano@gmail.com?subject=Quiero%20matricularme%20en%20Academia%20M%C3%A1gica&body=Hola%2C%20quiero%20informaci%C3%B3n%20para%20matricular%20a%20mi%20hijo%2Fa.%0A%0AEdad%3A%0ANombre%20del%20adulto%3A%0ATel%C3%A9fono%20(opcional)%3A";
-
 export const metadata: Metadata = {
   title: "Aprender jugando para niños de 4 a 10 años | Academia Mágica",
   description:
@@ -105,12 +102,12 @@ function EnrollmentLink({
   children?: ReactNode;
 }) {
   return (
-    <a
-      href={ENROLLMENT_EMAIL}
+    <Link
+      href="/matricula"
       className={"inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#ffd93d] px-7 py-3.5 text-center font-extrabold text-[#3b2a55] shadow-[0_10px_30px_rgba(255,217,61,0.28)] transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#ffd93d] " + className}
     >
       {children}
-    </a>
+    </Link>
   );
 }
 
