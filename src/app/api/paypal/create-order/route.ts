@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ approvalUrl });
   } catch (error) {
-    console.error("paypal_create_order_failed", error instanceof Error ? error.message : "unknown");
+    const message = error instanceof Error ? error.message : (error && typeof error === "object" && "message" in error ? String(error.message) : "unknown");\n    console.error("paypal_create_order_failed", message);
     return NextResponse.json({ error: "No hemos podido iniciar PayPal. Inténtalo de nuevo." }, { status: 500 });
   }
 }
