@@ -63,33 +63,65 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative flex min-h-screen flex-col overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/classroom/ninos-saltando.jpg"
-            alt="Niños celebrando en el aula de Academia Mágica"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[center_20%]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#3b2a55]/85 via-[#6c5ce7]/55 to-[#3b2a55]/90" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#3b2a55] via-transparent to-transparent" />
+      {/* HERO — portada tipo caja de videojuego: el elenco de personajes es el protagonista,
+          no una foto de fondo. El diamante flotando sobre la protagonista es el gesto central:
+          asi entiende cualquiera, de un vistazo, de que va el juego. */}
+      <section className="relative isolate flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-[#8676f2] via-[#6c5ce7] to-[#2f2049]">
+        {/* Fondo mágico: resplandores de color + estrellitas, sin foto */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[6%] top-[16%] h-40 w-40 rounded-full bg-[#ffd93d]/25 blur-3xl sm:h-64 sm:w-64" />
+          <div className="absolute right-[8%] top-[26%] h-48 w-48 rounded-full bg-[#7fe7c4]/20 blur-3xl sm:h-72 sm:w-72" />
+          <div className="absolute bottom-[6%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#ff6b9d]/20 blur-3xl" />
+          <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(1.5px_1.5px_at_10%_20%,white,transparent),radial-gradient(1.5px_1.5px_at_80%_15%,white,transparent),radial-gradient(1px_1px_at_60%_35%,white,transparent),radial-gradient(1px_1px_at_25%_55%,white,transparent),radial-gradient(1.5px_1.5px_at_90%_60%,white,transparent),radial-gradient(1px_1px_at_45%_75%,white,transparent)] [background-size:100%_100%]" />
         </div>
+
+        {/* Snapshots reales, como en la caja de un juego: la parte "de verdad" de la historia */}
+        <motion.div
+          initial={{ opacity: 0, y: -16, rotate: -10 }}
+          animate={{ opacity: 1, y: 0, rotate: -6 }}
+          transition={{ ...SPRING_PLAYFUL, delay: 0.65 }}
+          className="absolute left-3 top-24 z-20 hidden w-28 rounded-lg bg-white p-1.5 pb-3 shadow-xl sm:block sm:left-6 sm:top-28 sm:w-36"
+        >
+          <div className="relative h-20 w-full overflow-hidden rounded sm:h-24">
+            <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="150px" className="object-cover" />
+          </div>
+          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">¡Lo logré! 🎉</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: -16, rotate: 10 }}
+          animate={{ opacity: 1, y: 0, rotate: 5 }}
+          transition={{ ...SPRING_PLAYFUL, delay: 0.8 }}
+          className="absolute right-3 top-24 z-20 hidden w-28 rounded-lg bg-white p-1.5 pb-3 shadow-xl sm:block sm:right-6 sm:top-28 sm:w-36"
+        >
+          <div className="relative h-20 w-full overflow-hidden rounded sm:h-24">
+            <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="150px" className="object-cover" />
+          </div>
+          <p className="mt-1.5 text-center font-display text-[10px] font-bold text-[#3b2a55]">Aprendiendo 📚</p>
+        </motion.div>
+
+        {/* HUD de diamantes: asi se ve una vez adentro del juego */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ ...SPRING_PLAYFUL, delay: 0.4 }}
+          className="absolute right-4 top-20 z-20 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white ring-1 ring-white/30 backdrop-blur-md sm:right-8 sm:top-24 sm:px-4 sm:py-2 sm:text-sm"
+        >
+          💎 <span>Gana diamantes de verdad</span>
+        </motion.div>
 
         <motion.div
           initial="initial"
           animate="animate"
           variants={staggerContainer(0.12, 0.15)}
-          className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-6 pb-24 pt-24 text-center"
+          className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-2 pt-28 text-center"
         >
           <motion.div variants={staggerItemUi}>
             <h1 className="font-display text-balance text-5xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-7xl">
-              Academia Mágica
+              Academia Mágica
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-pretty text-lg font-semibold text-white/95 drop-shadow sm:text-2xl">
-              Aprender Jugando es Posible en Academia Mágica
+              Aprender Jugando es Posible en Academia Mágica
             </p>
           </motion.div>
 
@@ -116,22 +148,83 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Mascotas ilustradas flotando sobre el borde inferior del hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 0.5 }}
-          className="pointer-events-none absolute -bottom-2 left-0 right-0 z-10 flex items-end justify-center gap-4 sm:gap-10"
-        >
-          <div className="relative h-28 w-20 sm:h-40 sm:w-28">
-            <Image src="/personajes2d/girl_4-7_1.webp" alt="" fill sizes="160px" className="object-contain object-bottom drop-shadow-2xl" />
+        {/* EL ELENCO — portada tipo caja de juego: la protagonista al frente y al centro,
+            con un diamante flotando sobre su cabeza (como el "plumbob" de Los Sims), y
+            compañeros a los lados para mostrar que es para todas las edades. */}
+        <div className="relative z-10 mx-auto flex w-full max-w-4xl items-end justify-center px-2">
+          <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+            <Image src="/personajes2d/girl_10-12_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
-          <div className="relative h-36 w-24 sm:h-52 sm:w-36">
+
+          <motion.div
+            initial={{ opacity: 0, y: 40, x: -10 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
+            className="relative -mr-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
+          >
+            <Image src="/personajes2d/girl_4-7_3.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -left-2 top-2 hidden items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-[#3b2a55] shadow-lg ring-1 ring-[#3b2a55]/10 sm:flex"
+            >
+              🎨 +10💎
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 60, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ ...SPRING_PLAYFUL, delay: 0.3 }}
+            className="relative z-10 h-52 w-36 shrink-0 sm:h-72 sm:w-48 lg:h-80 lg:w-56"
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0], rotate: [0, 8, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-8 left-1/2 z-20 -translate-x-1/2 text-4xl drop-shadow-[0_0_12px_rgba(127,231,196,0.8)] sm:-top-10 sm:text-5xl"
+            >
+              💎
+            </motion.div>
+            <div className="absolute -top-10 left-1/2 h-16 w-16 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-2xl sm:h-20 sm:w-20" />
+            <Image
+              src="/personajes2d/girl_7-10_1.webp"
+              alt="Personaje principal de Academia Mágica, ganando diamantes al aprender"
+              fill
+              sizes="280px"
+              priority
+              className="object-contain object-bottom drop-shadow-2xl"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40, x: 10 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
+            className="relative -ml-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
+          >
             <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+              className="absolute -right-2 top-6 hidden items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-[#3b2a55] shadow-lg ring-1 ring-[#3b2a55]/10 sm:flex"
+            >
+              🔢 +10💎
+            </motion.div>
+          </motion.div>
+
+          <div className="relative hidden h-32 w-24 shrink-0 opacity-70 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
+            <Image src="/personajes2d/boy_7-10_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
           </div>
-          <div className="relative h-32 w-20 sm:h-44 sm:w-28">
-            <Image src="/personajes2d/girl_7-10_3.webp" alt="" fill sizes="160px" className="object-contain object-bottom drop-shadow-2xl" />
-          </div>
+        </div>
+
+        {/* Cinta con el lema, como el titulo en la caja de un juego */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...SPRING_UI, delay: 0.95 }}
+          className="relative z-10 mx-auto -mt-1 mb-6 w-fit rounded-full bg-[#ffd93d] px-5 py-1.5 text-xs font-bold uppercase tracking-wide text-[#3b2a55] shadow-lg sm:mb-8 sm:px-6 sm:py-2 sm:text-sm"
+        >
+          Estudia · Juega · Gana diamantes ✨
         </motion.div>
 
         {/* Divisor ondulado */}
