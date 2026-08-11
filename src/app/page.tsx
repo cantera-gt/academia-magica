@@ -149,9 +149,9 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
               <Link
                 href="/alumno"
-                className="block rounded-2xl bg-[#ffd93d] px-12 py-6 text-xl font-bold text-[#3b2a55] shadow-xl"
+                className="block rounded-2xl bg-[#ffd93d] px-12 py-6 text-center text-xl font-bold text-[#3b2a55] shadow-xl transition hover:brightness-110 hover:shadow-[0_0_28px_rgba(255,217,61,0.75)]"
               >
-                Acceder a la Academia 🧒✨
+                Acceder a la Academia
               </Link>
             </motion.div>
           </motion.div>
@@ -435,9 +435,9 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
               <Link
                 href="/alumno"
-                className="block rounded-2xl bg-white px-12 py-5 text-xl font-bold text-[#6c5ce7] shadow-xl"
+                className="block rounded-2xl bg-white px-12 py-5 text-center text-xl font-bold text-[#6c5ce7] shadow-xl transition hover:shadow-[0_0_28px_rgba(255,255,255,0.9)]"
               >
-                Acceder a la Academia 🧒✨
+                Acceder a la Academia
               </Link>
             </motion.div>
           </motion.div>
