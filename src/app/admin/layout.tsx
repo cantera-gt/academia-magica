@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { MyProfile } from "@/types/database";
+import AdminNav from "@/components/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -25,24 +25,17 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="flex items-center justify-between bg-slate-900 px-6 py-4">
-        <Link href="/admin" className="text-lg font-bold text-white">
-          Academia Mágica · Admin
-        </Link>
-        <nav className="flex gap-4 text-sm text-slate-300">
-          <Link href="/admin/alumnos" className="hover:text-white">
-            Alumnos
-          </Link>
-          <Link href="/admin/ejercicios" className="hover:text-white">
-            Ejercicios
-          </Link>
-          <form action="/api/auth/signout" method="post">
-            <button className="hover:text-white">Salir</button>
-          </form>
-        </nav>
-      </header>
-      <main className="mx-auto max-w-5xl p-6">{children}</main>
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-900 lg:flex">
+      <a
+        href="#contenido-admin"
+        className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-lg bg-white px-4 py-2 font-bold text-violet-700 shadow focus:translate-y-0"
+      >
+        Saltar al contenido
+      </a>
+      <AdminNav adminName={profile.display_name} />
+      <main id="contenido-admin" tabIndex={-1} className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <div className="mx-auto max-w-7xl">{children}</div>
+      </main>
     </div>
   );
 }
