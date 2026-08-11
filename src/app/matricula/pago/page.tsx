@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Pago de matrícula | Academia Mágica", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Pago de matrícula", robots: { index: false, follow: false } };
 
 export default async function PaymentPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const { ref } = await searchParams;
