@@ -21,7 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Matrícula no válida" }, { status: 400 });
     }
 
-    const serverSecret = process.env.PAYMENT_SERVER_SECRET;\n    if (!serverSecret) throw new Error("Servidor de pagos no configurado");\n\n    const supabase = await createClient();
+    const serverSecret = process.env.PAYMENT_SERVER_SECRET;
+    if (!serverSecret) throw new Error("Servidor de pagos no configurado");
+
+    const supabase = await createClient();
     const { data, error } = await supabase.rpc("get_enrollment_payment_summary", {
       p_public_reference: reference,
       p_payment_token: paymentToken,
