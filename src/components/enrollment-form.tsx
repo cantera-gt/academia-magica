@@ -69,12 +69,12 @@ export default function EnrollmentForm({ subjects }: { subjects: Subject[] }) {
       p_utm_medium: searchParams.get("utm_medium"),
       p_utm_campaign: searchParams.get("utm_campaign"),
     });
-    if (rpcError || !data?.[0]?.public_reference) {
+    if (rpcError || !data?.[0]?.public_reference || !data?.[0]?.payment_token) {
       setError(rpcError?.message ?? "No hemos podido guardar la matrícula. Inténtalo de nuevo.");
       setSubmitting(false);
       return;
     }
-    router.push(`/matricula/pago?ref=${encodeURIComponent(data[0].public_reference)}`);
+    router.push(`/matricula/pago?ref=${encodeURIComponent(data[0].public_reference)}&pt=${encodeURIComponent(data[0].payment_token)}`);
   }
 
   return <form onSubmit={handleSubmit} className="rounded-[2rem] bg-white p-5 shadow-2xl shadow-[#3b2a55]/10 sm:p-8">
