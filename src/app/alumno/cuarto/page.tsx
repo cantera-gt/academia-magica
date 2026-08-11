@@ -4,9 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { MyProfile, InventoryItem, ItemCategory, ItemZone } from "@/types/database";
 import { staggerContainer, staggerItem, SPRING_PLAYFUL } from "@/lib/motion";
+import { resolveItemIcon } from "@/lib/store-icons";
+import RoomScene from "@/components/room-scene";
 
 const CATEGORY_ICON: Record<ItemCategory, string> = {
   decoracion: "🎀",
@@ -27,19 +30,6 @@ const ZONE_LABEL: Record<ItemZone, string> = {
 };
 
 const ZONE_TABS: ItemZone[] = ["habitacion", "estudio", "jardin"];
-
-const ROOM_BG: Record<string, Record<ItemZone, string>> = {
-  girl: {
-    habitacion: "from-pink-300 via-fuchsia-200 to-purple-200",
-    estudio: "from-amber-200 via-orange-100 to-yellow-100",
-    jardin: "from-lime-300 via-green-200 to-emerald-200",
-  },
-  boy: {
-    habitacion: "from-sky-300 via-cyan-200 to-blue-200",
-    estudio: "from-amber-200 via-orange-100 to-yellow-100",
-    jardin: "from-lime-300 via-green-200 to-emerald-200",
-  },
-};
 
 export default function CuartoPage() {
   const router = useRouter();
@@ -130,7 +120,6 @@ export default function CuartoPage() {
   const extras = inventory.filter(
     (i) => i.store_items.zone === zone && i.store_items.category === "extra"
   );
-  const bgGradient = (ROOM_BG[profile.gender] ?? ROOM_BG.girl)[zone];
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -169,20 +158,20 @@ export default function CuartoPage() {
         </div>
         <LayoutGroup>
           {/* La habitacion */}
-          <div
-            className={`min-h-[280px] rounded-3xl bg-gradient-to-br ${bgGradient} p-6 shadow-inner`}
-          >
+          <div className="relative min-h-[280px] overflow-hidden rounded-3xl p-6 shadow-inner">
+            <RoomScene zone={zone} gender={profile.gender} />
+            <div className="absolute inset-0 rounded-3xl bg-white/10" />
             {placed.length === 0 ? (
-              <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center text-slate-500">
-                <p className="text-5xl">🪄</p>
-                <p className="mt-2 font-medium">
+              <div className="relative flex h-full min-h-[220px] flex-col items-center justify-center text-center">
+                <p className="text-5xl drop-shadow">🪄</p>
+                <p className="mt-2 rounded-full bg-white/80 px-4 py-1 font-medium text-slate-600 shadow">
                   Esta zona está vacía. Elegí items de abajo para decorarla.
                 </p>
               </div>
             ) : (
               <motion.div
                 layout
-                className="flex flex-wrap gap-4"
+                className="relative flex flex-wrap gap-4"
               >
                 <AnimatePresence>
                   {placed.map((inv) => (
@@ -199,9 +188,21 @@ export default function CuartoPage() {
                       className="flex w-24 flex-col items-center gap-1 rounded-2xl bg-white/70 p-3 text-center shadow backdrop-blur"
                       title="Quitar del cuarto"
                     >
-                      <span className="text-4xl">
-                        {CATEGORY_ICON[inv.store_items.category]}
-                      </span>
+                      {inv.store_items.image_url ? (
+                        <span className="relative block h-12 w-12 overflow-hidden rounded-lg bg-slate-50">
+                          <Image
+                            src={inv.store_items.image_url}
+                            alt={inv.store_items.name}
+                            fill
+                            sizes="48px"
+                            className="object-contain"
+                          />
+                        </span>
+                      ) : (
+                        <span className="text-4xl">
+                          {resolveItemIcon(inv.store_items.name, CATEGORY_ICON[inv.store_items.category])}
+                        </span>
+                      )}
                       <span className="text-xs font-semibold text-slate-700">
                         {inv.store_items.name}
                       </span>
@@ -245,9 +246,21 @@ export default function CuartoPage() {
                       className="flex flex-col items-center gap-1 rounded-xl bg-white p-3 text-center shadow"
                       title="Colocar en el cuarto"
                     >
-                      <span className="text-3xl">
-                        {CATEGORY_ICON[inv.store_items.category]}
-                      </span>
+                      {inv.store_items.image_url ? (
+                        <span className="relative block h-10 w-10 overflow-hidden rounded-lg bg-slate-50">
+                          <Image
+                            src={inv.store_items.image_url}
+                            alt={inv.store_items.name}
+                            fill
+                            sizes="40px"
+                            className="object-contain"
+                          />
+                        </span>
+                      ) : (
+                        <span className="text-3xl">
+                          {resolveItemIcon(inv.store_items.name, CATEGORY_ICON[inv.store_items.category])}
+                        </span>
+                      )}
                       <span className="text-xs font-medium text-slate-600">
                         {inv.store_items.name}
                       </span>

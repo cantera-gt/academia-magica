@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { MyProfile, StoreItem, ItemCategory, ItemZone } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
+import { resolveItemIcon } from "@/lib/store-icons";
 
 const CATEGORY_ICON: Record<ItemCategory, string> = {
   decoracion: "🎀",
@@ -295,8 +297,20 @@ export default function TiendaPage() {
                         className="h-10 w-10 rounded-full border border-slate-200 shadow-inner"
                         style={{ backgroundColor: item.color_hex }}
                       />
+                    ) : item.image_url ? (
+                      <span className="relative block h-16 w-16 overflow-hidden rounded-xl bg-slate-50">
+                        <Image
+                          src={item.image_url}
+                          alt={item.name}
+                          fill
+                          sizes="64px"
+                          className="object-contain"
+                        />
+                      </span>
                     ) : (
-                      <span className="text-4xl">{CATEGORY_ICON[item.category]}</span>
+                      <span className="text-4xl">
+                        {resolveItemIcon(item.name, CATEGORY_ICON[item.category])}
+                      </span>
                     )}
                     <span className="text-sm font-semibold text-slate-700">
                       {item.name}
