@@ -105,6 +105,17 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 
 - Acción principal: Quiero matricularme.
 - Acceso de alumnos: visible arriba a la derecha y enlazado a /alumno.
-- La captación inicial abre un correo preconfigurado a businesscatserrano@gmail.com; no se inventan precio, testimonios, plazas, descuentos ni garantías.
-- Antes de escalar campañas conviene sustituir el correo por un formulario persistente con consentimiento, protección antispam y seguimiento comercial, o conectarlo a un CRM/proveedor de correo.
+- La captación usa `/matricula`: formulario persistente para tutor legal o alumno adulto, con datos de contacto, datos mínimos del menor, protección antispam, UTM y referencia pública.
+- Supabase es la fuente de verdad de solicitudes. Google Sheets `1wU1jzKcKTsT9dkCepfz4e2m8t74VYRnWKMGCItiDrIo` es una vista operativa privada; la sincronización automática requiere todavía una autorización técnica de Google.
+- `/matricula/pago` prepara el paso PayPal sin realizar cargos hasta configurar cuenta, producto, precio y webhook verificado.
+- `/admin/matriculas` permite buscar, contactar por WhatsApp, cambiar estado/pago, etiquetar, anotar y exportar CSV.
+- Consentimientos separados: condiciones y privacidad obligatorios; marketing opcional. Se guardan versión y fecha/hora.
+- Antes de activar ventas: completar identidad legal, NIT, domicilio, precio, moneda, duración, cancelación y reembolso; revisión jurídica en Guatemala.
 - SEO: metadatos específicos, canonical, Open Graph, Twitter Card, datos estructurados de organización/aplicación/FAQ, robots.txt y sitemap.xml.
+
+
+## Migraciones de captación
+
+- `20260811190000_enrollment_pipeline.sql`
+- `20260811190500_enrollment_terms_consent.sql`
+- `20260811191000_enrollment_function_privileges.sql`
