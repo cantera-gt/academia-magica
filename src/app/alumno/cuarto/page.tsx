@@ -159,6 +159,27 @@ export default function CuartoPage() {
     });
   }
 
+  // Coloca el item en un punto exacto (x,y en % del cuarto) — se usa cuando lo
+  // sueltan arrastrando desde la biblioteca.
+  function placeItemAt(invId: string, x: number, y: number) {
+    setDraft((prev) => ({ ...prev, [invId]: { placed: true, x: clamp(x, 6, 94), y: clamp(y, 10, 90) } }));
+  }
+
+  // true si el punto (viewport) cayo dentro del lienzo del cuarto
+  function pointInRoom(point: { x: number; y: number }) {
+    const rect = roomRef.current?.getBoundingClientRect();
+    if (!rect) return false;
+    return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+  }
+
+  function roomRelativePercent(point: { x: number; y: number }) {
+    const rect = roomRef.current!.getBoundingClientRect();
+    return {
+      x: clamp(((point.x - rect.left) / rect.width) * 100, 6, 94),
+      y: clamp(((point.y - rect.top) / rect.height) * 100, 10, 90),
+    };
+  }
+
   function unplaceItem(invId: string) {
     setDraft((prev) => ({ ...prev, [invId]: { ...prev[invId], placed: false } }));
   }
@@ -173,12 +194,24 @@ export default function CuartoPage() {
     });
   }
 
+  // Reposiciona un item que YA esta en el cuarto. Si lo sueltan fuera del
+  // lienzo, se interpreta como "sacarlo" y vuelve a la biblioteca.
   function handleDragEnd(invId: string, info: { point: { x: number; y: number } }) {
     const rect = roomRef.current?.getBoundingClientRect();
     if (!rect || rect.width === 0) return;
-    const x = clamp(((info.point.x - rect.left) / rect.width) * 100, 6, 94);
-    const y = clamp(((info.point.y - rect.top) / rect.height) * 100, 10, 90);
+    if (!pointInRoom(info.point)) {
+      unplaceItem(invId);
+      return;
+    }
+    const { x, y } = roomRelativePercent(info.point);
     setDraft((prev) => ({ ...prev, [invId]: { ...prev[invId], x, y } }));
+  }
+
+  // Se llama cuando sueltan un item ARRASTRADO desde la biblioteca.
+  function handleLibraryDrop(invId: string, info: { point: { x: number; y: number } }) {
+    if (!pointInRoom(info.point)) return; // lo soltaron afuera: no hace nada, la tarjeta vuelve sola
+    const { x, y } = roomRelativePercent(info.point);
+    placeItemAt(invId, x, y);
   }
 
   async function saveDraft() {
@@ -304,25 +337,28 @@ export default function CuartoPage() {
             </div>
           )}
 
-          {roomSize.w > 0 &&
-            zoneInventory
-              .filter((inv) => draft[inv.id]?.placed)
-              .map((inv) => {
-                const d = draft[inv.id];
-                if (!d) return null;
-                const px = (d.x / 100) * roomSize.w - ITEM_SIZE / 2;
-                const py = (d.y / 100) * roomSize.h - ITEM_SIZE / 2;
-                return (
-                  <motion.div
-                    key={inv.id}
-                    drag
-                    dragConstraints={roomRef}
-                    dragMomentum={false}
-                    dragElastic={0}
-                    animate={{ x: px, y: py }}
-                    transition={SPRING_PLAYFUL}
-                    onDragEnd={(_e, info) => handleDragEnd(inv.id, info)}
-                    whileDrag={{ scale: 1.12, zIndex: 30, cursor: "grabbing" }}
+          {roomSize.w > 0 && (
+            <AnimatePresence>
+              {zoneInventory
+                .filter((inv) => draft[inv.id]?.placed)
+                .map((inv) => {
+                  const d = draft[inv.id];
+                  if (!d) return null;
+                  const px = (d.x / 100) * roomSize.w - ITEM_SIZE / 2;
+                  const py = (d.y / 100) * roomSize.h - ITEM_SIZE / 2;
+                  return (
+                    <motion.div
+                      key={inv.id}
+                      drag
+                      dragConstraints={roomRef}
+                      dragMomentum={false}
+                      dragElastic={0}
+                      initial={{ opacity: 0, scale: 0.4, x: px, y: py }}
+                      animate={{ opacity: 1, scale: 1, x: px, y: py }}
+                      exit={{ opacity: 0, scale: 0.4 }}
+                      transition={SPRING_PLAYFUL}
+                      onDragEnd={(_e, info) => handleDragEnd(inv.id, info)}
+                      whileDrag={{ scale: 1.12, zIndex: 30, cursor: "grabbing" }}
                     style={{
                       position: "absolute",
                       left: 0,
@@ -357,9 +393,11 @@ export default function CuartoPage() {
                         {resolveItemIcon(inv.store_items.name, CATEGORY_ICON[inv.store_items.category])}
                       </span>
                     )}
-                  </motion.div>
-                );
-              })}
+                    </motion.div>
+                  );
+                })}
+            </AnimatePresence>
+          )}
         </div>
 
         {/* Barra de acciones del cuarto */}
@@ -410,19 +448,29 @@ export default function CuartoPage() {
                     return (
                       <motion.div
                         key={inv.id}
-                        layout
-                        layoutId={inv.id}
                         variants={staggerItem}
                         exit={{ opacity: 0, scale: 0.6 }}
                         className="flex flex-col items-center gap-1 rounded-xl bg-white p-3 text-center shadow"
                       >
-                        <motion.button
+                        <motion.div
+                          role="button"
+                          tabIndex={0}
                           onClick={() => placeItem(inv.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") placeItem(inv.id);
+                          }}
+                          drag
+                          dragSnapToOrigin
+                          dragConstraints={false}
+                          dragElastic={0.15}
+                          onDragEnd={(_e, info) => handleLibraryDrop(inv.id, info)}
                           whileHover={{ scale: 1.06, y: -2 }}
                           whileTap={{ scale: 0.96 }}
+                          whileDrag={{ scale: 1.15, zIndex: 50, cursor: "grabbing", boxShadow: "0 12px 24px rgba(0,0,0,0.25)" }}
                           transition={SPRING_PLAYFUL}
-                          title="Colocar en el cuarto"
-                          className="flex flex-col items-center gap-1"
+                          style={{ touchAction: "none" }}
+                          title="Arrastrá al cuarto, o tocá para colocarlo"
+                          className="flex cursor-grab flex-col items-center gap-1"
                         >
                           {inv.store_items.image_url ? (
                             <span className="relative block h-10 w-10 overflow-hidden rounded-lg bg-slate-50">
@@ -442,7 +490,7 @@ export default function CuartoPage() {
                           <span className="text-xs font-medium text-slate-600">
                             {inv.store_items.name}
                           </span>
-                        </motion.button>
+                        </motion.div>
                         <button
                           onClick={() => setConfirmSell(inv)}
                           className="mt-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 hover:bg-rose-100"
