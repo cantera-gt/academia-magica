@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyPayPalWebhookSignature } from "@/lib/paypal";
+import { capturePayPalOrder, completedCapture, getPayPalOrder, verifyPayPalWebhookSignature } from "@/lib/paypal";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -65,17 +65,36 @@ export async function POST(request: Request) {
     const isOrderEvent = eventType.startsWith("CHECKOUT.ORDER.");
     const isRefundEvent = eventType === "PAYMENT.CAPTURE.REFUNDED" || eventType === "PAYMENT.CAPTURE.REVERSED";
     const orderId = relatedIds?.order_id ?? (isOrderEvent ? resource.id : undefined) ?? null;
-    const captureId = isRefundEvent ? relatedIds?.capture_id ?? null : resource.id ?? null;
-    const amount = resource.amount?.value ?? null;
-    const currency = resource.amount?.currency_code ?? null;
+    let effectiveEventType = eventType;
+    let resourceId = resource.id ?? null;
+    let captureId = isRefundEvent ? relatedIds?.capture_id ?? null : resourceId;
+    let amount = resource.amount?.value ?? null;
+    let currency = resource.amount?.currency_code ?? null;
+
+    if (eventType === "CHECKOUT.ORDER.APPROVED" && orderId) {
+      let order;
+      try {
+        order = await capturePayPalOrder(orderId);
+      } catch {
+        order = await getPayPalOrder(orderId);
+      }
+      const capture = completedCapture(order);
+      if (!capture) throw new Error("La orden aprobada todavía no tiene una captura confirmada");
+      effectiveEventType = "PAYMENT.CAPTURE.COMPLETED";
+      resourceId = capture.id;
+      captureId = capture.id;
+      amount = capture.amount;
+      currency = capture.currency;
+    }
+
     const serverSecret = process.env.PAYMENT_SERVER_SECRET;
     if (!serverSecret) throw new Error("Servidor de pagos no configurado");
 
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("process_enrollment_paypal_webhook", {
       p_event_id: eventId,
-      p_event_type: eventType,
-      p_resource_id: resource.id ?? null,
+      p_event_type: effectiveEventType,
+      p_resource_id: resourceId,
       p_order_id: orderId,
       p_capture_id: captureId,
       p_amount: amount,
