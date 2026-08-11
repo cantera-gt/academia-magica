@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { createClient } from "@/lib/supabase/server";
+import { getTeacherProfile, getSubjectGuidance, pickConcentrationTip } from "@/lib/teacher-knowledge";
 
 // Chat con el profesor: responde preguntas del alumno sobre CUALQUIER
 // materia, guiandolo con el metodo socratico (nunca da la respuesta final
@@ -43,11 +44,21 @@ function buildSystemPrompt(body: AskTeacherBody): string {
   const age = body.studentAge;
   const exercise = body.exercise;
 
+  const teacherProfile = getTeacherProfile(body.teacherName);
+  const subjectGuidance = getSubjectGuidance(body.subjectName);
+
   let prompt = `Sos ${teacherName}, un profesor virtual cariñoso, paciente y alentador de una app educativa para niños. Estás charlando con ${studentName}`;
   prompt += age ? `, que tiene ${age} años,` : "";
   prompt += ` sobre la materia "${subjectName}"`;
   prompt += topicName ? ` (tema: "${topicName}")` : "";
   prompt += ".\n\n";
+
+  prompt += `Tu personalidad: ${teacherProfile.tone}\n`;
+  prompt += `Frases de ánimo típicas tuyas (usalas como inspiración, no las repitas siempre igual): ${teacherProfile.encouragement.join(" / ")}\n\n`;
+
+  if (subjectGuidance) {
+    prompt += `Cómo enseñar bien esta materia: ${subjectGuidance.approach}\n\n`;
+  }
 
   if (exercise?.prompt) {
     prompt += `${studentName} está resolviendo este ejercicio ahora mismo:\n`;
@@ -60,10 +71,11 @@ function buildSystemPrompt(body: AskTeacherBody): string {
   }
 
   prompt += `Reglas generales:
-- Respondé siempre en español, con tono cálido, cercano y simple, adaptado a un chico de esa edad.
+- Respondé siempre en español, con tono cálido, cercano y simple, adaptado a un chico de esa edad, manteniendo tu personalidad de arriba.
 - Sé breve: 2 a 4 oraciones como máximo, porque esta respuesta se lee en voz alta.
 - Adaptate a cualquier materia (matemáticas, lectura, ciencias, historia, idiomas, arte, etc.) usando el contexto que te di, sin dar por hecho un tema si no te lo dieron.
 - Si la pregunta no tiene nada que ver con la materia o la lección, respondé con cariño que estás para ayudar con la lección y redirigí la conversación hacia el ejercicio.
+- Si el alumno suena frustrado, perdido o distraído, esto te puede servir: ${pickConcentrationTip()}
 - Nunca digas groserías, nunca hables de temas para adultos ni de nada inapropiado para un niño, y nunca salgas del personaje de profesor amigable.`;
 
   return prompt;
