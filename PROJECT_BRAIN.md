@@ -99,3 +99,12 @@ Migración: `20260811150000_spanish_human_body_curricula.sql`.
 - Banco editorial con revisión humana y variantes de ejercicios aplicados, especialmente lectura comprensiva y casos científicos.
 - Pruebas end-to-end autenticadas para administrador y alumno en cada despliegue.
 
+## Landing comercial y captación
+
+La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene la identidad visual crema, violeta, rosa, menta y amarillo, además de los personajes 2D y las fotografías existentes. Su estructura de conversión es: transformación deseada, problema cotidiano, mecanismo de producto, currículo, acompañamiento, control familiar, preguntas frecuentes y llamada final a la matrícula.
+
+- Acción principal: Quiero matricularme.
+- Acceso de alumnos: visible arriba a la derecha y enlazado a /alumno.
+- La captación inicial abre un correo preconfigurado a businesscatserrano@gmail.com; no se inventan precio, testimonios, plazas, descuentos ni garantías.
+- Antes de escalar campañas conviene sustituir el correo por un formulario persistente con consentimiento, protección antispam y seguimiento comercial, o conectarlo a un CRM/proveedor de correo.
+- SEO: metadatos específicos, canonical, Open Graph, Twitter Card, datos estructurados de organización/aplicación/FAQ, robots.txt y sitemap.xml.

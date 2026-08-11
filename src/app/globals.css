@@ -16,6 +16,10 @@ body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body), "Nunito", ui-rounded, system-ui, sans-serif;
 }
@@ -30,6 +34,11 @@ textarea {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+::selection {
+  background: #ffd93d;
+  color: #3b2a55;
 }
 
 @media (prefers-contrast: more) {

@@ -1,483 +1,314 @@
-"use client";
-
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { staggerContainer, staggerItemUi, SPRING_UI, SPRING_PLAYFUL, popIn } from "@/lib/motion";
+import type { ReactNode } from "react";
 
-const TEACHERS = [
-  { name: "Amara", img: "/profesores/amara.webp" },
-  { name: "Diego", img: "/profesores/diego.webp" },
-  { name: "James", img: "/profesores/james.webp" },
-  { name: "Kenji", img: "/profesores/kenji.webp" },
-  { name: "Lucía", img: "/profesores/lucia.webp" },
-  { name: "Lukas", img: "/profesores/lukas.webp" },
-  { name: "María José", img: "/profesores/maria-jose.webp" },
-  { name: "Susan", img: "/profesores/susan.webp" },
+const SITE_URL = "https://academia-magica-oficial.vercel.app";
+const ENROLLMENT_EMAIL =
+  "mailto:businesscatserrano@gmail.com?subject=Quiero%20matricularme%20en%20Academia%20M%C3%A1gica&body=Hola%2C%20quiero%20informaci%C3%B3n%20para%20matricular%20a%20mi%20hijo%2Fa.%0A%0AEdad%3A%0ANombre%20del%20adulto%3A%0ATel%C3%A9fono%20(opcional)%3A";
+
+export const metadata: Metadata = {
+  title: "Aprender jugando para niños de 4 a 10 años",
+  description:
+    "Plataforma educativa gamificada para niños de 4 a 10 años: matemáticas, español y cuerpo humano, profesores con voz, progreso visible y diamantes por aprender.",
+  alternates: { canonical: "/" },
+  keywords: [
+    "plataforma educativa para niños",
+    "aprender jugando",
+    "educación gamificada",
+    "matemáticas para niños",
+    "español para niños",
+    "Academia Mágica",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: SITE_URL,
+    siteName: "Academia Mágica",
+    title: "Academia Mágica | Aprender jugando es posible",
+    description:
+      "Una aventura educativa para que niños de 4 a 10 años aprendan, ganen diamantes y quieran seguir avanzando.",
+    images: [{
+      url: "/classroom/ninos-saltando.jpg",
+      alt: "Niños celebrando un logro en Academia Mágica",
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Academia Mágica | Aprender jugando es posible",
+    description:
+      "Aprendizaje gamificado, profesores con voz y progreso visible para niños de 4 a 10 años.",
+    images: ["/classroom/ninos-saltando.jpg"],
+  },
+};
+
+const BENEFITS = [
+  { icon: "🧠", title: "Aprende a su ritmo", text: "Los contenidos están organizados por edad, materia y dificultad para que avance paso a paso, sin saltos imposibles." },
+  { icon: "🎤", title: "Pregunta cuando lo necesita", text: "Cada materia tiene un profesor con voz. Le da pistas, le hace pensar y le enseña el camino sin regalarle la respuesta." },
+  { icon: "💎", title: "Cada logro cuenta", text: "Los aciertos se transforman en diamantes que puede usar para crear y decorar su propio mundo dentro de la academia." },
+  { icon: "📈", title: "Tú ves el progreso", text: "El panel de administración permite seguir actividad, rendimiento y evolución para acompañar con información real." },
 ];
 
-const FEATURES = [
-  {
-    emoji: "🧩",
-    title: "Ejercicios que se adaptan",
-    text: "Cada materia tiene ejercicios pensados para su edad, que suben de nivel a su ritmo.",
-  },
-  {
-    emoji: "🎤",
-    title: "Un profe siempre disponible",
-    text: "Si tiene una duda, le pregunta al profesor por voz o texto. Nunca le da la respuesta: le enseña el camino.",
-  },
-  {
-    emoji: "💎",
-    title: "Diamantes por cada logro",
-    text: "Resolver bien un ejercicio suma diamantes de verdad, no puntos vacíos.",
-  },
-  {
-    emoji: "🏰",
-    title: "Su cuarto, a su gusto",
-    text: "Con los diamantes compra muebles y objetos para decorar su propio cuarto mágico.",
-  },
+const SUBJECTS = [
+  { icon: "🔢", name: "Matemáticas", text: "Números, cálculo, geometría, medida, lógica y resolución de problemas con progresión por edad.", color: "bg-[#ffd93d]" },
+  { icon: "📚", name: "Español", text: "Lectura, vocabulario, ortografía, gramática y comprensión para expresarse cada vez mejor.", color: "bg-[#ff9abd]" },
+  { icon: "🫀", name: "Cuerpo humano", text: "Anatomía, sentidos, salud y hábitos explicados con curiosidad, ejemplos y actividades cercanas.", color: "bg-[#7fe7c4]" },
 ];
+
+const FAQS = [
+  { question: "¿Para qué edades está pensada Academia Mágica?", answer: "Está diseñada principalmente para niños y niñas de 4 a 10 años. El contenido se organiza por edades para que cada alumno encuentre un reto adecuado a su momento de aprendizaje." },
+  { question: "¿Necesita un adulto estar siempre a su lado?", answer: "Al principio conviene acompañarle para conocer la plataforma. Después puede avanzar con bastante autonomía: las instrucciones son claras y puede pedir ayuda al profesor por voz o texto." },
+  { question: "¿El profesor le dice directamente la respuesta?", answer: "No. Está preparado para guiar con preguntas y pequeñas pistas. El objetivo es que el alumno comprenda y llegue a la solución por sí mismo." },
+  { question: "¿Qué puede controlar la familia?", answer: "El administrador puede gestionar alumnos y asignaturas, consultar actividad y rendimiento, revisar el progreso y premiar logros con diamantes." },
+  { question: "¿Dónde funciona?", answer: "Es una aplicación web. Se accede online desde un navegador moderno en ordenador, tableta o móvil, sin instalar un programa especial." },
+  { question: "¿Cómo puedo conocer el precio y matricularme?", answer: "Pulsa «Quiero matricularme» y cuéntanos la edad del niño o niña. Te responderemos personalmente con la modalidad disponible, el precio y los siguientes pasos." },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": SITE_URL + "/#organization",
+      name: "Academia Mágica",
+      url: SITE_URL,
+      email: "businesscatserrano@gmail.com",
+      description: "Plataforma educativa gamificada para niños de 4 a 10 años.",
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": SITE_URL + "/#application",
+      name: "Academia Mágica",
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      url: SITE_URL,
+      audience: { "@type": "PeopleAudience", suggestedMinAge: 4, suggestedMaxAge: 10 },
+      provider: { "@id": SITE_URL + "/#organization" },
+      description: "Aprendizaje gamificado de matemáticas, español y cuerpo humano con profesores por voz, ejercicios y recompensas.",
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQS.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    },
+  ],
+};
+
+function EnrollmentLink({
+  className = "",
+  children = "Quiero matricularme",
+}: {
+  className?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <a
+      href={ENROLLMENT_EMAIL}
+      className={"inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#ffd93d] px-7 py-3.5 text-center font-extrabold text-[#3b2a55] shadow-[0_10px_30px_rgba(255,217,61,0.28)] transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#ffd93d] " + className}
+    >
+      {children}
+    </a>
+  );
+}
 
 export default function Home() {
   return (
-    <main className="font-body">
-      {/* HEADER FIJO: se mantiene visible en toda la pagina, no solo en el hero */}
-      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-[#3b2a55]/80 px-4 py-3 backdrop-blur-md sm:px-8">
-        <Link href="/" className="font-display text-lg font-bold text-white sm:text-xl">
-          ✨ Academia Mágica
-        </Link>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/alumno"
-            className="rounded-full bg-[#ffd93d] px-3 py-1.5 text-sm font-bold text-[#3b2a55] sm:px-4 sm:py-2"
-          >
-            Alumno 🧒
+    <main className="overflow-hidden bg-[#fffaf3] text-[#3b2a55]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[#3b2a55]/10 bg-[#fffaf3]/92 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8">
+          <Link href="/" aria-label="Academia Mágica, inicio" className="font-display text-lg font-extrabold sm:text-2xl">
+            <span aria-hidden="true">✨</span> Academia Mágica
           </Link>
-          <Link
-            href="/login"
-            className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-bold text-white ring-1 ring-white/40 hover:bg-white/25 sm:px-4 sm:py-2"
-          >
-            Admin 🔐
-          </Link>
+          <nav aria-label="Navegación principal" className="flex items-center gap-3">
+            <a href="#como-funciona" className="hidden text-sm font-bold text-[#3b2a55]/70 transition hover:text-[#6c5ce7] md:block">Cómo funciona</a>
+            <Link href="/alumno" className="rounded-full border-2 border-[#6c5ce7] px-4 py-2 text-sm font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7] hover:text-white sm:px-5">
+              Acceso alumnos
+            </Link>
+          </nav>
         </div>
       </header>
 
-      {/* HERO — portada tipo caja de videojuego: el elenco de personajes es el protagonista,
-          no una foto de fondo. El diamante flotando sobre la protagonista es el gesto central:
-          asi entiende cualquiera, de un vistazo, de que va el juego. */}
-      <section className="relative isolate flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-[#fffaf3] via-[#f9f1e7] to-[#f5ece5]">
-        {/* Fondo claro: el mismo tono crema con el que se generaron los personajes 2D,
-            para que cualquier resto de su fondo original quede camuflado en vez de
-            notarse (antes, sobre morado, se veia clarisimo). Resplandores de color suaves. */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[6%] top-[16%] h-40 w-40 rounded-full bg-[#ffd93d]/25 blur-3xl sm:h-64 sm:w-64" />
-          <div className="absolute right-[8%] top-[26%] h-48 w-48 rounded-full bg-[#7fe7c4]/25 blur-3xl sm:h-72 sm:w-72" />
-          <div className="absolute bottom-[6%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#ff6b9d]/15 blur-3xl" />
+      <section className="relative isolate pt-24 sm:pt-28">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute left-[-8rem] top-20 h-80 w-80 rounded-full bg-[#ff9abd]/20 blur-3xl" />
+          <div className="absolute right-[-7rem] top-44 h-96 w-96 rounded-full bg-[#7fe7c4]/25 blur-3xl" />
         </div>
-
-        {/* Snapshots reales, como en la caja de un juego: una pequeña columna de
-            recuerdos a cada lado, no dos fotos sueltas y perdidas en la esquina */}
-        <motion.div
-          initial={{ opacity: 0, y: -16, rotate: -10 }}
-          animate={{ opacity: 1, y: 0, rotate: -6 }}
-          whileHover={{ scale: 1.12, rotate: 0, zIndex: 40 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 0.65 }}
-          className="absolute left-16 top-24 z-20 hidden w-[159px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:left-24 sm:top-28 sm:w-[218px]"
-        >
-          <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
-            <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando un logro" fill sizes="180px" className="object-cover" />
-          </div>
-          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡Lo logré! 🎉</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: -16, rotate: 8 }}
-          animate={{ opacity: 1, y: 0, rotate: 9 }}
-          whileHover={{ scale: 1.15, rotate: 0, zIndex: 40 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 1.0 }}
-          className="absolute left-10 top-60 z-10 hidden w-[139px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:left-28 lg:top-72 lg:w-[179px]"
-        >
-          <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
-            <Image src="/classroom/jugando-futbol.jpg" alt="Niños jugando al fútbol en el recreo" fill sizes="160px" className="object-cover" />
-          </div>
-          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">¡A jugar! ⚽</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: -16, rotate: 10 }}
-          animate={{ opacity: 1, y: 0, rotate: 5 }}
-          whileHover={{ scale: 1.12, rotate: 0, zIndex: 40 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 0.8 }}
-          className="absolute right-16 top-24 z-20 hidden w-[159px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl sm:block sm:right-24 sm:top-28 sm:w-[218px]"
-        >
-          <div className="relative h-[119px] w-full overflow-hidden rounded sm:h-[159px]">
-            <Image src="/classroom/tutoria-nino-profesor.jpg" alt="Un profesor ayudando a un alumno" fill sizes="180px" className="object-cover" />
-          </div>
-          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Aprendiendo 📚</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: -16, rotate: -8 }}
-          animate={{ opacity: 1, y: 0, rotate: -9 }}
-          whileHover={{ scale: 1.15, rotate: 0, zIndex: 40 }}
-          transition={{ ...SPRING_PLAYFUL, delay: 1.1 }}
-          className="absolute right-10 top-60 z-10 hidden w-[139px] cursor-pointer rounded-lg bg-[#6c5ce7] p-2 pb-3 shadow-xl lg:block lg:right-28 lg:top-72 lg:w-[179px]"
-        >
-          <div className="relative h-[99px] w-full overflow-hidden rounded lg:h-[139px]">
-            <Image src="/classroom/tutoria-profesora-nina.jpg" alt="Una profesora guía a una alumna paso a paso" fill sizes="160px" className="object-cover" />
-          </div>
-          <p className="mt-1.5 text-center font-display text-[11px] font-bold text-white">Con la profe 🌟</p>
-        </motion.div>
-
-        <motion.div
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer(0.12, 0.15)}
-          className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-2 pt-28 text-center"
-        >
-          <motion.div variants={staggerItemUi}>
-            <h1 className="font-display text-balance text-5xl font-extrabold leading-tight text-[#3b2a55] sm:text-7xl">
-              Academia Mágica
+        <div className="mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-8 px-5 pb-14 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:pb-20">
+          <div className="relative z-10 max-w-2xl text-center lg:text-left">
+            <p className="mx-auto inline-flex rounded-full bg-[#6c5ce7]/10 px-4 py-2 text-sm font-extrabold text-[#6c5ce7] lg:mx-0">Para niños y niñas de 4 a 10 años</p>
+            <h1 className="font-display mt-5 text-balance text-4xl font-extrabold leading-[1.04] sm:text-6xl lg:text-7xl">
+              Que aprender deje de ser una pelea y se convierta en su <span className="text-[#6c5ce7]">aventura favorita</span>
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-pretty text-lg font-semibold text-[#3b2a55]/80 sm:text-2xl">
-              Aprender Jugando es Posible en Academia Mágica
+            <p className="mx-auto mt-6 max-w-xl text-pretty text-lg font-semibold leading-relaxed text-[#3b2a55]/75 sm:text-xl lg:mx-0">
+              Academia Mágica transforma matemáticas, español y cuerpo humano en retos, profesores que guían y diamantes que dan ganas de seguir. Tú ves cómo avanza. Tu hijo disfruta aprendiendo.
             </p>
-          </motion.div>
-
-          <motion.div variants={staggerItemUi}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
-              <Link
-                href="/alumno"
-                className="block rounded-2xl bg-[#ffd93d] px-12 py-6 text-center text-xl font-bold text-[#3b2a55] shadow-xl transition hover:brightness-110 hover:shadow-[0_0_28px_rgba(255,217,61,0.75)]"
-              >
-                Acceder a la Academia
-              </Link>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        {/* EL ELENCO — portada tipo caja de juego: la protagonista al frente y al centro,
-            con un diamante flotando sobre su cabeza (como el "plumbob" de Los Sims), y
-            compañeros a los lados para mostrar que es para todas las edades. */}
-        <div className="relative z-10 mx-auto flex w-full max-w-4xl items-end justify-center px-2">
-          {/* Extremo: 10-12 — mas chico y "lejano", diamante chico a juego */}
-          <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
-            <motion.div
-              animate={{ y: [0, -6, 0], rotate: [0, 8, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-              className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 text-lg drop-shadow-[0_0_8px_rgba(127,231,196,0.7)] sm:-top-5 sm:text-xl"
-            >
-              💎
-            </motion.div>
-            <div className="absolute -top-5 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-8 sm:w-8" />
-            <Image src="/personajes2d/girl_10-12_3.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <EnrollmentLink className="w-full text-lg sm:w-auto sm:px-9 sm:py-4">Quiero matricularme</EnrollmentLink>
+              <a href="#como-funciona" className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 py-3.5 font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7]/10 sm:w-auto">Ver cómo funciona ↓</a>
+            </div>
+            <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-bold text-[#3b2a55]/65 lg:justify-start">
+              <span>✓ 100% online</span><span>✓ A su ritmo</span><span>✓ Progreso visible</span>
+            </div>
           </div>
 
-          {/* Al lado: 7-10 */}
-          <motion.div
-            initial={{ opacity: 0, y: 40, x: -10 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
-            className="relative -mr-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
-          >
-            <motion.div
-              animate={{ y: [0, -8, 0], rotate: [0, 8, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              className="absolute -top-6 left-1/2 z-20 -translate-x-1/2 text-2xl drop-shadow-[0_0_10px_rgba(127,231,196,0.75)] sm:-top-7 sm:text-3xl"
-            >
-              💎
-            </motion.div>
-            <div className="absolute -top-7 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-12 sm:w-12" />
-            <Image src="/personajes2d/boy_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
-          </motion.div>
-
-          {/* Protagonista: 4-7, al centro y al frente, con el diamante flotando arriba */}
-          <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ ...SPRING_PLAYFUL, delay: 0.3 }}
-            className="relative z-10 h-52 w-36 shrink-0 sm:h-72 sm:w-48 lg:h-80 lg:w-56"
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0], rotate: [0, 8, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-8 left-1/2 z-20 -translate-x-1/2 text-4xl drop-shadow-[0_0_12px_rgba(127,231,196,0.8)] sm:-top-10 sm:text-5xl"
-            >
-              💎
-            </motion.div>
-            <div className="absolute -top-10 left-1/2 h-16 w-16 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-2xl sm:h-20 sm:w-20" />
-            <Image
-              src="/personajes2d/girl_4-7_1.webp"
-              alt="Personaje principal de Academia Mágica, ganando diamantes al aprender"
-              fill
-              sizes="280px"
-              priority
-              className="object-contain object-bottom drop-shadow-2xl"
-            />
-          </motion.div>
-
-          {/* Al lado: 7-10 */}
-          <motion.div
-            initial={{ opacity: 0, y: 40, x: 10 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            transition={{ ...SPRING_PLAYFUL, delay: 0.55 }}
-            className="relative -ml-3 h-40 w-28 shrink-0 sm:h-52 sm:w-36 lg:h-60 lg:w-40"
-          >
-            <motion.div
-              animate={{ y: [0, -8, 0], rotate: [0, -8, 8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.65 }}
-              className="absolute -top-6 left-1/2 z-20 -translate-x-1/2 text-2xl drop-shadow-[0_0_10px_rgba(127,231,196,0.75)] sm:-top-7 sm:text-3xl"
-            >
-              💎
-            </motion.div>
-            <div className="absolute -top-7 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-12 sm:w-12" />
-            <Image src="/personajes2d/girl_7-10_1.webp" alt="" fill sizes="200px" className="object-contain object-bottom drop-shadow-2xl" />
-          </motion.div>
-
-          {/* Extremo: 10-12 — mas chico y "lejano", diamante chico a juego */}
-          <div className="relative hidden h-32 w-24 shrink-0 sm:block sm:h-40 sm:w-28 lg:h-48 lg:w-32">
-            <motion.div
-              animate={{ y: [0, -6, 0], rotate: [0, -8, 8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.35 }}
-              className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 text-lg drop-shadow-[0_0_8px_rgba(127,231,196,0.7)] sm:-top-5 sm:text-xl"
-            >
-              💎
-            </motion.div>
-            <div className="absolute -top-5 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#7fe7c4]/40 blur-xl sm:h-8 sm:w-8" />
-            <Image src="/personajes2d/boy_10-12_2.webp" alt="" fill sizes="150px" className="object-contain object-bottom drop-shadow-xl" />
+          <div className="relative mx-auto h-[410px] w-full max-w-[590px] sm:h-[560px]">
+            <div className="absolute inset-x-[4%] bottom-[3%] top-[9%] rotate-2 rounded-[3rem] bg-gradient-to-br from-[#6c5ce7] via-[#725fe5] to-[#4b399a] shadow-[0_30px_90px_rgba(59,42,85,0.3)]" />
+            <div className="absolute left-[5%] top-[8%] z-20 -rotate-6 rounded-2xl bg-white px-4 py-3 shadow-xl">
+              <p className="text-xs font-extrabold text-[#6c5ce7]">RETO SUPERADO</p><p className="font-display text-xl font-extrabold">+10 💎</p>
+            </div>
+            <div className="absolute right-[2%] top-[18%] z-20 rotate-6 rounded-2xl bg-[#ffd93d] px-4 py-3 text-center shadow-xl"><p className="text-xs font-extrabold">ESTUDIA · JUEGA · CREA</p></div>
+            <div className="absolute bottom-[8%] left-1/2 z-10 h-[82%] w-[62%] -translate-x-1/2">
+              <Image src="/personajes2d/girl_4-7_1.webp" alt="Alumna de Academia Mágica aprendiendo y ganando diamantes" fill priority sizes="(min-width: 1024px) 400px, 70vw" className="object-contain object-bottom drop-shadow-[0_28px_26px_rgba(25,17,46,0.36)]" />
+            </div>
+            <div className="absolute bottom-[10%] left-[7%] h-[47%] w-[34%]"><Image src="/personajes2d/boy_7-10_1.webp" alt="Alumno de Academia Mágica" fill sizes="220px" className="object-contain object-bottom drop-shadow-xl" /></div>
+            <div className="absolute bottom-[9%] right-[5%] h-[49%] w-[34%]"><Image src="/personajes2d/girl_7-10_1.webp" alt="Alumna de Academia Mágica" fill sizes="220px" className="object-contain object-bottom drop-shadow-xl" /></div>
+            <div className="absolute left-1/2 top-[4%] z-20 -translate-x-1/2 text-5xl drop-shadow-[0_0_18px_rgba(127,231,196,0.95)] sm:text-7xl" aria-hidden="true">💎</div>
           </div>
         </div>
-
-        {/* Subtitulo elegante debajo del elenco, no un boton — el lema de la caja de juego */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING_UI, delay: 0.95 }}
-          className="relative z-10 mx-auto -mt-1 mb-16 whitespace-nowrap px-6 text-center font-display text-xl font-bold tracking-wide text-[#3b2a55] sm:mb-20 sm:text-3xl"
-        >
-          <span aria-hidden="true">✨</span> Estudia · Juega · Crea <span aria-hidden="true">✨</span>
-        </motion.p>
-
-        {/* Divisor ondulado */}
-        <svg
-          className="absolute -bottom-1 left-0 z-0 h-16 w-full text-[#6c5ce7]"
-          viewBox="0 0 1440 100"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="currentColor"
-            d="M0,60 C240,110 480,10 720,40 C960,70 1200,20 1440,55 L1440,100 L0,100 Z"
-          />
-        </svg>
       </section>
 
-      {/* COMO FUNCIONA — ahora es la seccion morada (antes lo era el hero); el hero
-          paso a un fondo claro para que no se note el resto de fondo de los personajes 2D */}
-      <section className="bg-gradient-to-b from-[#6c5ce7] to-[#5847b8] px-6 py-20 sm:px-10">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer(0.08, 0)}
-          className="mx-auto max-w-5xl"
-        >
-          <motion.h2
-            variants={staggerItemUi}
-            className="font-display text-balance text-center text-3xl font-extrabold text-white drop-shadow sm:text-4xl"
-          >
-            ¿Cómo funciona la magia?
-          </motion.h2>
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => (
-              <motion.div
-                key={f.title}
-                variants={popIn}
-                className="rounded-3xl bg-white p-6 text-center shadow-md ring-1 ring-[#3b2a55]/5"
-              >
-                <div className="text-4xl">{f.emoji}</div>
-                <h3 className="font-display mt-3 text-lg font-bold text-[#3b2a55]">
-                  {f.title}
-                </h3>
-                <p className="mt-2 text-sm text-[#3b2a55]/80">{f.text}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* PROFESORES */}
-      <section className="relative overflow-hidden bg-[#6c5ce7] px-6 py-20 sm:px-10">
-        <div className="absolute inset-0 opacity-25">
-          <Image
-            src="/classroom/reunion-profesores.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover"
-          />
+      <section aria-label="Ventajas principales" className="bg-[#3b2a55] px-5 py-5 text-white sm:px-8">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 text-center text-sm font-extrabold sm:grid-cols-4 sm:text-base">
+          <p>🎯 Retos por edad</p><p>🎤 Ayuda por voz</p><p>💎 Recompensas con sentido</p><p>📊 Seguimiento familiar</p>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#6c5ce7]/90 via-[#6c5ce7]/80 to-[#6c5ce7]/95" />
+      </section>
 
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer(0.06, 0)}
-          className="relative z-10 mx-auto max-w-5xl text-center"
-        >
-          <motion.h2 variants={staggerItemUi} className="font-display text-balance text-3xl font-extrabold text-white sm:text-4xl">
-            Profesores de verdad, listos para ayudar
-          </motion.h2>
-          <motion.p variants={staggerItemUi} className="mx-auto mt-3 max-w-xl text-white/85">
-            Cada materia tiene su profesor con voz propia. Si hay una duda, está a un micrófono de distancia.
-          </motion.p>
+      <section className="px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div>
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">La situación que conoces</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">No le falta capacidad. Le falta una forma de aprender que conecte con él.</h2>
+            <div className="mt-6 space-y-4 text-lg leading-relaxed text-[#3b2a55]/75">
+              <p>Le pides que practique y aparece el «ahora no», el aburrimiento o la frustración.</p>
+              <p>Las pantallas le atraen, pero no siempre encuentras contenido que le aporte algo de verdad.</p>
+              <p>Y tú quieres ayudar, aunque no siempre sabes qué ha entendido, dónde se atasca o cómo motivarle sin terminar discutiendo.</p>
+            </div>
+            <p className="font-display mt-7 rounded-3xl bg-[#ffd93d]/35 p-5 text-xl font-extrabold">La solución no es añadir más deberes. Es cambiar la experiencia de aprender.</p>
+          </div>
+          <div className="relative min-h-[430px] overflow-hidden rounded-[2.5rem] bg-[#6c5ce7] shadow-2xl">
+            <Image src="/classroom/ninos-suelo.jpg" alt="Niños aprendiendo juntos mediante el juego" fill sizes="(min-width: 1024px) 550px, 92vw" className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#3b2a55]/80 via-transparent to-transparent" />
+            <p className="font-display absolute bottom-0 left-0 max-w-md p-7 text-2xl font-extrabold text-white sm:p-9 sm:text-3xl">Su curiosidad ya está ahí. Vamos a convertirla en aprendizaje.</p>
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-12 grid grid-cols-4 gap-6 sm:grid-cols-8">
-            {TEACHERS.map((t) => (
-              <motion.div key={t.name} variants={popIn} className="flex flex-col items-center gap-2">
-                <div className="relative h-16 w-16 overflow-hidden rounded-full ring-4 ring-white/30 sm:h-20 sm:w-20">
-                  <Image src={t.img} alt={t.name} fill sizes="80px" className="object-cover" />
-                </div>
-                <p className="text-xs font-semibold text-white/90 sm:text-sm">{t.name}</p>
-              </motion.div>
+      <section id="como-funciona" className="scroll-mt-20 bg-[#6c5ce7] px-5 py-20 text-white sm:px-8 sm:py-28">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ffd93d]">El método de Academia Mágica</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">Aprende. Recibe ayuda. Gana. Crea. Y quiere volver.</h2>
+            <p className="mt-5 text-lg text-white/80">Una rueda de motivación que convierte cada pequeño avance en una razón para seguir practicando.</p>
+          </div>
+          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {BENEFITS.map((benefit, index) => (
+              <article key={benefit.title} className="rounded-3xl bg-white p-6 text-[#3b2a55] shadow-xl">
+                <div className="flex items-center justify-between"><span className="text-4xl" aria-hidden="true">{benefit.icon}</span><span className="font-display text-4xl font-extrabold text-[#6c5ce7]/15">0{index + 1}</span></div>
+                <h3 className="font-display mt-5 text-xl font-extrabold">{benefit.title}</h3>
+                <p className="mt-3 leading-relaxed text-[#3b2a55]/70">{benefit.text}</p>
+              </article>
             ))}
           </div>
-        </motion.div>
+          <div className="mt-10 text-center"><EnrollmentLink>Quiero matricularme</EnrollmentLink></div>
+        </div>
       </section>
 
-      {/* APRENDER JUGANDO */}
-      <section className="bg-[#fff8ec] px-6 py-20 sm:px-10">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer(0.1, 0)}
-          className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-2"
-        >
-          <motion.div variants={staggerItemUi} className="order-2 lg:order-1">
-            <p className="font-display text-sm font-bold uppercase tracking-wide text-[#ff6b9d]">
-              Aprender jugando
-            </p>
-            <h2 className="font-display mt-2 text-balance text-3xl font-extrabold text-[#3b2a55] sm:text-4xl">
-              Cada ejercicio bien hecho suma diamantes de verdad
-            </h2>
-            <p className="mt-4 text-[#3b2a55]/70">
-              No hay pantallas aburridas: hay juego, curiosidad y ganas de seguir. Los diamantes que gana se
-              convierten en muebles, objetos y sorpresas para su propio cuarto mágico.
-            </p>
-          </motion.div>
-          <motion.div variants={staggerItemUi} className="order-1 grid grid-cols-2 gap-4 lg:order-2">
-            <div className="relative col-span-2 h-56 overflow-hidden rounded-3xl shadow-lg sm:h-64">
-              <Image
-                src="/classroom/ninos-suelo.jpg"
-                alt="Niños jugando y aprendiendo en el suelo"
-                fill
-                sizes="(min-width: 1024px) 500px, 90vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative col-span-2 h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image
-                src="/classroom/jugando-futbol.jpg"
-                alt="Niños jugando al fútbol en el recreo"
-                fill
-                sizes="(min-width: 1024px) 500px, 90vw"
-                className="object-cover"
-              />
-            </div>
-          </motion.div>
-        </motion.div>
+      <section className="px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Qué va a encontrar dentro</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">Un currículo que crece con cada alumno</h2>
+            <p className="mt-5 text-lg text-[#3b2a55]/70">Temas, prácticas y evaluaciones organizados por edad para construir bases sólidas sin perder la diversión.</p>
+          </div>
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {SUBJECTS.map((subject) => (
+              <article key={subject.name} className="overflow-hidden rounded-[2rem] border border-[#3b2a55]/10 bg-white shadow-lg">
+                <div className={subject.color + " flex h-28 items-center justify-center text-6xl"} aria-hidden="true">{subject.icon}</div>
+                <div className="p-7"><h3 className="font-display text-2xl font-extrabold">{subject.name}</h3><p className="mt-3 leading-relaxed text-[#3b2a55]/70">{subject.text}</p></div>
+              </article>
+            ))}
+          </div>
+          <p className="mt-7 text-center text-sm font-bold text-[#3b2a55]/55">La plataforma está preparada para ampliar nuevas materias progresivamente.</p>
+        </div>
       </section>
 
-      {/* ACOMPAÑAMIENTO */}
-      <section className="bg-[#3b2a55] px-6 py-20 sm:px-10">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer(0.1, 0)}
-          className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-2"
-        >
-          <motion.div variants={staggerItemUi} className="grid grid-cols-2 gap-4">
-            <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image
-                src="/classroom/tutoria-nino-profesor.jpg"
-                alt="Un profesor ayuda a un alumno a resolver un ejercicio en su tablet"
-                fill
-                sizes="(min-width: 1024px) 250px, 45vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image
-                src="/classroom/tutoria-profesora-nina.jpg"
-                alt="Una profesora guía a una alumna paso a paso en su cuaderno"
-                fill
-                sizes="(min-width: 1024px) 250px, 45vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image
-                src="/classroom/tutoria-profesor-nino-2.jpg"
-                alt="Un profesor acompaña a un alumno mientras escribe en su cuaderno"
-                fill
-                sizes="(min-width: 1024px) 250px, 45vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative h-40 overflow-hidden rounded-3xl shadow-lg sm:h-48">
-              <Image
-                src="/classroom/tutoria-profesora-nina-2.jpg"
-                alt="Una profesora señala algo en la tablet mientras una alumna mira y sonríe"
-                fill
-                sizes="(min-width: 1024px) 250px, 45vw"
-                className="object-cover"
-              />
-            </div>
-          </motion.div>
-          <motion.div variants={staggerItemUi}>
-            <p className="font-display text-sm font-bold uppercase tracking-wide text-[#7fe7c4]">
-              Acompañamiento real
-            </p>
-            <h2 className="font-display mt-2 text-balance text-3xl font-extrabold text-white sm:text-4xl">
-              Nunca le damos la respuesta. Le enseñamos el camino.
-            </h2>
-            <p className="mt-4 text-white/70">
-              Como un profesor de verdad: con preguntas, pistas y paciencia, hasta que la respuesta la
-              encuentra ella o él solito. Eso es lo que queda.
-            </p>
-          </motion.div>
-        </motion.div>
+      <section className="bg-[#f2e9ff] px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[.95fr_1.05fr]">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative h-56 overflow-hidden rounded-[2rem] shadow-xl sm:h-72"><Image src="/classroom/tutoria-nino-profesor.jpg" alt="Profesor guiando a un alumno" fill sizes="280px" className="object-cover" /></div>
+            <div className="relative mt-10 h-56 overflow-hidden rounded-[2rem] shadow-xl sm:h-72"><Image src="/classroom/tutoria-profesora-nina.jpg" alt="Profesora acompañando a una alumna" fill sizes="280px" className="object-cover" /></div>
+          </div>
+          <div>
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#6c5ce7]">Un profesor a un micrófono de distancia</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">No le damos la respuesta. Le enseñamos a encontrarla.</h2>
+            <p className="mt-6 text-lg leading-relaxed text-[#3b2a55]/75">Cuando aparece una duda, puede escribirla o decirla en voz alta. El profesor conoce la materia y el ejercicio que está resolviendo, y responde con preguntas, ejemplos y pistas pequeñas.</p>
+            <ul className="mt-7 space-y-3 font-bold text-[#3b2a55]/80"><li>✓ Explicaciones adaptadas a su edad</li><li>✓ Ayuda disponible dentro del ejercicio</li><li>✓ Pensamiento y autonomía antes que respuestas fáciles</li></ul>
+          </div>
+        </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="bg-gradient-to-br from-[#6c5ce7] via-[#ff6b9d] to-[#ffd93d] px-6 py-20 text-center sm:px-10">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.4 }}
-          variants={staggerContainer(0.1, 0)}
-        >
-          <motion.h2 variants={staggerItemUi} className="font-display text-balance text-3xl font-extrabold text-white drop-shadow sm:text-4xl">
-            ¿Empezamos a jugar y aprender?
-          </motion.h2>
-          <motion.div variants={staggerItemUi} className="mt-8 flex justify-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={SPRING_UI}>
-              <Link
-                href="/alumno"
-                className="block rounded-2xl bg-white px-12 py-5 text-center text-xl font-bold text-[#6c5ce7] shadow-xl transition hover:shadow-[0_0_28px_rgba(255,255,255,0.9)]"
-              >
-                Acceder a la Academia
-              </Link>
-            </motion.div>
-          </motion.div>
-        </motion.div>
+      <section className="bg-[#3b2a55] px-5 py-20 text-white sm:px-8 sm:py-28">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div>
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#7fe7c4]">También está pensado para ti</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">Acompaña sin tener que adivinar qué está pasando</h2>
+            <p className="mt-6 text-lg leading-relaxed text-white/75">Desde el panel familiar puedes ver actividad, progreso y rendimiento; asignar materias, gestionar el acceso y reconocer el esfuerzo con diamantes.</p>
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="rounded-3xl bg-white/10 p-5"><p className="text-3xl">📊</p><p className="mt-2 font-extrabold">Métricas claras</p></div>
+              <div className="rounded-3xl bg-white/10 p-5"><p className="text-3xl">🎯</p><p className="mt-2 font-extrabold">Materias a medida</p></div>
+              <div className="rounded-3xl bg-white/10 p-5"><p className="text-3xl">🏅</p><p className="mt-2 font-extrabold">Premios y motivación</p></div>
+              <div className="rounded-3xl bg-white/10 p-5"><p className="text-3xl">🔒</p><p className="mt-2 font-extrabold">Acceso gestionado</p></div>
+            </div>
+          </div>
+          <div className="relative min-h-[430px] overflow-hidden rounded-[2.5rem] border-8 border-white/10">
+            <Image src="/classroom/ninos-saltando.jpg" alt="Niños celebrando que han aprendido" fill sizes="(min-width: 1024px) 550px, 92vw" className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#3b2a55]/75 via-transparent to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 rounded-3xl bg-white/95 p-5 text-[#3b2a55] shadow-xl"><p className="font-display text-xl font-extrabold">Menos perseguir. Más celebrar.</p><p className="mt-1 text-sm font-semibold text-[#3b2a55]/65">Porque sabes qué ha conseguido y dónde necesita apoyo.</p></div>
+          </div>
+        </div>
       </section>
 
-      <footer className="bg-[#3b2a55] px-6 py-6 text-center text-xs text-white/50">
-        Academia Mágica · Aprender Jugando es Posible ✨
+      <section className="px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center"><p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Antes de matricularte</p><h2 className="font-display mt-3 text-3xl font-extrabold sm:text-5xl">Preguntas frecuentes</h2></div>
+          <div className="mt-10 space-y-4">
+            {FAQS.map((item) => (
+              <details key={item.question} className="group rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
+                <summary className="font-display flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-extrabold marker:content-none">{item.question}<span className="text-2xl text-[#6c5ce7] transition group-open:rotate-45" aria-hidden="true">+</span></summary>
+                <p className="mt-4 max-w-3xl leading-relaxed text-[#3b2a55]/70">{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="matricula" className="scroll-mt-20 px-5 pb-20 sm:px-8 sm:pb-28">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#6c5ce7] via-[#755ee5] to-[#ff6b9d] px-6 py-14 text-center text-white shadow-2xl sm:px-12 sm:py-20">
+          <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-[#ffd93d]/25 blur-3xl" />
+          <div className="relative mx-auto max-w-3xl">
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ffd93d]">El siguiente paso</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">¿Quieres que aprender sea el momento que tu hijo espera?</h2>
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">Escríbenos con su edad y te explicaremos personalmente la modalidad disponible, el precio y cómo empezar.</p>
+            <div className="mt-8"><EnrollmentLink className="text-lg sm:px-10 sm:py-4">Quiero matricularme</EnrollmentLink></div>
+            <p className="mt-4 text-sm font-semibold text-white/70">Sin compromiso. Respuesta personal por correo.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[#2b1d40] px-5 py-10 text-white/65 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
+          <div><p className="font-display text-xl font-extrabold text-white">✨ Academia Mágica</p><p className="mt-1 text-sm">Aprender jugando es posible.</p></div>
+          <div className="flex flex-wrap justify-center gap-5 text-sm font-bold">
+            <a href="mailto:businesscatserrano@gmail.com" className="hover:text-white">Contacto</a>
+            <Link href="/alumno" className="hover:text-white">Acceso alumnos</Link>
+            <Link href="/login" className="hover:text-white">Administración</Link>
+          </div>
+        </div>
       </footer>
     </main>
   );
