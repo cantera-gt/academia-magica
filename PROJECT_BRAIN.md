@@ -106,7 +106,7 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 - Acción principal: Quiero matricularme.
 - Acceso de alumnos: visible arriba a la derecha y enlazado a /alumno.
 - La captación usa `/matricula`: formulario persistente para tutor legal o alumno adulto, con datos de contacto, datos mínimos del menor, protección antispam, UTM y referencia pública.
-- Supabase es la fuente de verdad de solicitudes. Google Sheets `1wU1jzKcKTsT9dkCepfz4e2m8t74VYRnWKMGCItiDrIo` es una vista operativa privada; la sincronización automática requiere todavía una autorización técnica de Google.
+- Supabase es la fuente de verdad de solicitudes. Se quitó el enlace a la hoja de Google Sheets `1wU1jzKcKTsT9dkCepfz4e2m8t74VYRnWKMGCItiDrIo` (11/08/2026) porque estaba creada bajo una cuenta de Google incorrecta (no businesscatserrano@gmail.com) y no había forma de corregir el dueño desde el código. La vista operativa hoy es el botón "Exportar CSV" en `/admin/matriculas`, que no depende de ninguna cuenta externa. Si se quiere retomar una hoja de Google Sheets, debe crearse nueva bajo businesscatserrano@gmail.com y volver a enlazarla.
 - `/matricula/pago` prepara el paso PayPal sin realizar cargos hasta configurar cuenta, producto, precio y webhook verificado.
 - `/admin/matriculas` permite buscar, contactar por WhatsApp, cambiar estado/pago, etiquetar, anotar y exportar CSV.
 - Consentimientos separados: condiciones y privacidad obligatorios; marketing opcional. Se guardan versión y fecha/hora.
