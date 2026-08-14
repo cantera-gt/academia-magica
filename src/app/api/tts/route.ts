@@ -18,6 +18,8 @@ const ALLOWED_VOICES = new Set([
   "es-US-PalomaNeural",
   "es-GT-MartaNeural",
   "es-CL-LorenzoNeural",
+  "de-DE-KatjaNeural",
+  "de-DE-ConradNeural",
 ]);
 
 const SUPERSCRIPT_DIGITS: Record<string, string> = {

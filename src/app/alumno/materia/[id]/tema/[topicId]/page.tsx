@@ -15,6 +15,7 @@ import type {
   MyProfile,
   ExerciseOption,
 } from "@/types/database";
+import DragDropExercise from "@/components/drag-drop-exercise";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
 import TeacherChatWidget from "@/components/teacher-chat-widget";
@@ -79,22 +80,43 @@ export default function TemaPage() {
   const [promptSpeaking, setPromptSpeaking] = useState(false);
   const [pendingLessonName, setPendingLessonName] = useState<string | null>(null);
 
+  // Andamiaje adaptativo: cuantas veces fallo el alumno ESTE ejercicio en
+  // fila. 0 = intento normal. 1 = ya mostramos pista + resaltamos la
+  // correcta. 2 = ya redujimos las opciones a 2. Se reinicia cada vez que
+  // se avanza a un ejercicio nuevo. Solo aplica en fase de practica (el
+  // Test final siempre es de un solo intento, como antes).
+  const [failStreak, setFailStreak] = useState(0);
+  const [shakeKey, setShakeKey] = useState(0);
+  const [revealCorrectLabel, setRevealCorrectLabel] = useState<string | null>(null);
+
   const NEUTRAL_ES_VOICE = "es-ES-ElviraNeural";
+  const NEUTRAL_DE_VOICE = "de-DE-KatjaNeural";
+
+  function defaultVoice(): string {
+    if (teacher?.voice_name) return teacher.voice_name;
+    return subjectSlug === "aleman" ? NEUTRAL_DE_VOICE : NEUTRAL_ES_VOICE;
+  }
 
   function speakPrompt() {
     if (!current) return;
     speakText(
       current.prompt.text,
-      teacher?.voice_name ?? NEUTRAL_ES_VOICE,
+      defaultVoice(),
       () => setPromptSpeaking(true),
       () => setPromptSpeaking(false)
     );
   }
 
+  // Opciones que se muestran de verdad: si ya fallo 2 veces seguidas este
+  // ejercicio, se reducen a la correcta + 1 distractor (elegido una sola
+  // vez por render, no se reordena en cada tilde de reloj).
+  const [reducedOptions, setReducedOptions] = useState<(string | ExerciseOption)[] | null>(null);
+
   const practiceList = exercises.filter((e) => !e.is_exam);
   const examList = exercises.filter((e) => e.is_exam);
   const currentList = phase === "practice" ? practiceList : examList;
   const current = currentList[index];
+  const visibleOptions = reducedOptions ?? current?.options ?? null;
   const lessonCount = new Set(practiceList.map((e) => e.lesson_id).filter(Boolean)).size;
 
   const load = useCallback(async () => {
@@ -148,6 +170,9 @@ export default function TemaPage() {
     setDiamondsThisRound(0);
     setFinishResult(null);
     setTextValue("");
+    setFailStreak(0);
+    setReducedOptions(null);
+    setRevealCorrectLabel(null);
     setStartedAt(Date.now());
     setStage(practiceList.length > 0 ? "playing" : "exam_intro");
     // No bloqueamos la UI por esto: solo deja constancia de "aca me quede"
@@ -160,6 +185,9 @@ export default function TemaPage() {
     setPhase("exam");
     setIndex(0);
     setTextValue("");
+    setFailStreak(0);
+    setReducedOptions(null);
+    setRevealCorrectLabel(null);
     setStartedAt(Date.now());
     setStage("playing");
   }
@@ -198,7 +226,32 @@ export default function TemaPage() {
     }
 
     const res = data as AttemptResult;
+
+    // Andamiaje adaptativo: en practica, si el tipo de ejercicio admite
+    // reintento (opcion multiple o arrastrar-soltar) y todavia no gastamos
+    // los 2 niveles de ayuda, dejamos que lo vuelva a intentar en el mismo
+    // ejercicio en vez de pasar a la pantalla de resultado.
+    const retryableType = current.type === "multiple_choice" || current.type === "drag_drop";
+    const canRetry = phase === "practice" && retryableType && !res.is_correct && failStreak < 2;
+
+    if (canRetry) {
+      const nextFail = failStreak + 1;
+      setFailStreak(nextFail);
+      setRevealCorrectLabel(res.correct_answer.value);
+      setShakeKey((k) => k + 1);
+      if (nextFail >= 2 && current.options) {
+        const correctOpt = current.options.find((o) => optLabel(o) === res.correct_answer.value);
+        const others = current.options.filter((o) => optLabel(o) !== res.correct_answer.value);
+        const oneOther = others.length > 0 ? others[Math.floor(Math.random() * others.length)] : undefined;
+        const pair = [correctOpt, oneOther].filter(Boolean) as (string | ExerciseOption)[];
+        setReducedOptions(pair.length === 2 ? pair : null);
+      }
+      setSubmitting(false);
+      return;
+    }
+
     setResult(res);
+    setRevealCorrectLabel(null);
     if (res.is_correct) {
       setDiamondsThisRound((d) => d + res.diamonds_earned);
       if (phase === "practice") setPracticeCorrect((c) => c + 1);
@@ -221,6 +274,9 @@ export default function TemaPage() {
       setIndex((i) => i + 1);
       setTextValue("");
       setResult(null);
+      setFailStreak(0);
+      setReducedOptions(null);
+      setRevealCorrectLabel(null);
       setStartedAt(Date.now());
       if (changingLesson) {
         setPendingLessonName(next.lesson_name);
@@ -525,6 +581,16 @@ export default function TemaPage() {
                   </button>
                 </div>
 
+                {failStreak > 0 && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700"
+                  >
+                    💡 {current.prompt.hint_after_fail ?? "¡Casi! Fijate bien y probá de nuevo."}
+                  </motion.p>
+                )}
+
                 {current.prompt.image_url && (
                   <div className="mt-4 flex justify-center">
                     <div className="relative h-40 w-40 overflow-hidden rounded-2xl bg-purple-50 sm:h-48 sm:w-48">
@@ -539,36 +605,71 @@ export default function TemaPage() {
                   </div>
                 )}
 
-                {current.options ? (
+                {current.type === "drag_drop" && current.prompt.drop_target && visibleOptions ? (
+                  <DragDropExercise
+                    key={shakeKey}
+                    dropTarget={current.prompt.drop_target}
+                    options={visibleOptions}
+                    submitting={submitting}
+                    revealCorrectLabel={revealCorrectLabel}
+                    onDrop={(label) => submitAnswer(label)}
+                  />
+                ) : visibleOptions ? (
                   <motion.div
-                    initial="initial"
-                    animate="animate"
-                    variants={staggerContainer(0.06)}
-                    className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2"
+                    key={shakeKey}
+                    animate={shakeKey > 0 ? { x: [0, -8, 8, -6, 6, 0] } : {}}
+                    transition={{ duration: 0.4 }}
                   >
-                    {current.options.map((opt) => {
-                      const label = optLabel(opt);
-                      const image = optImage(opt);
-                      return (
-                        <motion.button
-                          key={label}
-                          variants={staggerItem}
-                          disabled={submitting}
-                          onClick={() => submitAnswer(label)}
-                          whileHover={{ scale: submitting ? 1 : 1.03 }}
-                          whileTap={{ scale: submitting ? 1 : 0.97 }}
-                          transition={SPRING_PLAYFUL}
-                          className="flex items-center gap-3 rounded-xl border-2 border-purple-200 bg-purple-50 px-4 py-3 text-left font-semibold text-purple-800 hover:border-purple-400 hover:bg-purple-100 disabled:opacity-50"
-                        >
-                          {image && (
-                            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
-                              <Image src={image} alt="" fill sizes="48px" className="object-contain p-1" />
-                            </span>
-                          )}
-                          <span>{label}</span>
-                        </motion.button>
-                      );
-                    })}
+                    <motion.div
+                      initial="initial"
+                      animate="animate"
+                      variants={staggerContainer(0.06)}
+                      className={
+                        current.prompt.display_mode === "scene"
+                          ? "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"
+                          : "mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2"
+                      }
+                    >
+                      {visibleOptions.map((opt) => {
+                        const label = optLabel(opt);
+                        const image = optImage(opt);
+                        const isRevealed = revealCorrectLabel === label;
+                        const scene = current.prompt.display_mode === "scene";
+                        return (
+                          <motion.button
+                            key={label}
+                            variants={staggerItem}
+                            disabled={submitting}
+                            onClick={() => submitAnswer(label)}
+                            whileHover={{ scale: submitting ? 1 : 1.03 }}
+                            whileTap={{ scale: submitting ? 1 : 0.97 }}
+                            transition={SPRING_PLAYFUL}
+                            className={
+                              (scene
+                                ? "flex flex-col items-center gap-2 rounded-2xl p-3 text-center font-semibold text-purple-800 "
+                                : "flex items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold text-purple-800 ") +
+                              "border-2 bg-purple-50 hover:border-purple-400 hover:bg-purple-100 disabled:opacity-50 " +
+                              (isRevealed
+                                ? "border-emerald-400 ring-4 ring-emerald-200"
+                                : "border-purple-200")
+                            }
+                          >
+                            {image && (
+                              <span
+                                className={
+                                  scene
+                                    ? "relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white"
+                                    : "relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white"
+                                }
+                              >
+                                <Image src={image} alt="" fill sizes={scene ? "80px" : "48px"} className="object-contain p-1" />
+                              </span>
+                            )}
+                            <span>{label}</span>
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
                   </motion.div>
                 ) : (
                   <form

@@ -117,11 +117,32 @@ export interface ExerciseOption {
   image?: string;
 }
 
+// Zona de destino para ejercicios de arrastrar y soltar (drag_drop).
+export interface DropTarget {
+  label: string;
+  image?: string;
+}
+
+export interface ExercisePrompt {
+  text: string;
+  hint?: string;
+  image_url?: string;
+  // Pista adicional que solo se muestra despues del primer intento
+  // incorrecto (andamiaje adaptativo). Si no esta presente, se usa un
+  // mensaje generico de aliento.
+  hint_after_fail?: string;
+  // "scene" pinta las opciones como fichas grandes de imagen (tocar-escena)
+  // en vez de la fila chica de icono+texto por defecto ("grid").
+  display_mode?: "grid" | "scene";
+  // Solo para type = "drag_drop": la zona donde hay que soltar el objeto.
+  drop_target?: DropTarget;
+}
+
 export interface PlayableTopicExercise {
   id: string;
   type: ExerciseType;
   difficulty: number;
-  prompt: { text: string; hint?: string; image_url?: string };
+  prompt: ExercisePrompt;
   options: (string | ExerciseOption)[] | null;
   diamond_reward: number;
   is_exam: boolean;

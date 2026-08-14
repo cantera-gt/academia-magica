@@ -28,6 +28,9 @@ const SUBMODULE_ICON: Record<string, string> = {
   "Fonética y Lectura": "🔤",
   "Gramática y Ortografía": "✍️",
   "Comprensión y Expresión": "💬",
+  "Vocabulario y Pronunciación": "🗣️",
+  "Gramática y Estructuras": "🧩",
+  "Comprensión y Uso": "💬",
 };
 
 function groupBySubmodule(items: SubjectTopic[]) {
