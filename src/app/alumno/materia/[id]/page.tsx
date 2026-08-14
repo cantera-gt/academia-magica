@@ -23,6 +23,18 @@ function approxAgeFromBracket(bracket: string | null | undefined): number | null
   if (bracket === "10-12") return 11;
   return null;
 }
+function ageFromBirthdate(birthdate: string | null | undefined): number | null {
+  if (!birthdate) return null;
+  const b = new Date(birthdate);
+  if (Number.isNaN(b.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  const hadBirthdayThisYear =
+    now.getMonth() > b.getMonth() ||
+    (now.getMonth() === b.getMonth() && now.getDate() >= b.getDate());
+  if (!hadBirthdayThisYear) age -= 1;
+  return age;
+}
 
 const SUBMODULE_ICON: Record<string, string> = {
   "Fonética y Lectura": "🔤",
@@ -31,6 +43,12 @@ const SUBMODULE_ICON: Record<string, string> = {
   "Vocabulario y Pronunciación": "🗣️",
   "Gramática y Estructuras": "🧩",
   "Comprensión y Uso": "💬",
+  "Números y Cálculo": "🔢",
+  "Formas y Medidas": "📐",
+  "Lógica y Fracciones": "🧮",
+  "Formas y Figuras": "🔷",
+  "Espacio y Posición": "📍",
+  "Medidas y Cálculo": "📏",
 };
 
 function groupBySubmodule(items: SubjectTopic[]) {
@@ -132,9 +150,19 @@ export default function MateriaTopicsPage() {
     [recommendation]
   );
 
+const studentAge = ageFromBirthdate(profile?.birthdate) ?? approxAgeFromBracket(profile?.age_bracket);
+
   const groupedByModule = useMemo(() => {
     const groups: { age: number | null; items: SubjectTopic[]; total: number; passedCount: number }[] = [];
-    for (const t of topics) {
+    const visibleTopics =
+      studentAge == null
+        ? topics
+        : topics.filter(
+            (t) =>
+              t.recommended_age == null ||
+              (t.recommended_age >= studentAge - 1 && t.recommended_age <= studentAge + 1)
+          );
+    for (const t of visibleTopics) {
       const age = t.recommended_age ?? null;
       let group = groups.find((g) => g.age === age);
       if (!group) {
