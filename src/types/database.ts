@@ -112,12 +112,17 @@ export interface TopicDetail {
   prerequisites: string | null;
 }
 
+export interface ExerciseOption {
+  label: string;
+  image?: string;
+}
+
 export interface PlayableTopicExercise {
   id: string;
   type: ExerciseType;
   difficulty: number;
-  prompt: { text: string; hint?: string };
-  options: string[] | null;
+  prompt: { text: string; hint?: string; image_url?: string };
+  options: (string | ExerciseOption)[] | null;
   diamond_reward: number;
   is_exam: boolean;
   lesson_id: string | null;

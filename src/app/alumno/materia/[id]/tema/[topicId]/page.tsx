@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type {
@@ -12,10 +13,19 @@ import type {
   MySubjectTeacher,
   TopicDetail,
   MyProfile,
+  ExerciseOption,
 } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
 import TeacherChatWidget from "@/components/teacher-chat-widget";
+
+function optLabel(opt: string | ExerciseOption): string {
+  return typeof opt === "string" ? opt : opt.label;
+}
+
+function optImage(opt: string | ExerciseOption): string | null {
+  return typeof opt === "string" ? null : (opt.image ?? null);
+}
 
 function approxAgeFromBracket(bracket: string | null | undefined): number | null {
   if (bracket === "4-7") return 5;
@@ -515,6 +525,20 @@ export default function TemaPage() {
                   </button>
                 </div>
 
+                {current.prompt.image_url && (
+                  <div className="mt-4 flex justify-center">
+                    <div className="relative h-40 w-40 overflow-hidden rounded-2xl bg-purple-50 sm:h-48 sm:w-48">
+                      <Image
+                        src={current.prompt.image_url}
+                        alt=""
+                        fill
+                        sizes="192px"
+                        className="object-contain p-2"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {current.options ? (
                   <motion.div
                     initial="initial"
@@ -522,20 +546,29 @@ export default function TemaPage() {
                     variants={staggerContainer(0.06)}
                     className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2"
                   >
-                    {current.options.map((opt) => (
-                      <motion.button
-                        key={opt}
-                        variants={staggerItem}
-                        disabled={submitting}
-                        onClick={() => submitAnswer(opt)}
-                        whileHover={{ scale: submitting ? 1 : 1.03 }}
-                        whileTap={{ scale: submitting ? 1 : 0.97 }}
-                        transition={SPRING_PLAYFUL}
-                        className="rounded-xl border-2 border-purple-200 bg-purple-50 px-4 py-3 text-left font-semibold text-purple-800 hover:border-purple-400 hover:bg-purple-100 disabled:opacity-50"
-                      >
-                        {opt}
-                      </motion.button>
-                    ))}
+                    {current.options.map((opt) => {
+                      const label = optLabel(opt);
+                      const image = optImage(opt);
+                      return (
+                        <motion.button
+                          key={label}
+                          variants={staggerItem}
+                          disabled={submitting}
+                          onClick={() => submitAnswer(label)}
+                          whileHover={{ scale: submitting ? 1 : 1.03 }}
+                          whileTap={{ scale: submitting ? 1 : 0.97 }}
+                          transition={SPRING_PLAYFUL}
+                          className="flex items-center gap-3 rounded-xl border-2 border-purple-200 bg-purple-50 px-4 py-3 text-left font-semibold text-purple-800 hover:border-purple-400 hover:bg-purple-100 disabled:opacity-50"
+                        >
+                          {image && (
+                            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
+                              <Image src={image} alt="" fill sizes="48px" className="object-contain p-1" />
+                            </span>
+                          )}
+                          <span>{label}</span>
+                        </motion.button>
+                      );
+                    })}
                   </motion.div>
                 ) : (
                   <form
@@ -722,7 +755,7 @@ export default function TemaPage() {
                 prompt: current.prompt.text,
                 hint: current.prompt.hint,
                 type: current.type,
-                options: current.options,
+                options: current.options ? current.options.map(optLabel) : current.options,
               }
             : null
         }
