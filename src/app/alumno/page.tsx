@@ -18,6 +18,7 @@ export default function AlumnoLoginPage() {
   const supabase = createClient();
 
   const [students, setStudents] = useState<ActiveStudent[]>([]);
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ActiveStudent | null>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -180,13 +181,27 @@ export default function AlumnoLoginPage() {
         transition={{ duration: 0.25 }}
         className="text-3xl font-bold text-white"
       >
-        ¿Quién sos?
+   ¿Quién eres?
       </motion.h1>
-
+      {students.length > 3 && (
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscá tu nombre..."
+          className="w-64 rounded-xl border-2 border-white/30 bg-white/15 px-4 py-2.5 text-center text-white placeholder-white/50 outline-none focus:border-white"
+        />
+      )}
       {students.length === 0 ? (
         <p className="max-w-sm text-center text-white/80">
           Todavía no hay alumnos creados. Pedile a tu administrador que te
           registre en el panel de administración.
+        </p>
+      ) : students.filter((s) =>
+          s.display_name.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))
+        ).length === 0 ? (
+        <p className="max-w-sm text-center text-white/80">
+          No encontramos a nadie con ese nombre. Probá escribir menos letras.
         </p>
       ) : (
         <motion.div
@@ -195,7 +210,11 @@ export default function AlumnoLoginPage() {
           variants={staggerContainer(0.08)}
           className="flex flex-wrap justify-center gap-6"
         >
-          {students.map((s) => (
+          {students
+            .filter((s) =>
+              s.display_name.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es"))
+            )
+            .map((s) => (
             <motion.button
               key={s.username}
               variants={staggerItem}
@@ -227,3 +246,4 @@ export default function AlumnoLoginPage() {
     </main>
   );
 }
+
