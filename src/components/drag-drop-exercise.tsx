@@ -137,7 +137,7 @@ function DragChip({
       ) : (
         <span className="text-2xl">✨</span>
       )}
-      <span className="px-1 text-[10px] font-bold text-purple-700">{label}</span>
+      {!image && <span className="px-1 text-[10px] font-bold text-purple-700">{label}</span>}
     </motion.button>
   );
 }
