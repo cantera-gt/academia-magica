@@ -665,7 +665,7 @@ export default function TemaPage() {
                                 <Image src={image} alt="" fill sizes={scene ? "80px" : "48px"} className="object-contain p-1" />
                               </span>
                             )}
-                            <span>{label}</span>
+                           {(!scene || !image) && <span>{label}</span>}
                           </motion.button>
                         );
                       })}
