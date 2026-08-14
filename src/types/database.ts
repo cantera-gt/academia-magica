@@ -76,6 +76,7 @@ export interface SubjectTopic {
   sort_order: number;
   recommended_age: number | null;
   prerequisites: string | null;
+  submodule: string | null;
   practice_count: number;
   exam_count: number;
   practice_best_pct: number | null;

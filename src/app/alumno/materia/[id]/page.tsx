@@ -24,6 +24,26 @@ function approxAgeFromBracket(bracket: string | null | undefined): number | null
   return null;
 }
 
+const SUBMODULE_ICON: Record<string, string> = {
+  "Fonética y Lectura": "🔤",
+  "Gramática y Ortografía": "✍️",
+  "Comprensión y Expresión": "💬",
+};
+
+function groupBySubmodule(items: SubjectTopic[]) {
+  const groups: { submodule: string | null; items: SubjectTopic[] }[] = [];
+  for (const t of items) {
+    const key = t.submodule ?? null;
+    let g = groups.find((x) => x.submodule === key);
+    if (!g) {
+      g = { submodule: key, items: [] };
+      groups.push(g);
+    }
+    g.items.push(t);
+  }
+  return groups;
+}
+
 type Stage = "loading" | "choose_teacher" | "ready" | "empty" | "error";
 
 export default function MateriaTopicsPage() {
@@ -348,54 +368,63 @@ export default function MateriaTopicsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-3">
-                    {group.items.map((t) => {
-                      const hasContent = t.practice_count + t.exam_count > 0;
-                      return (
-                        <Link
-                          key={t.topic_id}
-                          href={hasContent ? `/alumno/materia/${subjectId}/tema/${t.topic_id}` : "#"}
-                          aria-disabled={!hasContent}
-                          className={`flex items-center gap-4 rounded-2xl bg-white p-4 shadow transition-transform ${
-                            hasContent ? "hover:-translate-y-0.5" : "pointer-events-none opacity-50"
-                          } ${
-                            recommendedTopicIds.has(t.topic_id) ? "ring-2 ring-purple-400" : ""
-                          }`}
-                        >
-                          <span className="text-3xl">
-                            {t.passed ? "🏆" : hasContent ? "📖" : "🔒"}
-                          </span>
-                          <div className="flex-1">
-                            <p className="font-bold text-slate-800">
-                              {t.name}
-                              {recommendedTopicIds.has(t.topic_id) && (
-                                <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">
-                                  👉 Recomendado por tu profe
+                  <div className="flex flex-col gap-4">
+                    {groupBySubmodule(group.items).map((sub) => (
+                      <div key={sub.submodule ?? "sin-submodulo"} className="flex flex-col gap-3">
+                        {sub.submodule && (
+                          <h3 className="px-1 text-xs font-bold uppercase tracking-wide text-purple-500">
+                            {SUBMODULE_ICON[sub.submodule] ?? "📚"} {sub.submodule}
+                          </h3>
+                        )}
+                        {sub.items.map((t) => {
+                          const hasContent = t.practice_count + t.exam_count > 0;
+                          return (
+                            <Link
+                              key={t.topic_id}
+                              href={hasContent ? `/alumno/materia/${subjectId}/tema/${t.topic_id}` : "#"}
+                              aria-disabled={!hasContent}
+                              className={`flex items-center gap-4 rounded-2xl bg-white p-4 shadow transition-transform ${
+                                hasContent ? "hover:-translate-y-0.5" : "pointer-events-none opacity-50"
+                              } ${
+                                recommendedTopicIds.has(t.topic_id) ? "ring-2 ring-purple-400" : ""
+                              }`}
+                            >
+                              <span className="text-3xl">
+                                {t.passed ? "🏆" : hasContent ? "📖" : "🔒"}
+                              </span>
+                              <div className="flex-1">
+                                <p className="font-bold text-slate-800">
+                                  {t.name}
+                                  {recommendedTopicIds.has(t.topic_id) && (
+                                    <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">
+                                      👉 Recomendado por tu profe
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-xs text-slate-400">
+                                  {hasContent
+                                    ? `${t.practice_count} ejercicios + Test final`
+                                    : "Próximamente"}
+                                </p>
+                              </div>
+                              {t.exam_best_stars > 0 ? (
+                                <div className="flex gap-0.5 text-lg">
+                                  {[1, 2, 3].map((n) => (
+                                    <span key={n} className={n <= t.exam_best_stars ? "" : "opacity-25"}>
+                                      ⭐
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : hasContent ? (
+                                <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600">
+                                  Empezar
                                 </span>
-                              )}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {hasContent
-                                ? `${t.practice_count} ejercicios + Test final`
-                                : "Próximamente"}
-                            </p>
-                          </div>
-                          {t.exam_best_stars > 0 ? (
-                            <div className="flex gap-0.5 text-lg">
-                              {[1, 2, 3].map((n) => (
-                                <span key={n} className={n <= t.exam_best_stars ? "" : "opacity-25"}>
-                                  ⭐
-                                </span>
-                              ))}
-                            </div>
-                          ) : hasContent ? (
-                            <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600">
-                              Empezar
-                            </span>
-                          ) : null}
-                        </Link>
-                      );
-                    })}
+                              ) : null}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
               ))}
