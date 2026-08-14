@@ -26,6 +26,7 @@ export interface MyProfile {
   character_id: string | null;
   diamonds: number;
   household_id: string;
+  birthdate: string | null;
 }
 
 export interface ActiveStudent {
