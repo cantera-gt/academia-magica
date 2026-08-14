@@ -183,7 +183,7 @@ export default function AlumnoLoginPage() {
       >
    ¿Quién eres?
       </motion.h1>
-      {students.length > 3 && (
+     {students.length > 1 && (
         <input
           type="text"
           value={search}
