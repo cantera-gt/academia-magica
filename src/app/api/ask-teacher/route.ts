@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
     // recien ahi empezamos a transmitir la respuesta de verdad.
     async function startStream() {
       const result = streamText({
-        model: "anthropic/claude-haiku-4-5",
+        model: "anthropic/claude-haiku-4.5",
         system: systemPrompt,
         messages: gatewayMessages,
         maxOutputTokens: 220,
