@@ -4,12 +4,13 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Subject } from "@/types/database";
+import StudentQuickLogin from "@/components/student-quick-login";
 
 const SITE_URL = "https://academia-magica-oficial.vercel.app";
 export const metadata: Metadata = {
   title: "Aprender jugando para niños de 4 a 10 años | Academia Mágica",
   description:
-    "Plataforma educativa gamificada para niños de 4 a 10 años con catálogo de materias, profesores con voz, progreso visible y diamantes por aprender.",
+    "Plataforma educativa gamificada para niños de 4 a 10 años con catálogo de materias, profesores con voz, progreso visible y diamantes por aprender. Acceso inmediato tras el pago.",
   alternates: { canonical: "/" },
   keywords: [
     "plataforma educativa para niños",
@@ -45,7 +46,7 @@ const BENEFITS = [
   { icon: "🧠", title: "Aprende a su ritmo", text: "Los contenidos están organizados por edad, materia y dificultad para que avance paso a paso, sin saltos imposibles." },
   { icon: "🎤", title: "Pregunta cuando lo necesita", text: "Cada materia tiene un profesor con voz. Le da pistas, le hace pensar y le enseña el camino sin regalarle la respuesta." },
   { icon: "💎", title: "Cada logro cuenta", text: "Los aciertos se transforman en diamantes que puede usar para crear y decorar su propio mundo dentro de la academia." },
-  { icon: "📈", title: "Tú ves el progreso", text: "El panel de administración permite seguir actividad, rendimiento y evolución para acompañar con información real." },
+  { icon: "📈", title: "Tú ves el progreso", text: "El panel familiar permite seguir actividad, rendimiento y evolución para acompañar con información real." },
 ];
 
 const FEATURED_SUBJECTS = [
@@ -54,12 +55,34 @@ const FEATURED_SUBJECTS = [
   { icon: "🫀", name: "Cuerpo humano", text: "Anatomía, sentidos, salud y hábitos explicados con curiosidad, ejemplos y actividades cercanas.", color: "bg-[#7fe7c4]" },
 ];
 
+const OBJECTIONS = [
+  {
+    icon: "🎮",
+    title: "“¿No es demasiada pantalla?”",
+    text: "Entendemos la duda. Lo que cambia es qué hace con esa pantalla: 7 de cada 10 familias con niños de 2 a 8 años ya usan aplicaciones educativas como parte de su rutina, según un estudio de verano 2025 de Age of Learning (ABCmouse). Nosotros sumamos límites de tiempo por sesión y un panel para que veas exactamente en qué invierte cada minuto.",
+    source: { label: "Age of Learning / ABCmouse, 2025", href: "https://www.abcmouse.com/learn/advice/education-app-statistics-every-parent-should-know/77938" },
+  },
+  {
+    icon: "🧪",
+    title: "“¿La gamificación realmente funciona?”",
+    text: "Un meta-análisis de 2025 sobre gamificación en educación K-12, publicado en Psychology in the Schools, encontró un efecto positivo de moderado a grande sobre la motivación de los alumnos (g = 0,654) frente a la enseñanza sin estos elementos.",
+    source: { label: "Kurnaz, Psychology in the Schools, 2025", href: "https://onlinelibrary.wiley.com/doi/10.1002/pits.70056" },
+  },
+  {
+    icon: "💳",
+    title: "“¿Es seguro pagar y cómo empiezo?”",
+    text: "El pago se procesa con PayPal. En cuanto se confirma, el acceso se activa al instante: recibís un correo con el enlace para crear el usuario de tu hijo/a, sin esperar respuesta de nadie.",
+    source: null,
+  },
+];
+
 const FAQS = [
   { question: "¿Para qué edades está pensada Academia Mágica?", answer: "Está diseñada principalmente para niños y niñas de 4 a 10 años. El contenido se organiza por edades para que cada alumno encuentre un reto adecuado a su momento de aprendizaje." },
   { question: "¿Necesita un adulto estar siempre a su lado?", answer: "Al principio conviene acompañarle para conocer la plataforma. Después puede avanzar con bastante autonomía: las instrucciones son claras y puede pedir ayuda al profesor por voz o texto." },
   { question: "¿El profesor le dice directamente la respuesta?", answer: "No. Está preparado para guiar con preguntas y pequeñas pistas. El objetivo es que el alumno comprenda y llegue a la solución por sí mismo." },
-  { question: "¿Qué puede controlar la familia?", answer: "El administrador puede gestionar alumnos y asignaturas, consultar actividad y rendimiento, revisar el progreso y premiar logros con diamantes." },
+  { question: "¿Qué puede controlar la familia?", answer: "Desde el panel para padres podés ver tiempo de uso, precisión, racha de días y progreso por materia, además de gestionar el acceso y contratar más materias cuando quieras." },
   { question: "¿Dónde funciona?", answer: "Es una aplicación web. Se accede online desde un navegador moderno en ordenador, tableta o móvil, sin instalar un programa especial." },
+  { question: "¿Qué pasa apenas termino de pagar?", answer: "El acceso se activa de inmediato. Te llega un correo con la confirmación de la compra y un enlace para crear el usuario con el que tu hijo/a va a entrar a la plataforma. Todo el proceso es automático, sin esperar a que alguien te responda." },
   { question: "¿Cómo puedo conocer el precio y matricularme?", answer: "Pulsa «Quiero matricularme», elige las materias y verás el precio final al instante. El acceso dura 3 meses: 1–3 materias cuestan $10 cada una, 4–6 cuestan $8, 7–10 cuestan $7 y desde 11 cuestan $6. Después puedes continuar al pago seguro con PayPal." },
 ];
 
@@ -83,7 +106,7 @@ const jsonLd = {
       url: SITE_URL,
       audience: { "@type": "PeopleAudience", suggestedMinAge: 4, suggestedMaxAge: 10 },
       provider: { "@id": SITE_URL + "/#organization" },
-      description: "Aprendizaje gamificado con un catálogo creciente de materias, profesores por voz, ejercicios y recompensas.",
+      description: "Aprendizaje gamificado con un catálogo creciente de materias, profesores por voz, ejercicios y recompensas. Acceso inmediato y automático tras el pago.",
     },
     {
       "@type": "FAQPage",
@@ -129,9 +152,9 @@ export default async function Home() {
           </Link>
           <nav aria-label="Navegación principal" className="flex items-center gap-3">
             <a href="#como-funciona" className="hidden text-sm font-bold text-[#3b2a55]/70 transition hover:text-[#6c5ce7] md:block">Cómo funciona</a>
-            <Link href="/alumno" className="rounded-full border-2 border-[#6c5ce7] px-4 py-2 text-sm font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7] hover:text-white sm:px-5">
+            <a href="#acceso-alumnos" className="rounded-full border-2 border-[#6c5ce7] px-4 py-2 text-sm font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7] hover:text-white sm:px-5">
               Acceso alumnos
-            </Link>
+            </a>
           </nav>
         </div>
       </header>
@@ -148,14 +171,14 @@ export default async function Home() {
               Que aprender deje de ser una pelea y se convierta en su <span className="text-[#6c5ce7]">aventura favorita</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg font-semibold leading-relaxed text-[#3b2a55]/75 sm:text-xl lg:mx-0">
-              Academia Mágica transforma un catálogo creciente de materias en retos, profesores que guían y diamantes que dan ganas de seguir. Tú ves cómo avanza. Tu hijo disfruta aprendiendo.
+              Academia Mágica transforma un catálogo creciente de materias en retos, profesores que guían y diamantes que dan ganas de seguir. Pagás, el acceso se activa al instante y tu hijo/a ya puede entrar.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <EnrollmentLink className="w-full text-lg sm:w-auto sm:px-9 sm:py-4">Quiero matricularme</EnrollmentLink>
               <a href="#como-funciona" className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-7 py-3.5 font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7]/10 sm:w-auto">Ver cómo funciona ↓</a>
             </div>
             <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-bold text-[#3b2a55]/65 lg:justify-start">
-              <span>✓ 100% online</span><span>✓ A su ritmo</span><span>✓ Progreso visible</span>
+              <span>✓ Acceso inmediato tras el pago</span><span>✓ A su ritmo</span><span>✓ Progreso visible</span>
             </div>
           </div>
 
@@ -178,7 +201,29 @@ export default async function Home() {
 
       <section aria-label="Ventajas principales" className="bg-[#3b2a55] px-5 py-5 text-white sm:px-8">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 text-center text-sm font-extrabold sm:grid-cols-4 sm:text-base">
-          <p>🎯 Retos por edad</p><p>🎤 Ayuda por voz</p><p>💎 Recompensas con sentido</p><p>📊 Seguimiento familiar</p>
+          <p>🎯 Retos por edad</p><p>🎤 Ayuda por voz</p><p>💎 Recompensas con sentido</p><p>⚡ Acceso automático</p>
+        </div>
+      </section>
+
+      <section aria-label="Respaldo con datos" className="px-5 py-14 sm:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
+              <p className="font-display text-4xl font-extrabold text-[#6c5ce7]">g = 0,65</p>
+              <p className="mt-2 font-bold">Efecto positivo de la gamificación sobre la motivación de alumnos K-12, según un meta-análisis de 2025.</p>
+              <a href="https://onlinelibrary.wiley.com/doi/10.1002/pits.70056" target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-bold text-[#6c5ce7]/70 hover:underline">Kurnaz, Psychology in the Schools, 2025 ↗</a>
+            </div>
+            <div className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
+              <p className="font-display text-4xl font-extrabold text-[#ff6b9d]">6 de 10</p>
+              <p className="mt-2 font-bold">Padres con hijos en primaria que dicen tener dificultades para ayudarlos con la tarea.</p>
+              <a href="https://familieslearning.org/blog/60-percent-of-parents-struggle-to-help-with-homework-survey-reveals/" target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-bold text-[#ff6b9d]/70 hover:underline">National Center for Families Learning ↗</a>
+            </div>
+            <div className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
+              <p className="font-display text-4xl font-extrabold text-[#2fae82]">72%</p>
+              <p className="mt-2 font-bold">De familias con niños de 2 a 8 años ya usan aplicaciones educativas como parte de su rutina.</p>
+              <a href="https://www.abcmouse.com/learn/advice/education-app-statistics-every-parent-should-know/77938" target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-bold text-[#2fae82]/70 hover:underline">Age of Learning / ABCmouse, 2025 ↗</a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -188,7 +233,7 @@ export default async function Home() {
             <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">La situación que conoces</p>
             <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">No le falta capacidad. Le falta una forma de aprender que conecte con él.</h2>
             <div className="mt-6 space-y-4 text-lg leading-relaxed text-[#3b2a55]/75">
-              <p>Le pides que practique y aparece el «ahora no», el aburrimiento o la frustración.</p>
+              <p>Le pides que practique y aparece el «ahora no», el aburrimiento o la frustración. No sos el único: 6 de cada 10 padres con hijos en primaria dicen tener dificultades reales para ayudarlos con la tarea.</p>
               <p>Las pantallas le atraen, pero no siempre encuentras contenido que le aporte algo de verdad.</p>
               <p>Y tú quieres ayudar, aunque no siempre sabes qué ha entendido, dónde se atasca o cómo motivarle sin terminar discutiendo.</p>
             </div>
@@ -303,9 +348,30 @@ export default async function Home() {
         </div>
       </section>
 
+      <section aria-label="Dudas frecuentes antes de matricularte" className="px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Antes de decidir</p>
+            <h2 className="font-display mt-3 text-3xl font-extrabold sm:text-5xl">Las dudas más habituales, respondidas con datos</h2>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            {OBJECTIONS.map((item) => (
+              <article key={item.title} className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
+                <span className="text-3xl" aria-hidden="true">{item.icon}</span>
+                <h3 className="font-display mt-3 text-lg font-extrabold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#3b2a55]/70">{item.text}</p>
+                {item.source && (
+                  <a href={item.source.href} target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-bold text-[#6c5ce7]/70 hover:underline">{item.source.label} ↗</a>
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="px-5 py-20 sm:px-8 sm:py-28">
         <div className="mx-auto max-w-4xl">
-          <div className="text-center"><p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Antes de matricularte</p><h2 className="font-display mt-3 text-3xl font-extrabold sm:text-5xl">Preguntas frecuentes</h2></div>
+          <div className="text-center"><p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Preguntas frecuentes</p><h2 className="font-display mt-3 text-3xl font-extrabold sm:text-5xl">Todo lo demás que quizás te preguntes</h2></div>
           <div className="mt-10 space-y-4">
             {FAQS.map((item) => (
               <details key={item.question} className="group rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm">
@@ -317,15 +383,26 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="matricula" className="scroll-mt-20 px-5 pb-20 sm:px-8 sm:pb-28">
+      <section id="acceso-alumnos" className="scroll-mt-20 bg-[#f2e9ff] px-5 py-20 sm:px-8 sm:py-28">
+        <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-[1fr_.9fr]">
+          <div>
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#6c5ce7]">¿Ya sos parte de Academia Mágica?</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-4xl">Entrá directo desde acá, sin buscar otra página</h2>
+            <p className="mt-4 text-lg leading-relaxed text-[#3b2a55]/70">Si tu hijo/a ya tiene usuario, escribí su nombre de usuario y su PIN acá mismo. Si todavía no se matriculó, hacelo en un par de minutos y el acceso queda listo al instante.</p>
+          </div>
+          <StudentQuickLogin />
+        </div>
+      </section>
+
+      <section className="scroll-mt-20 px-5 pb-20 sm:px-8 sm:pb-28">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#6c5ce7] via-[#755ee5] to-[#ff6b9d] px-6 py-14 text-center text-white shadow-2xl sm:px-12 sm:py-20">
           <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-[#ffd93d]/25 blur-3xl" />
           <div className="relative mx-auto max-w-3xl">
             <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ffd93d]">El siguiente paso</p>
             <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">¿Quieres que aprender sea el momento que tu hijo espera?</h2>
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">Escríbenos con su edad y te explicaremos personalmente la modalidad disponible, el precio y cómo empezar.</p>
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">Elegí las materias, pagá con PayPal y el acceso queda activo al instante: te llega un correo con el enlace para crear el usuario de tu hijo/a. Sin esperas, sin trámites manuales.</p>
             <div className="mt-8"><EnrollmentLink className="text-lg sm:px-10 sm:py-4">Quiero matricularme</EnrollmentLink></div>
-            <p className="mt-4 text-sm font-semibold text-white/70">Sin compromiso. Respuesta personal por correo.</p>
+            <p className="mt-4 text-sm font-semibold text-white/70">Pago seguro con PayPal · Acceso inmediato · Duración de 3 meses</p>
           </div>
         </div>
       </section>
@@ -335,7 +412,7 @@ export default async function Home() {
           <div><p className="font-display text-xl font-extrabold text-white">✨ Academia Mágica</p><p className="mt-1 text-sm">Aprender jugando es posible.</p></div>
           <div className="flex flex-wrap justify-center gap-5 text-sm font-bold">
             <a href="mailto:businesscatserrano@gmail.com" className="hover:text-white">Contacto</a>
-            <Link href="/alumno" className="hover:text-white">Acceso alumnos</Link>
+            <a href="#acceso-alumnos" className="hover:text-white">Acceso alumnos</a>
             <Link href="/login" className="hover:text-white">Administración</Link>
           </div>
         </div>
