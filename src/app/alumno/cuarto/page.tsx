@@ -92,7 +92,12 @@ export default function CuartoPage() {
     load();
   }, [load]);
 
-  // Mide el tamano real del cuarto para poder convertir % <-> pixeles al arrastrar
+  // Mide el tamano real del cuarto para poder convertir % <-> pixeles al arrastrar.
+  // Depende tambien de "loading": el div del cuarto recien existe en el DOM
+  // cuando loading pasa a false, asi que sin esta dependencia el efecto podia
+  // correr una sola vez con roomRef.current todavia en null (primera carga) y
+  // nunca mas volver a medir -> los items colocados quedaban invisibles hasta
+  // que el usuario cambiaba de pestana de zona.
   useEffect(() => {
     const el = roomRef.current;
     if (!el) return;
@@ -101,7 +106,7 @@ export default function CuartoPage() {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [zone]);
+  }, [zone, loading]);
 
   const zoneInventory = useMemo(
     () =>
