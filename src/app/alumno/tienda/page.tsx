@@ -47,9 +47,13 @@ const CATEGORY_LABEL: Record<ItemCategory, string> = {
 // 2D superpuesto. Se busca por el nombre del item porque hoy solo hay un
 // puñado de accesorios con arte; si mas adelante hay muchos, esto puede
 // pasar a una columna en la base de datos.
+// Calibrado contra el retrato real (girl_7-10_1.webp / boy_7-10_1.webp): el
+// personaje ocupa el 100% del alto del contenedor y el pelo arranca en el
+// borde superior, por eso el top es negativo (el accesorio "flota" por
+// encima del contenedor para quedar sobre la cabeza en vez de tapar la cara).
 const ACCESSORY_OVERLAY: Record<string, { top: number; left: number; width: number }> = {
-  "Gorro de Fiesta": { top: -7.5, left: 50, width: 38 },
-  "Corona de Diamantes": { top: 0.5, left: 50, width: 41 },
+  "Gorro de Fiesta": { top: -21, left: 50, width: 30 },
+  "Corona de Diamantes": { top: -11, left: 50, width: 34 },
 };
 
 export default function TiendaPage() {
@@ -276,9 +280,13 @@ export default function TiendaPage() {
                       style={{
                         position: "absolute",
                         top: `${pos.top}%`,
-                        left: `${pos.left}%`,
+                        // Framer Motion controla el transform del elemento
+                        // (por la animacion de scale), asi que no podemos
+                        // centrar con transform: translateX(-50%) porque lo
+                        // pisa. Centramos restando la mitad del ancho en el
+                        // left directamente.
+                        left: `calc(${pos.left}% - ${pos.width / 2}%)`,
                         width: `${pos.width}%`,
-                        transform: "translateX(-50%)",
                       }}
                       className="pointer-events-none drop-shadow"
                     />
