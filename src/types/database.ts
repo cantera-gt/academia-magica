@@ -235,3 +235,41 @@ export interface InventoryItem {
   position: RoomPosition3D | null;
   store_items: StoreItem;
 }
+
+// Estadisticas agregadas para el Panel para padres (tiempo, precision,
+// racha, diamantes y progreso por materia). Ver RPC public.my_parent_stats().
+export interface ParentStatsSubject {
+  subject_id: string;
+  subject_name: string;
+  subject_icon: string | null;
+  subject_color: string | null;
+  seconds: number;
+  exercises: number;
+  accuracy_pct: number | null;
+  topics_passed: number;
+}
+
+export interface ParentStatsDay {
+  day: string;
+  seconds: number;
+  exercises: number;
+}
+
+export interface ParentStats {
+  display_name: string;
+  diamonds_balance: number;
+  generated_at: string;
+  total_seconds: number;
+  total_exercises: number;
+  accuracy_pct: number | null;
+  seconds_last_7d: number;
+  seconds_last_30d: number;
+  diamonds_last_30d: number;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string | null;
+  topics_passed_total: number;
+  achievements_count: number;
+  by_subject: ParentStatsSubject[];
+  daily_last_14d: ParentStatsDay[];
+}
