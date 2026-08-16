@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/alumnos", label: "Alumnos", icon: "♟" },
   { href: "/admin/matriculas", label: "Matrículas", icon: "✍" },
   { href: "/admin/suscripciones", label: "Suscripciones", icon: "⏳" },
+  { href: "/admin/pedidos", label: "Pedidos", icon: "🧾" },
   { href: "/admin/comunicacion", label: "Comunicación", icon: "✉" },
   { href: "/admin/actividad", label: "Registro", icon: "◷" },
   { href: "/admin/ejercicios", label: "Contenido", icon: "✦" },
