@@ -267,6 +267,12 @@ export default function AlumnoInicioPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/alumno/panel-padres"
+            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
+          >
+            Panel para padres 👨‍👩‍👧
+          </Link>
+          <Link
             href="/alumno/tienda"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
           >
