@@ -310,3 +310,26 @@ export interface AdminSubjectSubscription {
   days_remaining: number | null;
   status: SubjectSubscriptionStatus;
 }
+
+export type SubjectOrderPaymentMethod = "paypal" | "manual";
+export type SubjectOrderPaymentStatus = "not_started" | "pending" | "paid" | "failed" | "refunded" | "cancelled";
+
+// Fila del listado de pedidos (PayPal + manuales) para el admin. Ver RPC
+// public.admin_list_subject_orders().
+export interface AdminSubjectOrder {
+  order_id: string;
+  student_id: string;
+  student_name: string;
+  subject_names: string[];
+  subject_count: number;
+  total_price_usd: number;
+  currency: string;
+  access_months: number;
+  payment_status: SubjectOrderPaymentStatus;
+  payment_method: SubjectOrderPaymentMethod;
+  payment_note: string | null;
+  paid_at: string | null;
+  proof_file_path: string | null;
+  paypal_order_id: string | null;
+  created_at: string;
+}
