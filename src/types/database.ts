@@ -247,6 +247,8 @@ export interface ParentStatsSubject {
   exercises: number;
   accuracy_pct: number | null;
   topics_passed: number;
+  expires_at: string | null;
+  subscription_status: SubjectSubscriptionStatus;
 }
 
 export interface ParentStatsDay {
@@ -272,4 +274,39 @@ export interface ParentStats {
   achievements_count: number;
   by_subject: ParentStatsSubject[];
   daily_last_14d: ParentStatsDay[];
+}
+
+export type SubjectSubscriptionStatus = "activa" | "por_vencer" | "vencida" | "sin_vencimiento";
+
+// Materia asignada a un alumno con su estado de vencimiento (3 meses por
+// compra). Ver RPC public.assigned_subjects_with_status().
+export interface AssignedSubjectWithStatus extends Subject {
+  expires_at: string | null;
+  status: SubjectSubscriptionStatus;
+}
+
+// Resumen de una orden de compra de materias adicionales, para la pagina de
+// pago. Ver RPC public.get_subject_order_summary().
+export interface SubjectOrderSummary {
+  id: string;
+  subject_count: number;
+  total_price_usd: number;
+  currency: string;
+  access_months: number;
+  payment_status: string;
+  subject_names: string[];
+}
+
+// Fila del listado global de suscripciones para el admin. Ver RPC
+// public.admin_list_subject_subscriptions().
+export interface AdminSubjectSubscription {
+  student_id: string;
+  student_name: string;
+  subject_id: string;
+  subject_name: string;
+  subject_icon: string | null;
+  assigned_at: string;
+  expires_at: string | null;
+  days_remaining: number | null;
+  status: SubjectSubscriptionStatus;
 }
