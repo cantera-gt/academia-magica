@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, ParentStats } from "@/types/database";
+import type { MyProfile, ParentStats, Subject } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
+import { getEnrollmentPricing } from "@/lib/enrollment-pricing";
 
 function formatDuration(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
@@ -22,6 +23,18 @@ function formatDay(dateStr: string): string {
   return d.toLocaleDateString("es", { weekday: "short" }).replace(".", "");
 }
 
+function formatExpiry(dateStr: string | null): string {
+  if (!dateStr) return "Sin vencimiento";
+  return new Date(dateStr).toLocaleDateString("es", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string }> = {
+  activa: { label: "Activa", className: "bg-emerald-100 text-emerald-700" },
+  por_vencer: { label: "Por vencer", className: "bg-amber-100 text-amber-800" },
+  vencida: { label: "Vencida", className: "bg-red-100 text-red-700" },
+  sin_vencimiento: { label: "Sin vencimiento", className: "bg-slate-100 text-slate-600" },
+};
+
 export default function PanelPadresPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -34,6 +47,12 @@ export default function PanelPadresPage() {
   const [submitting, setSubmitting] = useState(false);
   const [stats, setStats] = useState<ParentStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+
+  const [purchaseOptions, setPurchaseOptions] = useState<Subject[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showPurchase, setShowPurchase] = useState(false);
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -80,11 +99,39 @@ export default function PanelPadresPage() {
     setSubmitting(false);
     setStatsLoading(true);
 
-    const { data: s, error: statsError } = await supabase.rpc("my_parent_stats");
+    const [{ data: s, error: statsError }, { data: options }] = await Promise.all([
+      supabase.rpc("my_parent_stats"),
+      supabase.rpc("my_subject_purchase_options"),
+    ]);
     if (!statsError && s) {
       setStats(s as ParentStats);
     }
+    setPurchaseOptions((options as Subject[]) ?? []);
     setStatsLoading(false);
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function startPurchase() {
+    if (selectedIds.size === 0) return;
+    setCreatingOrder(true);
+    setOrderError(null);
+    const { data, error: orderErr } = await supabase.rpc("create_subject_order", {
+      p_subject_ids: Array.from(selectedIds),
+    });
+    if (orderErr || !data?.[0]?.id) {
+      setOrderError(orderErr?.message ?? "No se pudo crear la orden");
+      setCreatingOrder(false);
+      return;
+    }
+    router.push(`/alumno/panel-padres/pago?order=${data[0].id}`);
   }
 
   if (loading || !profile) {
@@ -173,6 +220,7 @@ export default function PanelPadresPage() {
 
   // Paso 2: panel de estadísticas
   const maxDaySeconds = Math.max(1, ...(stats?.daily_last_14d.map((d) => d.seconds) ?? [1]));
+  const pricing = getEnrollmentPricing(selectedIds.size);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -235,35 +283,113 @@ export default function PanelPadresPage() {
 
             {/* Tiempo y desempeño por materia */}
             <motion.div variants={staggerItem} className="mt-6 rounded-2xl bg-white p-5 shadow">
-              <h2 className="text-lg font-bold text-slate-800">Tiempo por materia</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-slate-800">Tus materias</h2>
+                <button
+                  onClick={() => setShowPurchase((v) => !v)}
+                  className="rounded-full bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-700"
+                >
+                  {showPurchase ? "Cerrar" : "＋ Contratar más asignaturas"}
+                </button>
+              </div>
               {stats.by_subject.length === 0 ? (
                 <p className="mt-3 text-sm text-slate-500">
                   Todavía no hay materias asignadas.
                 </p>
               ) : (
                 <div className="mt-4 flex flex-col gap-3">
-                  {stats.by_subject.map((s) => (
-                    <div
-                      key={s.subject_id}
-                      className="flex items-center gap-3 rounded-xl bg-slate-50 p-3"
-                      style={{ borderLeft: `4px solid ${s.subject_color ?? "#a855f7"}` }}
-                    >
-                      <span className="text-2xl">{s.subject_icon}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-700">{s.subject_name}</p>
-                        <p className="text-xs text-slate-500">
-                          {s.exercises} ejercicio{s.exercises === 1 ? "" : "s"}
-                          {s.accuracy_pct !== null ? ` · ${s.accuracy_pct}% de aciertos` : ""}
-                          {s.topics_passed > 0 ? ` · ${s.topics_passed} temas superados` : ""}
-                        </p>
+                  {stats.by_subject.map((s) => {
+                    const badge = SUBSCRIPTION_BADGE[s.subscription_status] ?? SUBSCRIPTION_BADGE.sin_vencimiento;
+                    return (
+                      <div
+                        key={s.subject_id}
+                        className="flex flex-col gap-2 rounded-xl bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-3"
+                        style={{ borderLeft: `4px solid ${s.subject_color ?? "#a855f7"}` }}
+                      >
+                        <span className="text-2xl">{s.subject_icon}</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-slate-700">{s.subject_name}</p>
+                          <p className="text-xs text-slate-500">
+                            {s.exercises} ejercicio{s.exercises === 1 ? "" : "s"}
+                            {s.accuracy_pct !== null ? ` · ${s.accuracy_pct}% de aciertos` : ""}
+                            {s.topics_passed > 0 ? ` · ${s.topics_passed} temas superados` : ""}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${badge.className}`}>
+                            {badge.label}
+                          </span>
+                          <span className="text-[11px] text-slate-400">{formatExpiry(s.expires_at)}</span>
+                          <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-bold text-purple-700">
+                            {formatDuration(s.seconds)}
+                          </span>
+                        </div>
                       </div>
-                      <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-bold text-purple-700">
-                        {formatDuration(s.seconds)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+
+              <AnimatePresence>
+                {showPurchase && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-5 overflow-hidden rounded-2xl border-2 border-purple-200 bg-purple-50 p-4"
+                  >
+                    <h3 className="font-bold text-purple-900">Contratar más asignaturas</h3>
+                    <p className="mt-1 text-xs text-purple-700">
+                      3 meses de acceso por materia. 1–3 materias $10 c/u · 4–6 $8 · 7–10 $7 · 11+ $6.
+                    </p>
+                    {purchaseOptions.length === 0 ? (
+                      <p className="mt-3 text-sm text-purple-700">
+                        Ya tenés acceso activo a todas las materias disponibles. 🎉
+                      </p>
+                    ) : (
+                      <>
+                        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {purchaseOptions.map((s) => (
+                            <label
+                              key={s.id}
+                              className="flex cursor-pointer items-center gap-2 rounded-xl bg-white p-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-purple-100"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.has(s.id)}
+                                onChange={() => toggleSelected(s.id)}
+                                className="h-4 w-4 accent-purple-600"
+                              />
+                              {s.icon} {s.name}
+                            </label>
+                          ))}
+                        </div>
+                        {selectedIds.size > 0 && (
+                          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-3">
+                            <p className="text-sm text-slate-600">
+                              {pricing.subjectCount} materia{pricing.subjectCount === 1 ? "" : "s"} ·{" "}
+                              {pricing.unitPriceUsd} USD c/u
+                            </p>
+                            <p className="text-xl font-black text-purple-700">{pricing.totalUsd} USD</p>
+                          </div>
+                        )}
+                        {orderError && (
+                          <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
+                            {orderError}
+                          </p>
+                        )}
+                        <button
+                          onClick={startPurchase}
+                          disabled={selectedIds.size === 0 || creatingOrder}
+                          className="mt-4 w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white hover:bg-purple-700 disabled:opacity-50"
+                        >
+                          {creatingOrder ? "Preparando pago..." : "Continuar al pago →"}
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {stats.achievements_count > 0 && (
