@@ -302,6 +302,8 @@ export interface SubjectOrderSummary {
 export interface AdminSubjectSubscription {
   student_id: string;
   student_name: string;
+  household_id: string;
+  household_name: string;
   subject_id: string;
   subject_name: string;
   subject_icon: string | null;
@@ -320,6 +322,8 @@ export interface AdminSubjectOrder {
   order_id: string;
   student_id: string;
   student_name: string;
+  household_id: string;
+  household_name: string;
   subject_names: string[];
   subject_count: number;
   total_price_usd: number;

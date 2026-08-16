@@ -23,6 +23,8 @@ export interface AdminStudentOverview {
   topics_started: number;
   topics_passed: number;
   assigned_subjects: number;
+  household_id: string;
+  household_name: string;
 }
 
 export interface AdminSummary {
@@ -136,6 +138,8 @@ export interface AdminStudentRecord {
   status_reason: string | null;
   tags: string[];
   last_contacted_at: string | null;
+  household_id: string;
+  household_name: string;
 }
 
 export interface AdminStudentDetail {

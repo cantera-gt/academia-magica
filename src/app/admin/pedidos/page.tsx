@@ -155,6 +155,7 @@ export default function AdminOrdersPage() {
           <thead>
             <tr className="text-left text-xs font-extrabold uppercase tracking-wide text-slate-400">
               <th className="px-4 py-3">Alumno</th>
+              <th className="px-4 py-3">Familia</th>
               <th className="px-4 py-3">Materias</th>
               <th className="px-4 py-3">Fecha</th>
               <th className="px-4 py-3">Total</th>
@@ -167,14 +168,14 @@ export default function AdminOrdersPage() {
           <tbody className="divide-y divide-slate-100">
             {loading && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
                   Cargando…
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
                   No hay pedidos en este filtro.
                 </td>
               </tr>
@@ -185,6 +186,7 @@ export default function AdminOrdersPage() {
               return (
                 <tr key={order.order_id}>
                   <td className="px-4 py-3 font-bold text-slate-800">{order.student_name}</td>
+                  <td className="px-4 py-3 text-slate-500">{order.household_name}</td>
                   <td className="px-4 py-3 text-slate-700">{order.subject_names.join(", ")}</td>
                   <td className="px-4 py-3 text-slate-500">{formatDateTime(order.paid_at ?? order.created_at)}</td>
                   <td className="px-4 py-3 font-bold text-slate-800">

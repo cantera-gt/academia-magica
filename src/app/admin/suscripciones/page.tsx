@@ -153,6 +153,7 @@ export default function AdminSubscriptionsPage() {
           <thead>
             <tr className="text-left text-xs font-extrabold uppercase tracking-wide text-slate-400">
               <th className="px-4 py-3">Alumno</th>
+              <th className="px-4 py-3">Familia</th>
               <th className="px-4 py-3">Materia</th>
               <th className="px-4 py-3">Vence</th>
               <th className="px-4 py-3">Días</th>
@@ -163,14 +164,14 @@ export default function AdminSubscriptionsPage() {
           <tbody className="divide-y divide-slate-100">
             {loading && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                   Cargando…
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                   No hay suscripciones en este filtro.
                 </td>
               </tr>
@@ -180,6 +181,7 @@ export default function AdminSubscriptionsPage() {
               return (
                 <tr key={key}>
                   <td className="px-4 py-3 font-bold text-slate-800">{row.student_name}</td>
+                  <td className="px-4 py-3 text-slate-500">{row.household_name}</td>
                   <td className="px-4 py-3 text-slate-700">
                     {row.subject_icon} {row.subject_name}
                   </td>
