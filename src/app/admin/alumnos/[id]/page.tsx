@@ -6,9 +6,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateTime, formatShortDate, relativeActivity } from "@/lib/admin-format";
 import type { AdminStudentDetail } from "@/types/admin";
-import type { Subject } from "@/types/database";
+import type { Subject, AdminSubjectSubscription } from "@/types/database";
 
 type Tab = "summary" | "learning" | "activity" | "management";
+
+const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string }> = {
+  vencida: { label: "Vencida", className: "bg-red-100 text-red-700" },
+  por_vencer: { label: "Por vencer", className: "bg-amber-100 text-amber-800" },
+  activa: { label: "Activa", className: "bg-emerald-100 text-emerald-700" },
+  sin_vencimiento: { label: "Sin vencimiento", className: "bg-slate-100 text-slate-600" },
+};
 
 export default function StudentDetailPage() {
   const params = useParams<{ id: string }>();
@@ -37,13 +44,16 @@ export default function StudentDetailPage() {
   const [changingStatus, setChangingStatus] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<AdminSubjectSubscription[]>([]);
+  const [extendingKey, setExtendingKey] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const [{ data, error: detailError }, { data: subjectRows }] = await Promise.all([
+    const [{ data, error: detailError }, { data: subjectRows }, { data: subscriptionRows }] = await Promise.all([
       supabase.rpc("admin_student_detail", { p_student_id: studentId }),
       supabase.from("subjects").select("id, slug, name, category, icon, color, sort_order, active").eq("active", true).order("sort_order"),
+      supabase.rpc("admin_list_subject_subscriptions"),
     ]);
     if (detailError || !data) {
       setError(detailError?.message ?? "No se encontró el alumno.");
@@ -59,6 +69,7 @@ export default function StudentDetailPage() {
     setTagsText(next.student.tags.join(", "));
     setStatusReason(next.student.status_reason ?? "");
     setSubjects((subjectRows as Subject[] | null) ?? []);
+    setSubscriptions(((subscriptionRows as AdminSubjectSubscription[] | null) ?? []).filter((row) => row.student_id === studentId));
     setLoading(false);
   }, [studentId, supabase]);
 
@@ -91,6 +102,17 @@ export default function StudentDetailPage() {
     const { error: saveError } = await supabase.rpc("admin_set_student_subjects", { p_student_id: studentId, p_subject_ids: Array.from(assigned) });
     if (saveError) setNotice(saveError.message); else { setNotice("Materias guardadas y acción registrada."); await load(); }
     setSavingSubjects(false);
+  }
+
+  async function extendSubscription(subjectId: string, months: number) {
+    setExtendingKey(subjectId); setNotice(null);
+    const row = subscriptions.find((r) => r.subject_id === subjectId);
+    const base = row?.expires_at && new Date(row.expires_at) > new Date() ? new Date(row.expires_at) : new Date();
+    const next = new Date(base);
+    next.setMonth(next.getMonth() + months);
+    const { error: extendError } = await supabase.rpc("admin_set_subject_expiry", { p_student_id: studentId, p_subject_id: subjectId, p_expires_at: next.toISOString() });
+    if (extendError) setNotice(extendError.message); else { setNotice(`Vencimiento actualizado: +${months} meses.`); await load(); }
+    setExtendingKey(null);
   }
 
   async function saveDetails() {
@@ -180,9 +202,11 @@ export default function StudentDetailPage() {
         </div>
       </div>}
 
-      {tab === "learning" && <div className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_1fr]">
+      {tab === "learning" && <div className="mt-6 space-y-6"><div className="grid gap-6 xl:grid-cols-[1.15fr_1fr]">
         <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6"><div className="flex items-center justify-between gap-3"><div><h2 className="font-display text-xl font-extrabold">Progreso por materia</h2><p className="text-sm text-slate-500">Resultados reales acumulados.</p></div></div><div className="mt-5 space-y-4">{detail.subjects.map((subject) => <article key={subject.subject_id} className="rounded-xl border border-slate-200 p-4"><div className="flex items-start justify-between gap-3"><div><h3 className="font-extrabold text-slate-900">{subject.icon} {subject.name}</h3><p className="text-xs text-slate-400">{subject.attempts} intentos · {subject.topics_passed}/{subject.topics_started} temas aprobados</p></div><span className="text-lg font-extrabold" style={{ color: subject.color ?? "#7c3aed" }}>{subject.accuracy_pct == null ? "—" : `${subject.accuracy_pct}%`}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${subject.accuracy_pct ?? 0}%`, backgroundColor: subject.color ?? "#7c3aed" }} /></div></article>)}{detail.subjects.length === 0 && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No tiene materias asignadas.</p>}</div></section>
         <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6"><div className="flex items-center justify-between gap-3"><div><h2 className="font-display text-xl font-extrabold">Materias asignadas</h2><p className="text-sm text-slate-500">Los cambios se guardan de forma atómica.</p></div><button disabled={savingSubjects} onClick={saveSubjects} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-50">{savingSubjects ? "Guardando…" : "Guardar"}</button></div><div className="mt-5 max-h-[580px] overflow-y-auto">{Object.entries(subjectGroups).map(([category, group]) => <fieldset key={category} className="mb-5"><legend className="mb-2 text-xs font-extrabold uppercase tracking-wide text-slate-400">{category}</legend><div className="space-y-1">{group.map((subject) => <label key={subject.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"><input type="checkbox" checked={assigned.has(subject.id)} onChange={() => setAssigned((current) => { const next = new Set(current); if (next.has(subject.id)) next.delete(subject.id); else next.add(subject.id); return next; })} className="h-4 w-4 accent-violet-600" />{subject.icon} {subject.name}</label>)}</div></fieldset>)}</div></section>
+      </div>
+      <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6"><div className="flex items-center justify-between gap-3"><div><h2 className="font-display text-xl font-extrabold">Vencimientos</h2><p className="text-sm text-slate-500">Acceso de 3 meses por materia. Extendé manualmente los pagos hechos fuera de PayPal.</p></div><Link href="/admin/suscripciones" className="text-sm font-extrabold text-violet-600 hover:underline">Ver todas →</Link></div><div className="mt-4 divide-y divide-slate-100">{subscriptions.map((row) => { const badge = SUBSCRIPTION_BADGE[row.status] ?? SUBSCRIPTION_BADGE.sin_vencimiento; return <div key={row.subject_id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="font-bold text-slate-800">{row.subject_icon} {row.subject_name}</p><p className="text-xs text-slate-400">{row.expires_at ? formatShortDate(row.expires_at) : "Sin vencimiento"}{row.days_remaining != null ? ` · ${row.days_remaining} días` : ""}</p></div><div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-xs font-extrabold ${badge.className}`}>{badge.label}</span><button disabled={extendingKey === row.subject_id} onClick={() => extendSubscription(row.subject_id, 3)} className="rounded-lg bg-violet-100 px-3 py-1.5 text-xs font-extrabold text-violet-700 hover:bg-violet-200 disabled:opacity-50">{extendingKey === row.subject_id ? "…" : "+3 meses"}</button></div></div>; })}{subscriptions.length === 0 && <p className="py-4 text-sm text-slate-400">No tiene materias con vencimiento registrado.</p>}</div></section>
       </div>}
 
       {tab === "activity" && <div className="mt-6 grid gap-6 xl:grid-cols-2">
