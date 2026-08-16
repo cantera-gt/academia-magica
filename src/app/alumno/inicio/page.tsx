@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, Subject, Character, CharacterGender, AgeBracket, SubjectScore } from "@/types/database";
+import type {
+  MyProfile,
+  AssignedSubjectWithStatus,
+  Character,
+  CharacterGender,
+  AgeBracket,
+  SubjectScore,
+} from "@/types/database";
 import {
   staggerContainer,
   staggerItem,
@@ -13,11 +20,18 @@ import {
 } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
 
+const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string } | null> = {
+  activa: null,
+  sin_vencimiento: null,
+  por_vencer: { label: "Vence pronto", className: "bg-amber-100 text-amber-800" },
+  vencida: { label: "Vencida", className: "bg-red-100 text-red-700" },
+};
+
 export default function AlumnoInicioPage() {
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<AssignedSubjectWithStatus[]>([]);
   const [scores, setScores] = useState<Record<string, SubjectScore>>({});
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,10 +51,10 @@ export default function AlumnoInicioPage() {
       const { data: p } = await supabase.rpc("my_profile").maybeSingle();
       setProfile(p as MyProfile);
 
-      const { data: subs } = await supabase.rpc("assigned_subjects", {
+      const { data: subs } = await supabase.rpc("assigned_subjects_with_status", {
         p_student_id: user.id,
       });
-      setSubjects((subs as Subject[]) ?? []);
+      setSubjects((subs as AssignedSubjectWithStatus[]) ?? []);
 
       const { data: subjectScores } = await supabase.rpc("my_subject_scores");
       const scoreMap: Record<string, SubjectScore> = {};
@@ -312,32 +326,52 @@ export default function AlumnoInicioPage() {
           variants={staggerContainer(0.05, 0.15)}
           className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
         >
-          {subjects.map((s) => (
-            <motion.div key={s.id} variants={staggerItem}>
-              <Link href={`/alumno/materia/${s.id}`}>
-                <motion.div
-                  whileHover={{ scale: 1.06, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={SPRING_PLAYFUL}
-                  className="flex flex-col items-center gap-2 rounded-2xl bg-white p-5 text-center shadow"
-                  style={{ borderTop: `4px solid ${s.color ?? "#a855f7"}` }}
-                >
-                  <span className="text-4xl">{s.icon}</span>
-                  <span className="text-sm font-semibold text-slate-700">
-                    {s.name}
+          {subjects.map((s) => {
+            const badge = SUBSCRIPTION_BADGE[s.status];
+            const blocked = s.status === "vencida";
+            const tile = (
+              <motion.div
+                whileHover={blocked ? undefined : { scale: 1.06, y: -3 }}
+                whileTap={blocked ? undefined : { scale: 0.97 }}
+                transition={SPRING_PLAYFUL}
+                className={`relative flex flex-col items-center gap-2 rounded-2xl bg-white p-5 text-center shadow ${
+                  blocked ? "opacity-60" : ""
+                }`}
+                style={{ borderTop: `4px solid ${s.color ?? "#a855f7"}` }}
+              >
+                {badge && (
+                  <span
+                    className={`absolute -top-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${badge.className}`}
+                  >
+                    {badge.label}
                   </span>
-                  {scores[s.id] && scores[s.id].topics_total > 0 && (
+                )}
+                <span className="text-4xl">{blocked ? "🔒" : s.icon}</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  {s.name}
+                </span>
+                {blocked ? (
+                  <span className="text-[11px] font-bold text-red-600">
+                    Pedile a tu familia que renueve esta materia
+                  </span>
+                ) : (
+                  scores[s.id] && scores[s.id].topics_total > 0 && (
                     <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-600">
                       {scores[s.id].topics_passed}/{scores[s.id].topics_total} temas
                       {scores[s.id].avg_exam_pct !== null
                         ? ` · ${scores[s.id].avg_exam_pct}%`
                         : ""}
                     </span>
-                  )}
-                </motion.div>
-              </Link>
-            </motion.div>
-          ))}
+                  )
+                )}
+              </motion.div>
+            );
+            return (
+              <motion.div key={s.id} variants={staggerItem}>
+                {blocked ? tile : <Link href={`/alumno/materia/${s.id}`}>{tile}</Link>}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </main>
