@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import type { MyProfile, StoreItem, ItemCategory, ItemZone } from "@/types/database";
+import type { MyProfile, StoreItem, ItemCategory, ItemZone, Character } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
 import { resolveItemIcon } from "@/lib/store-icons";
@@ -43,11 +43,21 @@ const CATEGORY_LABEL: Record<ItemCategory, string> = {
   deporte: "Deporte",
 };
 
+// Posicion (en % del ancho/alto del retrato del personaje) de cada accesorio
+// 2D superpuesto. Se busca por el nombre del item porque hoy solo hay un
+// puñado de accesorios con arte; si mas adelante hay muchos, esto puede
+// pasar a una columna en la base de datos.
+const ACCESSORY_OVERLAY: Record<string, { top: number; left: number; width: number }> = {
+  "Gorro de Fiesta": { top: -7.5, left: 50, width: 38 },
+  "Corona de Diamantes": { top: 0.5, left: 50, width: 41 },
+};
+
 export default function TiendaPage() {
   const router = useRouter();
   const supabase = createClient();
 
   const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [character, setCharacter] = useState<Character | null>(null);
   const [zone, setZone] = useState<ItemZone>("habitacion");
   const [items, setItems] = useState<StoreItem[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
@@ -76,6 +86,15 @@ export default function TiendaPage() {
       return;
     }
 
+    if (myProfile.character_id) {
+      const { data: charData } = await supabase
+        .from("characters")
+        .select("id, gender, display_name, image_url, thumbnail_url, age_min, age_max, sort_order")
+        .eq("id", myProfile.character_id)
+        .maybeSingle();
+      setCharacter((charData as Character) ?? null);
+    }
+
     const { data: storeData } = await supabase
       .from("store_items")
       .select(
@@ -83,12 +102,12 @@ export default function TiendaPage() {
       )
       .eq("gender", myProfile.gender)
       .eq("active", true)
-      // El personaje ahora es una imagen 2D fija (decision 10/08/2026, ya
-      // no hay personalizacion 3D de ropa ni accesorios enganchados a hueso)
-      // -> se ocultan "color_ropa" y "accesorio" (pensados para el sistema
-      // 3D) hasta que exista el sistema de accesorios superpuestos en 2D.
+      // El personaje ahora es una imagen 2D fija (decision 10/08/2026, ya no
+      // hay personalizacion 3D de ropa enganchada a hueso) -> se sigue
+      // ocultando "color_ropa" (pensado para el sistema 3D viejo).
+      // "accesorio" SI se muestra: son PNG con transparencia que se
+      // superponen sobre el retrato 2D (ver ACCESSORY_OVERLAY arriba).
       .neq("category", "color_ropa")
-      .neq("category", "accesorio")
       .order("category")
       .order("sort_order");
     setItems((storeData as StoreItem[]) ?? []);
@@ -228,6 +247,50 @@ export default function TiendaPage() {
       </header>
 
       <div className="mx-auto max-w-5xl p-6">
+        {character && (
+          <div className="mb-6 flex flex-col items-center gap-3 rounded-2xl bg-white p-5 shadow sm:flex-row sm:items-end sm:justify-center">
+            <div className="relative h-56 w-40 shrink-0 overflow-visible">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={character.image_url}
+                alt={character.display_name}
+                className="absolute bottom-0 left-1/2 h-full -translate-x-1/2 object-contain drop-shadow-lg"
+              />
+              {items
+                .filter(
+                  (item) =>
+                    item.category === "accesorio" &&
+                    equipped.has(item.id) &&
+                    ACCESSORY_OVERLAY[item.name]
+                )
+                .map((item) => {
+                  const pos = ACCESSORY_OVERLAY[item.name];
+                  return (
+                    <motion.img
+                      key={item.id}
+                      initial={{ opacity: 0, scale: 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={SPRING_PLAYFUL}
+                      src={item.image_url ?? undefined}
+                      alt={item.name}
+                      style={{
+                        position: "absolute",
+                        top: `${pos.top}%`,
+                        left: `${pos.left}%`,
+                        width: `${pos.width}%`,
+                        transform: "translateX(-50%)",
+                      }}
+                      className="pointer-events-none drop-shadow"
+                    />
+                  );
+                })}
+            </div>
+            <p className="text-center text-sm font-semibold text-slate-600 sm:text-left">
+              ¡Así te queda, {profile.display_name}! Comprá accesorios ✨ y
+              tocá &quot;Ponérselo&quot; para probarlos.
+            </p>
+          </div>
+        )}
         <div className="mb-6 flex gap-2 overflow-x-auto">
           {ZONE_TABS.map((z) => (
             <button
