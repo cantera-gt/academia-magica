@@ -1,6 +1,7 @@
 export type UserRole = "admin" | "student";
 export type CharacterGender = "girl" | "boy";
 export type AgeBracket = "4-7" | "7-10" | "10-12";
+export type VisualTheme = "princesa" | "espacial" | "deportivo";
 
 // Personajes fijos en 2D (imagen unica por personaje, sin personalizacion
 // de ropa/color). Se filtran por gender + age_bracket del alumno.
@@ -27,6 +28,7 @@ export interface MyProfile {
   diamonds: number;
   household_id: string;
   birthdate: string | null;
+  visual_theme: VisualTheme;
   // Nivel/XP: progreso que solo sube (a diferencia de los diamantes, que se
   // gastan en la tienda). Racha: dias seguidos con al menos un intento.
   xp_total: number;

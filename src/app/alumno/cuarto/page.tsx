@@ -11,6 +11,8 @@ import { staggerContainer, staggerItem, SPRING_PLAYFUL } from "@/lib/motion";
 import { resolveItemIcon } from "@/lib/store-icons";
 import RoomScene from "@/components/room-scene";
 import DiamondCounter from "@/components/diamond-counter";
+import ThemePicker from "@/components/theme-picker";
+import { themeOf } from "@/lib/theme";
 
 const CATEGORY_ICON: Record<ItemCategory, string> = {
   decoracion: "🎀",
@@ -286,9 +288,11 @@ export default function CuartoPage() {
   const libraryItems = zoneInventory.filter((inv) => !draft[inv.id]?.placed);
   const anyPlaced = placedIds.length > 0;
 
+  const theme = themeOf(profile.visual_theme);
+
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="flex items-center justify-between bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-6 text-white">
+      <header className={`flex items-center justify-between bg-gradient-to-r ${theme.headerGradient} px-6 py-6 text-white`}>
         <div>
           <Link href="/alumno/inicio" className="text-sm text-white/70 hover:text-white">
             ← Mi inicio
@@ -298,6 +302,10 @@ export default function CuartoPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <ThemePicker
+            current={profile.visual_theme}
+            onChange={(t) => setProfile((p) => (p ? { ...p, visual_theme: t } : p))}
+          />
           <div className="rounded-full bg-white/15 px-4 py-2 backdrop-blur">
             <DiamondCounter value={profile.diamonds} />
           </div>

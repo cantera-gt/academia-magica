@@ -20,6 +20,8 @@ import {
 } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
 import { StreakBadge, LevelBar } from "@/components/streak-level-bar";
+import ThemePicker from "@/components/theme-picker";
+import { themeOf } from "@/lib/theme";
 
 const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string } | null> = {
   activa: null,
@@ -253,6 +255,7 @@ export default function AlumnoInicioPage() {
   }
 
   const character = characters.find((c) => c.id === profile.character_id);
+  const theme = themeOf(profile.visual_theme);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -260,7 +263,7 @@ export default function AlumnoInicioPage() {
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="flex items-center justify-between bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-white"
+        className={`flex items-center justify-between bg-gradient-to-r ${theme.headerGradient} px-6 py-4 text-white`}
       >
         <div className="flex items-center gap-3">
           {character && (
@@ -281,6 +284,10 @@ export default function AlumnoInicioPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <ThemePicker
+            current={profile.visual_theme}
+            onChange={(t) => setProfile((p) => (p ? { ...p, visual_theme: t } : p))}
+          />
           <Link
             href="/alumno/panel-padres"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"

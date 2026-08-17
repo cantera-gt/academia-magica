@@ -19,6 +19,8 @@ import DragDropExercise from "@/components/drag-drop-exercise";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL, EASE_OUT } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
 import TeacherChatWidget from "@/components/teacher-chat-widget";
+import { playCorrectSound, playIncorrectSound, playLevelUpSound } from "@/lib/sound";
+import { subjectThemeOf } from "@/lib/subject-theme";
 
 function optLabel(opt: string | ExerciseOption): string {
   return typeof opt === "string" ? opt : opt.label;
@@ -34,6 +36,22 @@ function approxAgeFromBracket(bracket: string | null | undefined): number | null
   if (bracket === "10-12") return 11;
   return null;
 }
+
+// Feedback "gamer": variamos el mensaje/icono de acierto segun el combo
+// (racha de aciertos seguidos en esta sesion) para que no sea siempre la
+// misma tarjeta. El array crece con el indice del combo (module), asi que
+// nunca se repite dos veces seguidas mientras la racha avanza.
+const CORRECT_PRAISES = [
+  "\u00a1Correcto!",
+  "\u00a1Genial!",
+  "\u00a1Sos un crack!",
+  "\u00a1Imparable!",
+  "\u00a1As\u00ed se hace!",
+  "\u00a1Excelente!",
+  "\u00a1Diste en el clavo!",
+];
+const CORRECT_ICONS = ["\ud83c\udf89", "\u2728", "\ud83c\udf1f", "\ud83e\udd73", "\ud83d\udca5", "\ud83d\ude80", "\u2b50"];
+const INCORRECT_PRAISES = ["\u00a1Casi!", "\u00a1Por poco!", "\u00a1Casi lo ten\u00e9s!", "Segu\u00ed as\u00ed"];
 
 type Stage =
   | "loading"
@@ -88,6 +106,14 @@ export default function TemaPage() {
   const [failStreak, setFailStreak] = useState(0);
   const [shakeKey, setShakeKey] = useState(0);
   const [revealCorrectLabel, setRevealCorrectLabel] = useState<string | null>(null);
+
+  // Feedback "gamer": combo de aciertos seguidos en esta sesion (no se
+  // persiste, es solo para variar el festejo) y el personaje elegido por
+  // el alumno, para que "reaccione" (rebote/sacuda) en el feedback.
+  const [combo, setCombo] = useState(0);
+  const [character, setCharacter] = useState<{ thumbnail_url: string; display_name: string } | null>(
+    null
+  );
 
   const NEUTRAL_ES_VOICE = "es-ES-ElviraNeural";
   const NEUTRAL_DE_VOICE = "de-DE-KatjaNeural";
@@ -152,6 +178,18 @@ export default function TemaPage() {
 
     const { data: profileData } = await supabase.rpc("my_profile").maybeSingle();
     setProfile((profileData as MyProfile) ?? null);
+    setCombo(0);
+    const charId = (profileData as MyProfile | null)?.character_id;
+    if (charId) {
+      const { data: charRow } = await supabase
+        .from("characters")
+        .select("thumbnail_url, display_name")
+        .eq("id", charId)
+        .maybeSingle();
+      setCharacter((charRow as { thumbnail_url: string; display_name: string }) ?? null);
+    } else {
+      setCharacter(null);
+    }
 
     const list = (data as PlayableTopicExercise[]) ?? [];
     setExercises(list);
@@ -256,6 +294,15 @@ export default function TemaPage() {
       setDiamondsThisRound((d) => d + res.diamonds_earned);
       if (phase === "practice") setPracticeCorrect((c) => c + 1);
       else setExamCorrect((c) => c + 1);
+      setCombo((c) => {
+        const next = c + 1;
+        playCorrectSound(next);
+        return next;
+      });
+      if (res.leveled_up) setTimeout(() => playLevelUpSound(), 260);
+    } else {
+      setCombo(0);
+      playIncorrectSound();
     }
     setStage("feedback");
     setSubmitting(false);
@@ -328,9 +375,10 @@ export default function TemaPage() {
   }, []);
 
   const isExamPhase = phase === "exam" && stage !== "exam_intro";
+  const subjectTheme = subjectThemeOf(subjectSlug);
   const bg = isExamPhase
     ? "bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500"
-    : "bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500";
+    : `bg-gradient-to-br ${subjectTheme.gradient}`;
 
   return (
     <main className={`min-h-screen ${bg} p-6`}>
@@ -392,6 +440,27 @@ export default function TemaPage() {
               variants={fadeSlideUp}
               className="mt-6 flex flex-col items-center gap-4"
             >
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={SPRING_PLAYFUL}
+                className="flex w-full items-center gap-3 rounded-2xl bg-black/15 p-4 text-left text-white"
+              >
+                <span className="text-4xl">{subjectTheme.icon}</span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-white/70">
+                    {subjectTheme.missionLabel}
+                  </p>
+                  <p className="text-sm text-white/90">
+                    Conseguí {practiceList.length}{" "}
+                    {practiceList.length === 1
+                      ? subjectTheme.unitLabel.toLowerCase()
+                      : subjectTheme.unitLabelPlural}{" "}
+                    resolviendo los ejercicios de este tema.
+                  </p>
+                </div>
+              </motion.div>
+
               {teacher && (
                 <div className="flex w-full items-end gap-2">
                   <motion.div
@@ -551,7 +620,9 @@ export default function TemaPage() {
             >
               <div className="mb-4 flex items-center justify-between text-sm text-white/80">
                 <span>
-                  {isExamPhase ? "Test 🏆" : "Pregunta"} {index + 1} de {currentList.length}
+                  {isExamPhase
+                    ? `Test 🏆 ${index + 1} de ${currentList.length}`
+                    : `${subjectTheme.icon} ${subjectTheme.unitLabel} ${index + 1} de ${currentList.length}`}
                 </span>
                 <span>💎 +{current.diamond_reward}</span>
               </div>
@@ -741,45 +812,99 @@ export default function TemaPage() {
                 </motion.div>
               )}
 
-              <motion.div
-                animate={
-                  result.is_correct
-                    ? { scale: [0.7, 1.08, 1] }
-                    : { x: [0, -10, 10, -8, 8, 0] }
-                }
-                transition={
-                  result.is_correct ? SPRING_PLAYFUL : { duration: 0.45, ease: "easeOut" }
-                }
-                className={`rounded-3xl p-6 text-center shadow-xl ${
-                  result.is_correct
-                    ? "bg-gradient-to-br from-emerald-400 to-teal-500"
-                    : "bg-gradient-to-br from-orange-400 to-rose-400"
-                }`}
-              >
-                <p className="text-6xl">{result.is_correct ? "🎉" : "💫"}</p>
-                <h2 className="mt-2 text-2xl font-bold text-white">
-                  {result.is_correct ? "¡Correcto!" : "¡Casi!"}
-                </h2>
-                {result.is_correct ? (
-                  <motion.p
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                    className="mt-1 flex items-center justify-center gap-3 text-lg font-semibold text-white"
+              {result.is_correct && combo >= 2 && (
+                <motion.div
+                  key={combo}
+                  initial={{ opacity: 0, scale: 0.5, y: -8 }}
+                  animate={{ opacity: 1, scale: [0.5, 1.25, 1], y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className={`mb-3 flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-extrabold text-white shadow ${
+                    combo >= 8
+                      ? "bg-gradient-to-r from-fuchsia-500 to-purple-600"
+                      : combo >= 5
+                        ? "bg-gradient-to-r from-rose-500 to-orange-500"
+                        : "bg-gradient-to-r from-amber-400 to-orange-500"
+                  }`}
+                >
+                  <span>🔥</span>
+                  Combo x{combo}
+                </motion.div>
+              )}
+
+              <div className="relative">
+                {character && (
+                  <motion.div
+                    key={result.is_correct ? "happy" : "sad"}
+                    initial={{ opacity: 0, scale: 0.6, y: 10 }}
+                    animate={
+                      result.is_correct
+                        ? { opacity: 1, scale: [0.6, 1.15, 1], y: [10, -6, 0] }
+                        : { opacity: 1, scale: 1, y: 0, x: [0, -6, 6, -4, 4, 0] }
+                    }
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="absolute -top-6 left-1/2 z-10 -translate-x-1/2"
                   >
-                    <span>+{result.diamonds_earned} 💎</span>
-                    {result.xp_earned > 0 && <span>+{result.xp_earned} ⭐ XP</span>}
-                  </motion.p>
-                ) : (
-                  <p className="mt-1 text-white/90">
-                    La respuesta era:{" "}
-                    <span className="font-bold">{result.correct_answer.value}</span>
+                    <div className="relative">
+                      <Image
+                        src={character.thumbnail_url}
+                        alt={character.display_name}
+                        width={64}
+                        height={64}
+                        className="h-16 w-16 rounded-full border-4 border-white object-cover shadow-lg"
+                      />
+                      <span className="absolute -right-1 -top-1 text-xl">
+                        {result.is_correct ? "✨" : "💭"}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+
+                <motion.div
+                  animate={
+                    result.is_correct
+                      ? { scale: [0.7, 1.08, 1] }
+                      : { x: [0, -10, 10, -8, 8, 0] }
+                  }
+                  transition={
+                    result.is_correct ? SPRING_PLAYFUL : { duration: 0.45, ease: "easeOut" }
+                  }
+                  className={`rounded-3xl p-6 text-center shadow-xl ${
+                    character ? "pt-9" : ""
+                  } ${
+                    result.is_correct
+                      ? "bg-gradient-to-br from-emerald-400 to-teal-500"
+                      : "bg-gradient-to-br from-orange-400 to-rose-400"
+                  }`}
+                >
+                  <p className="text-6xl">
+                    {result.is_correct ? CORRECT_ICONS[combo % CORRECT_ICONS.length] : "💫"}
                   </p>
-                )}
-                {result.explanation && (
-                  <p className="mt-3 text-sm text-white/90">{result.explanation}</p>
-                )}
-              </motion.div>
+                  <h2 className="mt-2 text-2xl font-bold text-white">
+                    {result.is_correct
+                      ? CORRECT_PRAISES[combo % CORRECT_PRAISES.length]
+                      : INCORRECT_PRAISES[index % INCORRECT_PRAISES.length]}
+                  </h2>
+                  {result.is_correct ? (
+                    <motion.p
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="mt-1 flex items-center justify-center gap-3 text-lg font-semibold text-white"
+                    >
+                      <span>+{result.diamonds_earned} 💎</span>
+                      {result.xp_earned > 0 && <span>+{result.xp_earned} ⭐ XP</span>}
+                    </motion.p>
+                  ) : (
+                    <p className="mt-1 text-white/90">
+                      La respuesta era:{" "}
+                      <span className="font-bold">{result.correct_answer.value}</span>
+                    </p>
+                  )}
+                  {result.explanation && (
+                    <p className="mt-3 text-sm text-white/90">{result.explanation}</p>
+                  )}
+                </motion.div>
+              </div>
 
               <motion.button
                 onClick={nextExercise}

@@ -12,6 +12,27 @@ const GAMES = [
     description: "Encontrá las parejas de cartas. ¡Cuantos menos intentos, más diamantes!",
     color: "from-teal-400 to-cyan-500",
   },
+  {
+    slug: "suma-veloz",
+    name: "Suma Veloz",
+    icon: "⚡",
+    description: "Resolvé cuentas contrarreloj. ¡Cuantas más aciertes, más diamantes!",
+    color: "from-sky-400 to-indigo-500",
+  },
+  {
+    slug: "reflejos",
+    name: "Ojo de Halcón",
+    icon: "🦅",
+    description: "Esperá la señal verde y tocá lo más rápido posible.",
+    color: "from-amber-400 to-rose-500",
+  },
+  {
+    slug: "puzzle",
+    name: "Rompecabezas Mágico",
+    icon: "🧩",
+    description: "Ordená las piezas deslizándolas. ¡Cuantos menos movimientos, mejor!",
+    color: "from-violet-500 to-fuchsia-600",
+  },
 ];
 
 export default function JuegosPage() {

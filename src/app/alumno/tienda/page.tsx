@@ -10,6 +10,8 @@ import type { MyProfile, StoreItem, ItemCategory, ItemZone, Character } from "@/
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
 import { resolveItemIcon } from "@/lib/store-icons";
+import ThemePicker from "@/components/theme-picker";
+import { themeOf } from "@/lib/theme";
 
 const CATEGORY_ICON: Record<ItemCategory, string> = {
   decoracion: "🎀",
@@ -230,9 +232,11 @@ export default function TiendaPage() {
     );
   }
 
+  const theme = themeOf(profile.visual_theme);
+
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="flex items-center justify-between bg-gradient-to-r from-fuchsia-500 to-purple-600 px-6 py-6 text-white">
+      <header className={`flex items-center justify-between bg-gradient-to-r ${theme.headerGradient} px-6 py-6 text-white`}>
         <div>
           <Link href="/alumno/inicio" className="text-sm text-white/70 hover:text-white">
             ← Mi inicio
@@ -240,6 +244,10 @@ export default function TiendaPage() {
           <h1 className="mt-1 text-2xl font-bold">Tienda ✨</h1>
         </div>
         <div className="flex items-center gap-3">
+          <ThemePicker
+            current={profile.visual_theme}
+            onChange={(t) => setProfile((p) => (p ? { ...p, visual_theme: t } : p))}
+          />
           <Link
             href="/alumno/cuarto"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
