@@ -398,6 +398,36 @@ export default function PanelPadresPage() {
               </AnimatePresence>
             </motion.div>
 
+            {/* Metodo pedagogico */}
+            <motion.div variants={staggerItem} className="mt-6 rounded-2xl bg-white p-5 shadow">
+              <h2 className="text-lg font-bold text-slate-800">{"\uD83E\uDDE0 C\u00f3mo ense\u00f1amos: la Taxonom\u00eda de Bloom"}</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                {"Cada ejercicio de la plataforma est\u00e1 pensado seg\u00fan los 6 niveles de pensamiento de la Taxonom\u00eda de Bloom, un modelo pedag\u00f3gico cl\u00e1sico usado en todo el mundo. No es solo memorizar: cada tema avanza en profundidad, de lo m\u00e1s simple a lo m\u00e1s exigente."}
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                {[
+                  { icon: "\uD83E\uDDE0", label: "Recordar", desc: "Guardar y traer a la mente lo aprendido" },
+                  { icon: "\uD83D\uDCA1", label: "Entender", desc: "Explicarlo con sus propias palabras" },
+                  { icon: "\uD83D\uDEE0\uFE0F", label: "Aplicar", desc: "Usarlo para resolver algo nuevo" },
+                  { icon: "\uD83D\uDD0D", label: "Analizar", desc: "Separar en partes y ver c\u00f3mo se conectan" },
+                  { icon: "\u2696\uFE0F", label: "Evaluar", desc: "Opinar y justificar con motivos" },
+                  { icon: "\u2728", label: "Crear", desc: "Inventar algo nuevo con lo aprendido" },
+                ].map((level) => (
+                  <div key={level.label} className="rounded-xl bg-indigo-50 p-3 text-center">
+                    <span className="text-xl">{level.icon}</span>
+                    <p className="mt-1 text-xs font-bold text-indigo-900">{level.label}</p>
+                    <p className="mt-0.5 text-[10px] leading-tight text-indigo-700">{level.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-sm text-slate-600">
+                {"En la pr\u00e1ctica esto se ve en cada tema: los ejercicios de pr\u00e1ctica trabajan primero recordar y entender, y el Test final exige aplicar lo aprendido. Las pistas adaptativas (que aparecen si tu hijo/a falla varias veces) tambi\u00e9n bajan un escal\u00f3n en la taxonom\u00eda para ayudarlo a construir la base antes de exigirle el siguiente nivel."}
+              </p>
+              <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
+                {"\uD83D\uDC49 Tu hijo/a ya tiene disponible, sin costo, la materia \u201cC\u00f3mo Aprendemos\u201d: una introducci\u00f3n pensada para su edad a estos 6 niveles, con ejemplos cotidianos en vez de teor\u00eda."}
+              </p>
+            </motion.div>
+
             {stats.achievements_count > 0 && (
               <motion.p variants={staggerItem} className="mt-4 text-center text-sm text-slate-500">
                 🏅 {stats.achievements_count} logro{stats.achievements_count === 1 ? "" : "s"} desbloqueado

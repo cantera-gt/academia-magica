@@ -47,7 +47,7 @@ export default function AlumnosPage() {
     setLoadError(null);
     const [{ data, error }, { data: subjectData }] = await Promise.all([
       supabase.rpc("admin_students_overview"),
-      supabase.from("subjects").select("id, slug, name, category, icon, color, sort_order, active").eq("active", true).order("sort_order"),
+      supabase.from("subjects").select("id, slug, name, category, icon, color, sort_order, active").eq("active", true).neq("slug", "introduccion").order("sort_order"),
     ]);
     if (error) setLoadError("No se pudo cargar la vista avanzada de alumnos.");
     setStudents((data as AdminStudentOverview[] | null) ?? []);
