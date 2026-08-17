@@ -17,7 +17,7 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://academia-magica-oficial.vercel.app"),
+  metadataBase: new URL("https://academiamagicaedu.com"),
   title: {
     default: "Academia Mágica | Aprender jugando",
     template: "%s | Academia Mágica",

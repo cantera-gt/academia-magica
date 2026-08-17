@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const SITE_URL = "https://academia-magica-oficial.vercel.app";
+const SITE_URL = "https://academiamagicaedu.com";
 
 async function sendConfirmationEmail(reference: string, paymentToken: string) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -27,7 +27,7 @@ async function sendConfirmationEmail(reference: string, paymentToken: string) {
 
     const subjectNames = ((data.subject_names ?? []) as string[]).join(", ");
     const claimUrl = `${SITE_URL}/bienvenida?ref=${encodeURIComponent(reference)}&pt=${encodeURIComponent(paymentToken)}`;
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "Academia Mágica <notificaciones@academia-magica-oficial.vercel.app>";
+    const fromAddress = process.env.RESEND_FROM_EMAIL || "Academia Mágica <notificaciones@academiamagicaedu.com>";
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#3b2a55;">

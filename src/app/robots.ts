@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/alumno/", "/api/", "/login"],
     },
-    sitemap: "https://academia-magica-oficial.vercel.app/sitemap.xml",
-    host: "https://academia-magica-oficial.vercel.app",
+    sitemap: "https://academiamagicaedu.com/sitemap.xml",
+    host: "https://academiamagicaedu.com",
   };
 }

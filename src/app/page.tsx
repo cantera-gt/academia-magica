@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Subject } from "@/types/database";
 import StudentQuickLogin from "@/components/student-quick-login";
 
-const SITE_URL = "https://academia-magica-oficial.vercel.app";
+const SITE_URL = "https://academiamagicaedu.com";
 export const metadata: Metadata = {
   title: "Aprender jugando para niños de 4 a 10 años | Academia Mágica",
   description:
