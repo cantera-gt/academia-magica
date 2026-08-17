@@ -12,6 +12,7 @@ const links = [
   { href: "/admin/comunicacion", label: "Comunicación", icon: "✉" },
   { href: "/admin/actividad", label: "Registro", icon: "◷" },
   { href: "/admin/ejercicios", label: "Contenido", icon: "✦" },
+  { href: "/admin/afiliados", label: "Afiliados", icon: "🤝" },
 ];
 
 export default function AdminNav({ adminName }: { adminName: string }) {

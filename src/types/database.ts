@@ -358,3 +358,48 @@ export interface AdminSubjectOrder {
   paypal_order_id: string | null;
   created_at: string;
 }
+
+export type AffiliateStatus = "active" | "inactive";
+export type AffiliateCommissionSourceType = "enrollment" | "subject_order";
+export type AffiliateCommissionStatus = "pending" | "paid";
+
+// Fila del listado de afiliadas para el admin. Ver RPC public.admin_list_affiliates().
+export interface AdminAffiliate {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  code: string;
+  commission_rate: number;
+  status: AffiliateStatus;
+  notes: string | null;
+  created_at: string;
+  sales_count: number;
+  total_sales_usd: number;
+  commission_pending_usd: number;
+  commission_paid_usd: number;
+}
+
+// Fila de comisi\u00f3n, para el admin (public.admin_affiliate_commissions) y para
+// la propia afiliada (public.my_affiliate_commissions, sin household_name).
+export interface AffiliateCommission {
+  id: string;
+  source_type: AffiliateCommissionSourceType;
+  sale_amount_usd: number;
+  commission_rate: number;
+  commission_amount_usd: number;
+  status: AffiliateCommissionStatus;
+  paid_at: string | null;
+  paid_note: string | null;
+  created_at: string;
+  household_name?: string;
+}
+
+// Ver RPC public.my_affiliate_profile().
+export interface AffiliateProfile {
+  id: string;
+  name: string;
+  code: string;
+  commission_rate: number;
+  status: AffiliateStatus;
+}

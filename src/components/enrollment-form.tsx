@@ -12,6 +12,12 @@ type ApplicantType = "legal_guardian" | "adult_student";
 const inputClass = "mt-2 min-h-12 w-full rounded-2xl border border-[#3b2a55]/20 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/15";
 const categoryNames: Record<string, string> = { idiomas: "Idiomas", matematicas: "Matemáticas y lógica", ciencias: "Ciencias", humanidades: "Humanidades", transversales: "Habilidades transversales", complementarias: "Arte, deporte y tecnología" };
 
+function getAffiliateCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|; )am_aff=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export default function EnrollmentForm({ subjects }: { subjects: Subject[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,6 +78,7 @@ export default function EnrollmentForm({ subjects }: { subjects: Subject[] }) {
       p_utm_source: searchParams.get("utm_source"),
       p_utm_medium: searchParams.get("utm_medium"),
       p_utm_campaign: searchParams.get("utm_campaign"),
+      p_affiliate_code: getAffiliateCookie(),
     });
     if (rpcError || !data?.[0]?.public_reference || !data?.[0]?.payment_token) {
       setError(rpcError?.message ?? "No hemos podido guardar la matrícula. Inténtalo de nuevo.");
