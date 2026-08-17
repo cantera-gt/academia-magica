@@ -56,6 +56,7 @@ export interface Subject {
   category: string;
   icon: string | null;
   color: string | null;
+  description: string | null;
   sort_order: number;
   active: boolean;
 }

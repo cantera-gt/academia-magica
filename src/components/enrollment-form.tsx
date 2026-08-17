@@ -6,6 +6,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ENROLLMENT_PRICE_TIERS, getEnrollmentPricing } from "@/lib/enrollment-pricing";
 import type { Subject } from "@/types/database";
+import SubjectInfoBadge from "@/components/subject-info-badge";
 
 type ApplicantType = "legal_guardian" | "adult_student";
 const inputClass = "mt-2 min-h-12 w-full rounded-2xl border border-[#3b2a55]/20 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/15";
@@ -86,7 +87,7 @@ export default function EnrollmentForm({ subjects }: { subjects: Subject[] }) {
     <fieldset id="materias" className="mt-8 scroll-mt-6"><legend className="font-display text-xl font-extrabold">1. Selecciona tus materias</legend>
       {subjects.length === 0 ? <p role="alert" className="mt-4 rounded-2xl bg-amber-50 p-4 font-bold text-amber-900">No pudimos cargar las materias. Actualiza la página.</p> : <div className="mt-5 space-y-6">{Object.entries(grouped).map(([category, items]) => <section key={category}><h2 className="mb-2 text-sm font-extrabold uppercase tracking-wider text-[#3b2a55]/55">{categoryNames[category] ?? category}</h2><div className="grid gap-2 sm:grid-cols-2">{items.map((subject) => {
         const checked = selected.has(subject.id);
-        return <label key={subject.id} className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-3 transition focus-within:ring-4 focus-within:ring-[#6c5ce7]/15 ${checked ? "border-[#6c5ce7] bg-[#f2e9ff]" : "border-[#3b2a55]/10 hover:border-[#6c5ce7]/40"}`}><input type="checkbox" checked={checked} onChange={() => toggleSubject(subject.id)} className="size-5 accent-[#6c5ce7]" /><span className="text-xl" aria-hidden="true">{subject.icon ?? "✨"}</span><span className="font-extrabold leading-tight">{subject.name}</span>{checked && <span className="ml-auto font-black text-[#6c5ce7]" aria-hidden="true">✓</span>}</label>;
+        return <label key={subject.id} className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-3 transition focus-within:ring-4 focus-within:ring-[#6c5ce7]/15 ${checked ? "border-[#6c5ce7] bg-[#f2e9ff]" : "border-[#3b2a55]/10 hover:border-[#6c5ce7]/40"}`}><input type="checkbox" checked={checked} onChange={() => toggleSubject(subject.id)} className="size-5 accent-[#6c5ce7]" /><span className="text-xl" aria-hidden="true">{subject.icon ?? "✨"}</span><span className="flex min-w-0 items-center gap-1.5 font-extrabold leading-tight"><span className="truncate">{subject.name}</span><SubjectInfoBadge description={subject.description} /></span>{checked && <span className="ml-auto font-black text-[#6c5ce7]" aria-hidden="true">✓</span>}</label>;
       })}</div></section>)}</div>}
     </fieldset>
 

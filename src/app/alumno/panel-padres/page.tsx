@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { MyProfile, ParentStats, Subject } from "@/types/database";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
 import { getEnrollmentPricing } from "@/lib/enrollment-pricing";
+import SubjectInfoBadge from "@/components/subject-info-badge";
 
 function formatDuration(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
@@ -360,7 +361,12 @@ export default function PanelPadresPage() {
                                 onChange={() => toggleSelected(s.id)}
                                 className="h-4 w-4 accent-purple-600"
                               />
-                              {s.icon} {s.name}
+                              <span className="flex min-w-0 items-center gap-1.5">
+                                <span className="truncate">
+                                  {s.icon} {s.name}
+                                </span>
+                                <SubjectInfoBadge description={s.description} />
+                              </span>
                             </label>
                           ))}
                         </div>
