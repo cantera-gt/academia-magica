@@ -731,7 +731,7 @@ export default function TemaPage() {
                   transition={{ duration: 0.5, ease: "easeOut" }}
                   className="mb-3 rounded-2xl bg-gradient-to-br from-amber-300 to-yellow-500 p-4 text-center shadow-lg"
                 >
-                  <p className="text-3xl">🆙</p>
+                  <p className="text-3xl">🏆</p>
                   <p className="mt-1 text-lg font-extrabold text-amber-900">
                     ¡Subiste a Nivel {result.level}!
                   </p>
