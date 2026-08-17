@@ -124,6 +124,7 @@ function DragChip({
       disabled={disabled}
       whileHover={{ scale: disabled ? 1 : 1.05 }}
       whileTap={{ scale: disabled ? 1 : 0.95 }}
+      whileDrag={{ scale: 1.12, zIndex: 30, boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}
       className={
         "relative z-10 flex h-20 w-20 cursor-grab flex-col items-center justify-center gap-1 rounded-2xl border-2 bg-white shadow-md active:cursor-grabbing disabled:opacity-50 " +
         (revealed ? "border-emerald-400 ring-4 ring-emerald-200" : "border-purple-200")

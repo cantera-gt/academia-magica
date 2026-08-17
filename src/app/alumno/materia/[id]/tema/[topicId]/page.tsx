@@ -16,7 +16,7 @@ import type {
   ExerciseOption,
 } from "@/types/database";
 import DragDropExercise from "@/components/drag-drop-exercise";
-import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL } from "@/lib/motion";
+import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL, EASE_OUT } from "@/lib/motion";
 import { speakText, stopSpeaking } from "@/lib/speech";
 import TeacherChatWidget from "@/components/teacher-chat-widget";
 
@@ -342,7 +342,7 @@ export default function TemaPage() {
           ← Temas
         </Link>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {stage === "loading" && (
             <motion.p key="loading" className="mt-10 text-center text-white">
               Cargando...
@@ -557,10 +557,10 @@ export default function TemaPage() {
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
                 <motion.div
-                  className="h-full rounded-full bg-white"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(index / currentList.length) * 100}%` }}
-                  transition={{ duration: 0.3 }}
+                  className="h-full w-full origin-left rounded-full bg-white"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: index / currentList.length }}
+                  transition={{ duration: 0.3, ease: EASE_OUT }}
                 />
               </div>
 
