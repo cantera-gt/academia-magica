@@ -27,6 +27,15 @@ export interface MyProfile {
   diamonds: number;
   household_id: string;
   birthdate: string | null;
+  // Nivel/XP: progreso que solo sube (a diferencia de los diamantes, que se
+  // gastan en la tienda). Racha: dias seguidos con al menos un intento.
+  xp_total: number;
+  level: number;
+  level_title: string | null;
+  xp_into_level: number;
+  xp_for_next_level: number | null;
+  current_streak: number;
+  longest_streak: number;
 }
 
 export interface ActiveStudent {
@@ -176,6 +185,15 @@ export interface AttemptResult {
   diamonds_earned: number;
   correct_answer: { value: string };
   explanation: string | null;
+  // Nivel/XP y racha diaria (ver submit_exercise_attempt).
+  xp_earned: number;
+  xp_total: number;
+  level: number;
+  leveled_up: boolean;
+  level_title: string | null;
+  current_streak: number;
+  streak_extended: boolean;
+  streak_started: boolean;
 }
 
 export type ItemCategory =

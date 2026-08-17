@@ -712,6 +712,35 @@ export default function TemaPage() {
               variants={fadeSlideUp}
               className="mt-6"
             >
+              {result.streak_extended && (
+                <motion.div
+                  initial={{ opacity: 0, y: -12, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={SPRING_PLAYFUL}
+                  className="mb-3 flex items-center justify-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-extrabold text-orange-700"
+                >
+                  <span className="text-lg">🔥</span>
+                  ¡Racha de {result.current_streak} {result.current_streak === 1 ? "día" : "días"}!
+                </motion.div>
+              )}
+
+              {result.leveled_up && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.6, y: -10 }}
+                  animate={{ opacity: 1, scale: [0.6, 1.15, 1], y: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="mb-3 rounded-2xl bg-gradient-to-br from-amber-300 to-yellow-500 p-4 text-center shadow-lg"
+                >
+                  <p className="text-3xl">🆙</p>
+                  <p className="mt-1 text-lg font-extrabold text-amber-900">
+                    ¡Subiste a Nivel {result.level}!
+                  </p>
+                  {result.level_title && (
+                    <p className="text-sm font-bold text-amber-800">{result.level_title}</p>
+                  )}
+                </motion.div>
+              )}
+
               <motion.div
                 animate={
                   result.is_correct
@@ -736,9 +765,10 @@ export default function TemaPage() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="mt-1 text-lg font-semibold text-white"
+                    className="mt-1 flex items-center justify-center gap-3 text-lg font-semibold text-white"
                   >
-                    +{result.diamonds_earned} 💎
+                    <span>+{result.diamonds_earned} 💎</span>
+                    {result.xp_earned > 0 && <span>+{result.xp_earned} ⭐ XP</span>}
                   </motion.p>
                 ) : (
                   <p className="mt-1 text-white/90">

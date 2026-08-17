@@ -1,0 +1,233 @@
+From 2968865f8ad0a3aa8069fa9e8ce00150ac32dac1 Mon Sep 17 00:00:00 2001
+From: Pablo Serrano <businesscatserrano@gmail.com>
+Date: Mon, 17 Aug 2026 05:14:31 +0200
+Subject: [PATCH] Racha diaria + nivel/XP: progreso permanente separado de los
+ diamantes
+
+- Se activa la tabla streaks (ya existia en el schema pero nadie la
+  actualizaba): submit_exercise_attempt ahora suma un dia de racha por
+  intento diario, con longest_streak.
+- Nueva columna profiles.xp_total + tabla level_thresholds (curva de
+  niveles tipo Duolingo/Prodigy) + funcion student_level(xp).
+- my_profile() y my_parent_stats() devuelven xp/nivel/racha.
+- admin_students_overview() muestra nivel y racha por alumno.
+- Home del alumno: barra de racha + nivel bajo el header.
+- Pantalla de ejercicio: toast de racha del dia + celebracion de subida
+  de nivel + XP ganado junto a los diamantes en el feedback.
+---
+ src/app/alumno/inicio/page.tsx                | 13 +++
+ .../materia/[id]/tema/[topicId]/page.tsx      | 34 +++++++-
+ src/components/streak-level-bar.tsx           | 81 +++++++++++++++++++
+ src/types/database.ts                         | 18 +++++
+ 4 files changed, 144 insertions(+), 2 deletions(-)
+ create mode 100644 src/components/streak-level-bar.tsx
+
+diff --git a/src/app/alumno/inicio/page.tsx b/src/app/alumno/inicio/page.tsx
+index 66748b7..7e24995 100755
+--- a/src/app/alumno/inicio/page.tsx
++++ b/src/app/alumno/inicio/page.tsx
+@@ -19,6 +19,7 @@ import {
+   SPRING_PLAYFUL,
+ } from "@/lib/motion";
+ import DiamondCounter from "@/components/diamond-counter";
++import { StreakBadge, LevelBar } from "@/components/streak-level-bar";
+ 
+ const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string } | null> = {
+   activa: null,
+@@ -308,6 +309,18 @@ export default function AlumnoInicioPage() {
+         </div>
+       </motion.header>
+ 
++      <div className="border-b border-slate-100 bg-white px-6 py-3">
++        <div className="mx-auto flex max-w-5xl items-center gap-4">
++          <StreakBadge value={profile.current_streak} />
++          <LevelBar
++            level={profile.level}
++            title={profile.level_title}
++            xpInto={profile.xp_into_level}
++            xpNeeded={profile.xp_for_next_level}
++          />
++        </div>
++      </div>
++
+       <div className="mx-auto max-w-5xl p-6">
+         <h2 className="text-xl font-bold text-slate-800">Tus materias</h2>
+         {subjects.length === 0 && (
+diff --git a/src/app/alumno/materia/[id]/tema/[topicId]/page.tsx b/src/app/alumno/materia/[id]/tema/[topicId]/page.tsx
+index 3170969..1987581 100644
+--- a/src/app/alumno/materia/[id]/tema/[topicId]/page.tsx
++++ b/src/app/alumno/materia/[id]/tema/[topicId]/page.tsx
+@@ -712,6 +712,35 @@ export default function TemaPage() {
+               variants={fadeSlideUp}
+               className="mt-6"
+             >
++              {result.streak_extended && (
++                <motion.div
++                  initial={{ opacity: 0, y: -12, scale: 0.9 }}
++                  animate={{ opacity: 1, y: 0, scale: 1 }}
++                  transition={SPRING_PLAYFUL}
++                  className="mb-3 flex items-center justify-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-extrabold text-orange-700"
++                >
++                  <span className="text-lg">🔥</span>
++                  ¡Racha de {result.current_streak} {result.current_streak === 1 ? "día" : "días"}!
++                </motion.div>
++              )}
++
++              {result.leveled_up && (
++                <motion.div
++                  initial={{ opacity: 0, scale: 0.6, y: -10 }}
++                  animate={{ opacity: 1, scale: [0.6, 1.15, 1], y: 0 }}
++                  transition={{ duration: 0.5, ease: "easeOut" }}
++                  className="mb-3 rounded-2xl bg-gradient-to-br from-amber-300 to-yellow-500 p-4 text-center shadow-lg"
++                >
++                  <p className="text-3xl">🆙</p>
++                  <p className="mt-1 text-lg font-extrabold text-amber-900">
++                    ¡Subiste a Nivel {result.level}!
++                  </p>
++                  {result.level_title && (
++                    <p className="text-sm font-bold text-amber-800">{result.level_title}</p>
++                  )}
++                </motion.div>
++              )}
++
+               <motion.div
+                 animate={
+                   result.is_correct
+@@ -736,9 +765,10 @@ export default function TemaPage() {
+                     initial={{ opacity: 0, y: 8 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: 0.15 }}
+-                    className="mt-1 text-lg font-semibold text-white"
++                    className="mt-1 flex items-center justify-center gap-3 text-lg font-semibold text-white"
+                   >
+-                    +{result.diamonds_earned} 💎
++                    <span>+{result.diamonds_earned} 💎</span>
++                    {result.xp_earned > 0 && <span>+{result.xp_earned} ⭐ XP</span>}
+                   </motion.p>
+                 ) : (
+                   <p className="mt-1 text-white/90">
+diff --git a/src/components/streak-level-bar.tsx b/src/components/streak-level-bar.tsx
+new file mode 100644
+index 0000000..2a25c0e
+--- /dev/null
++++ b/src/components/streak-level-bar.tsx
+@@ -0,0 +1,81 @@
++"use client";
++
++import { useEffect, useRef, useState } from "react";
++import { motion } from "framer-motion";
++import { SPRING_PLAYFUL, EASE_OUT } from "@/lib/motion";
++
++// Racha diaria: dias seguidos con al menos un intento. A diferencia de los
++// diamantes (moneda que se gasta), la racha y el nivel/XP nunca bajan solos
++// -- son el "progreso permanente" que hace que volver todos los dias se
++// sienta valioso (mismo principio que usan Duolingo/Prodigy).
++export function StreakBadge({ value }: { value: number }) {
++  const [popping, setPopping] = useState(false);
++  const prev = useRef(value);
++
++  useEffect(() => {
++    if (value > prev.current) {
++      setPopping(true);
++      const t = setTimeout(() => setPopping(false), 450);
++      prev.current = value;
++      return () => clearTimeout(t);
++    }
++    prev.current = value;
++  }, [value]);
++
++  if (value <= 0) {
++    return (
++      <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-400">
++        <span className="text-base grayscale">🔥</span>
++        Empezá tu racha hoy
++      </div>
++    );
++  }
++
++  return (
++    <motion.div
++      animate={popping ? { scale: [1, 1.3, 1] } : { scale: 1 }}
++      transition={SPRING_PLAYFUL}
++      className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-sm font-extrabold text-orange-600"
++    >
++      <span className="text-base">🔥</span>
++      {value} {value === 1 ? "día" : "días"} seguidos
++    </motion.div>
++  );
++}
++
++export function LevelBar({
++  level,
++  title,
++  xpInto,
++  xpNeeded,
++}: {
++  level: number;
++  title: string | null;
++  xpInto: number;
++  xpNeeded: number | null;
++}) {
++  const pct = xpNeeded && xpNeeded > 0 ? Math.min(1, xpInto / xpNeeded) : 1;
++
++  return (
++    <div className="flex min-w-0 flex-1 items-center gap-2.5">
++      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-extrabold text-violet-700">
++        {level}
++      </span>
++      <div className="min-w-0 flex-1">
++        <p className="truncate text-xs font-bold text-slate-500">
++          Nivel {level}
++          {title ? ` · ${title}` : ""}
++        </p>
++        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
++          <motion.div
++            className="h-full origin-left rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
++            initial={{ scaleX: 0 }}
++            animate={{ scaleX: pct }}
++            transition={{ duration: 0.5, ease: EASE_OUT }}
++            style={{ width: "100%" }}
++          />
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/types/database.ts b/src/types/database.ts
+index da41331..08bf7da 100755
+--- a/src/types/database.ts
++++ b/src/types/database.ts
+@@ -27,6 +27,15 @@ export interface MyProfile {
+   diamonds: number;
+   household_id: string;
+   birthdate: string | null;
++  // Nivel/XP: progreso que solo sube (a diferencia de los diamantes, que se
++  // gastan en la tienda). Racha: dias seguidos con al menos un intento.
++  xp_total: number;
++  level: number;
++  level_title: string | null;
++  xp_into_level: number;
++  xp_for_next_level: number | null;
++  current_streak: number;
++  longest_streak: number;
+ }
+ 
+ export interface ActiveStudent {
+@@ -176,6 +185,15 @@ export interface AttemptResult {
+   diamonds_earned: number;
+   correct_answer: { value: string };
+   explanation: string | null;
++  // Nivel/XP y racha diaria (ver submit_exercise_attempt).
++  xp_earned: number;
++  xp_total: number;
++  level: number;
++  leveled_up: boolean;
++  level_title: string | null;
++  current_streak: number;
++  streak_extended: boolean;
++  streak_started: boolean;
+ }
+ 
+ export type ItemCategory =
+-- 
+2.34.1

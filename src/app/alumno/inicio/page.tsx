@@ -19,6 +19,7 @@ import {
   SPRING_PLAYFUL,
 } from "@/lib/motion";
 import DiamondCounter from "@/components/diamond-counter";
+import { StreakBadge, LevelBar } from "@/components/streak-level-bar";
 
 const SUBSCRIPTION_BADGE: Record<string, { label: string; className: string } | null> = {
   activa: null,
@@ -307,6 +308,18 @@ export default function AlumnoInicioPage() {
           <DiamondCounter value={profile.diamonds} />
         </div>
       </motion.header>
+
+      <div className="border-b border-slate-100 bg-white px-6 py-3">
+        <div className="mx-auto flex max-w-5xl items-center gap-4">
+          <StreakBadge value={profile.current_streak} />
+          <LevelBar
+            level={profile.level}
+            title={profile.level_title}
+            xpInto={profile.xp_into_level}
+            xpNeeded={profile.xp_for_next_level}
+          />
+        </div>
+      </div>
 
       <div className="mx-auto max-w-5xl p-6">
         <h2 className="text-xl font-bold text-slate-800">Tus materias</h2>
