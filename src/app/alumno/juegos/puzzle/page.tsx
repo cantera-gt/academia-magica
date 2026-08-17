@@ -86,12 +86,12 @@ export default function PuzzlePage() {
       <div className="mx-auto max-w-md">
         <div className="flex items-center justify-between text-white">
           <Link href="/alumno/juegos" className="text-sm text-white/70 hover:text-white">
-            \u2190 Juegos
+            {"\u2190 Juegos"}
           </Link>
           <span className="text-sm font-semibold">Movimientos: {moves}</span>
         </div>
 
-        <h1 className="mt-3 text-center text-2xl font-bold text-white">Rompecabezas M\u00e1gico \ud83e\udde9</h1>
+        <h1 className="mt-3 text-center text-2xl font-bold text-white">{"Rompecabezas M\u00e1gico \ud83e\udde9"}</h1>
         <p className="mt-1 text-center text-sm text-white/80">
           Deslizá las piezas hasta ordenarlas del 1 al 8.
         </p>
@@ -128,8 +128,8 @@ export default function PuzzlePage() {
               transition={SPRING_PLAYFUL}
               className="mt-6 flex flex-col items-center gap-3 rounded-3xl bg-white/15 p-6 text-center text-white backdrop-blur"
             >
-              <span className="text-5xl">\ud83c\udf89</span>
-              <p className="text-lg font-bold">\u00a1Lo resolviste en {moves} movimientos!</p>
+              <span className="text-5xl">{"\ud83c\udf89"}</span>
+              <p className="text-lg font-bold">{"\u00a1Lo resolviste en "}{moves}{" movimientos!"}</p>
               {saving ? (
                 <p className="text-sm text-white/80">Calculando premio...</p>
               ) : result ? (
