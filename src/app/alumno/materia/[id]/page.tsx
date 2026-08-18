@@ -154,14 +154,8 @@ const studentAge = ageFromBirthdate(profile?.birthdate) ?? approxAgeFromBracket(
 
   const groupedByModule = useMemo(() => {
     const groups: { age: number | null; items: SubjectTopic[]; total: number; passedCount: number }[] = [];
-    const visibleTopics =
-      studentAge == null
-        ? topics
-        : topics.filter(
-            (t) =>
-              t.recommended_age == null ||
-              (t.recommended_age >= studentAge - 1 && t.recommended_age <= studentAge + 1)
-          );
+      const visibleTopics =
+      studentAge == null ? topics : topics.filter(() => true); // se ve el currículo completo, no solo ±1 año
     for (const t of visibleTopics) {
       const age = t.recommended_age ?? null;
       let group = groups.find((g) => g.age === age);
