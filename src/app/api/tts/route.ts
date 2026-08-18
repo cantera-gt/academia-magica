@@ -13,6 +13,7 @@ export const maxDuration = 30;
 const ALLOWED_VOICES = new Set([
     "es-ES-ElviraNeural",
     "es-ES-AlvaroNeural",
+    "es-ES-XimenaNeural",
     "en-GB-RyanNeural",
     "es-AR-ElenaNeural",
     "es-MX-JorgeNeural",
