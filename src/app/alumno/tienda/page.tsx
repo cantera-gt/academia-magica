@@ -167,7 +167,12 @@ export default function TiendaPage() {
     setBuyingId(null);
   }
 
-  const EQUIPPABLE: ItemCategory[] = ["accesorio", "color_ropa"];
+  // "fondo" se agrega aca porque ahora tambien se "equipa" (activa) desde la
+  // tienda igual que un color de ropa o un accesorio: solo un fondo activo
+  // por zona a la vez. RoomScene en /alumno/cuarto lee el item con
+  // equipped=true de categoria "fondo" para esa zona y lo muestra en vez de
+  // la escena SVG generica.
+  const EQUIPPABLE: ItemCategory[] = ["accesorio", "color_ropa", "fondo"];
 
   async function toggleEquip(item: StoreItem) {
     if (equippingId) return;
@@ -196,6 +201,19 @@ export default function TiendaPage() {
             if (
               other.category === "color_ropa" &&
               other.garment_slot === item.garment_slot &&
+              other.id !== item.id
+            ) {
+              next.delete(other.id);
+            }
+          }
+        }
+        // Un fondo solo puede tener uno activo por zona: desequipa en el
+        // estado local cualquier otro fondo de la misma zona.
+        if (item.category === "fondo") {
+          for (const other of items) {
+            if (
+              other.category === "fondo" &&
+              other.zone === item.zone &&
               other.id !== item.id
             ) {
               next.delete(other.id);
@@ -363,6 +381,8 @@ export default function TiendaPage() {
                 const isEquipping = equippingId === item.id;
                 const bought = justBought === item.id;
                 const isEquippable = EQUIPPABLE.includes(item.category);
+                const equipVerb = item.category === "fondo" ? "Usar" : "Ponérselo";
+                const equippedVerb = item.category === "fondo" ? "En uso ✓" : "Puesto ✓";
 
                 return (
                   <motion.div
@@ -413,7 +433,7 @@ export default function TiendaPage() {
                               : "bg-slate-100 text-slate-600"
                           }`}
                         >
-                          {isEquipping ? "..." : isEquipped ? "Puesto ✓" : "Ponérselo"}
+                          {isEquipping ? "..." : isEquipped ? equippedVerb : equipVerb}
                         </motion.button>
                       ) : isOwned ? (
                         <motion.span
