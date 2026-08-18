@@ -35,16 +35,21 @@ const ZONE_LABEL: Record<ItemZone, string> = {
 const ZONE_TABS: ItemZone[] = ["habitacion", "estudio", "jardin"];
 
 // Solo estas categorias se "colocan" en el cuarto (muebles, mascotas, decoracion,
-// deporte). La ropa/accesorios se equipan en el personaje desde la tienda, y los
+// deporte). La ropa/accesorios se equipan en el personaje desde la tienda, los
+// "fondo" se activan desde la tienda (uno por zona) y no se colocan a mano, y los
 // "extra" (libros, stickers, diploma) se leen en la biblioteca, no se colocan.
 const PLACEABLE_CATEGORIES: ItemCategory[] = ["decoracion", "mueble", "mascota", "deporte"];
 
-const ITEM_SIZE = 76; // px, tamano fijo de cada item colocado en el cuarto
+const ITEM_SIZE = 76; // px, tamano BASE de cada item colocado en el cuarto (antes de aplicar scale)
+const SCALE_MIN = 0.6;
+const SCALE_MAX = 1.8;
+const SCALE_STEP = 0.15;
 
 type DraftEntry = {
   placed: boolean;
   x: number; // 0-100, centro del item como % del ancho del cuarto
   y: number; // 0-100, centro del item como % del alto del cuarto
+  scale: number; // 1 = tamano por defecto; agrandar/achicar al arrastrar
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -82,7 +87,7 @@ export default function CuartoPage() {
     const { data } = await supabase
       .from("student_inventory")
       .select(
-        "id, item_id, placed_in_room, position, store_items(id, gender, name, description, category, price_diamonds, image_url, sort_order, zone)"
+        "id, item_id, placed_in_room, position, equipped, store_items(id, gender, name, description, category, price_diamonds, image_url, sort_order, zone)"
       )
       .eq("student_id", user.id);
 
@@ -123,6 +128,16 @@ export default function CuartoPage() {
     [inventory, zone]
   );
 
+  // Fondo activo para esta zona: el item de categoria "fondo" que el alumno
+  // equipo desde la tienda (uno solo por zona, ver set_item_equipped). Si
+  // ninguno esta equipado, RoomScene cae en su escena SVG generica de siempre.
+  const activeBackground = useMemo(() => {
+    const bg = inventory.find(
+      (i) => i.store_items.zone === zone && i.store_items.category === "fondo" && i.equipped
+    );
+    return bg?.store_items.image_url ?? null;
+  }, [inventory, zone]);
+
   // Reconstruye el borrador cada vez que cambia la zona (o se recarga el inventario)
   useEffect(() => {
     const next: Record<string, DraftEntry> = {};
@@ -131,8 +146,9 @@ export default function CuartoPage() {
       const hasPos = inv.position && typeof inv.position.x === "number";
       let x = hasPos ? inv.position!.x : 30 + (placedCount % 4) * 18;
       let y = hasPos ? inv.position!.y : 35 + Math.floor((placedCount % 8) / 4) * 28;
+      const scale = clamp(inv.position?.scale ?? 1, SCALE_MIN, SCALE_MAX);
       if (inv.placed_in_room) placedCount++;
-      next[inv.id] = { placed: inv.placed_in_room, x: clamp(x, 6, 94), y: clamp(y, 10, 90) };
+      next[inv.id] = { placed: inv.placed_in_room, x: clamp(x, 6, 94), y: clamp(y, 10, 90), scale };
     });
     setDraft(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,9 +160,13 @@ export default function CuartoPage() {
       if (!d) return false;
       const origX = inv.position?.x ?? d.x;
       const origY = inv.position?.y ?? d.y;
+      const origScale = inv.position?.scale ?? 1;
       return (
         d.placed !== inv.placed_in_room ||
-        (d.placed && (Math.round(d.x) !== Math.round(origX) || Math.round(d.y) !== Math.round(origY)))
+        (d.placed &&
+          (Math.round(d.x) !== Math.round(origX) ||
+            Math.round(d.y) !== Math.round(origY) ||
+            Math.round(d.scale * 100) !== Math.round(origScale * 100)))
       );
     });
   }, [draft, zoneInventory]);
@@ -161,6 +181,7 @@ export default function CuartoPage() {
           placed: true,
           x: existing?.placed ? existing.x : clamp(25 + (placedCount % 4) * 18, 6, 94),
           y: existing?.placed ? existing.y : clamp(30 + Math.floor((placedCount % 8) / 4) * 28, 10, 90),
+          scale: existing?.scale ?? 1,
         },
       };
     });
@@ -169,7 +190,10 @@ export default function CuartoPage() {
   // Coloca el item en un punto exacto (x,y en % del cuarto) — se usa cuando lo
   // sueltan arrastrando desde la biblioteca.
   function placeItemAt(invId: string, x: number, y: number) {
-    setDraft((prev) => ({ ...prev, [invId]: { placed: true, x: clamp(x, 6, 94), y: clamp(y, 10, 90) } }));
+    setDraft((prev) => ({
+      ...prev,
+      [invId]: { placed: true, x: clamp(x, 6, 94), y: clamp(y, 10, 90), scale: prev[invId]?.scale ?? 1 },
+    }));
   }
 
   // true si el punto (viewport) cayo dentro del lienzo del cuarto
@@ -189,6 +213,17 @@ export default function CuartoPage() {
 
   function unplaceItem(invId: string) {
     setDraft((prev) => ({ ...prev, [invId]: { ...prev[invId], placed: false } }));
+  }
+
+  // Agranda/achica un item ya colocado en el cuarto, dentro del rango
+  // SCALE_MIN..SCALE_MAX. delta positivo agranda, negativo achica.
+  function resizeItem(invId: string, delta: number) {
+    setDraft((prev) => {
+      const d = prev[invId];
+      if (!d) return prev;
+      const nextScale = clamp(Math.round((d.scale + delta) * 100) / 100, SCALE_MIN, SCALE_MAX);
+      return { ...prev, [invId]: { ...d, scale: nextScale } };
+    });
   }
 
   function returnAllToLibrary() {
@@ -230,9 +265,13 @@ export default function CuartoPage() {
         if (!d) return false;
         const origX = inv.position?.x ?? d.x;
         const origY = inv.position?.y ?? d.y;
+        const origScale = inv.position?.scale ?? 1;
         return (
           d.placed !== inv.placed_in_room ||
-          (d.placed && (Math.round(d.x) !== Math.round(origX) || Math.round(d.y) !== Math.round(origY)))
+          (d.placed &&
+            (Math.round(d.x) !== Math.round(origX) ||
+              Math.round(d.y) !== Math.round(origY) ||
+              Math.round(d.scale * 100) !== Math.round(origScale * 100)))
         );
       })
       .map((inv) => {
@@ -241,7 +280,9 @@ export default function CuartoPage() {
           .from("student_inventory")
           .update({
             placed_in_room: d.placed,
-            position: d.placed ? { x: Math.round(d.x), y: Math.round(d.y) } : inv.position,
+            position: d.placed
+              ? { x: Math.round(d.x), y: Math.round(d.y), scale: Math.round(d.scale * 100) / 100 }
+              : inv.position,
           })
           .eq("id", inv.id);
       });
@@ -338,7 +379,7 @@ export default function CuartoPage() {
           ref={roomRef}
           className="relative min-h-[320px] overflow-hidden rounded-3xl shadow-inner sm:min-h-[380px]"
         >
-          <RoomScene zone={zone} gender={profile.gender} />
+          <RoomScene zone={zone} gender={profile.gender} backgroundImageUrl={activeBackground} />
           <div className="absolute inset-0 rounded-3xl bg-white/5" />
 
           {!anyPlaced && (
@@ -357,8 +398,9 @@ export default function CuartoPage() {
                 .map((inv) => {
                   const d = draft[inv.id];
                   if (!d) return null;
-                  const px = (d.x / 100) * roomSize.w - ITEM_SIZE / 2;
-                  const py = (d.y / 100) * roomSize.h - ITEM_SIZE / 2;
+                  const size = ITEM_SIZE * d.scale;
+                  const px = (d.x / 100) * roomSize.w - size / 2;
+                  const py = (d.y / 100) * roomSize.h - size / 2;
                   return (
                     <motion.div
                       key={inv.id}
@@ -376,8 +418,8 @@ export default function CuartoPage() {
                       position: "absolute",
                       left: 0,
                       top: 0,
-                      width: ITEM_SIZE,
-                      height: ITEM_SIZE,
+                      width: size,
+                      height: size,
                       touchAction: "none",
                     }}
                     className="group flex cursor-grab flex-col items-center justify-center rounded-2xl bg-white/90 p-1.5 shadow-lg backdrop-blur"
@@ -390,6 +432,32 @@ export default function CuartoPage() {
                     >
                       ✕
                     </button>
+                    <div className="absolute -bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 opacity-0 shadow transition-opacity group-hover:opacity-100">
+                      <button
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          resizeItem(inv.id, -SCALE_STEP);
+                        }}
+                        disabled={d.scale <= SCALE_MIN}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-white disabled:opacity-30"
+                        title="Achicar"
+                      >
+                        −
+                      </button>
+                      <button
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          resizeItem(inv.id, SCALE_STEP);
+                        }}
+                        disabled={d.scale >= SCALE_MAX}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-white disabled:opacity-30"
+                        title="Agrandar"
+                      >
+                        +
+                      </button>
+                    </div>
                     {inv.store_items.image_url ? (
                       <span className="relative block h-11 w-11 overflow-hidden rounded-lg">
                         <Image
