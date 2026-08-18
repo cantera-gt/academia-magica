@@ -6,14 +6,31 @@ import type { ItemZone, CharacterGender } from "@/types/database";
  * porque esos son justamente los items que se compran en la tienda — si la
  * base ya los mostrara dibujados, se verian duplicados o el alumno pensaria
  * que ya los tiene. Esto es solo el "cascaron" del espacio.
+ *
+ * Si el alumno tiene un fondo comprado y equipado para esta zona
+ * (backgroundImageUrl), se muestra esa imagen en vez de la escena SVG
+ * generica de mas abajo.
  */
 export default function RoomScene({
   zone,
   gender,
+  backgroundImageUrl,
 }: {
   zone: ItemZone;
   gender: CharacterGender;
+  backgroundImageUrl?: string | null;
 }) {
+  if (backgroundImageUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={backgroundImageUrl}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full rounded-3xl object-cover"
+      />
+    );
+  }
   if (zone === "jardin") return <GardenScene />;
   if (zone === "estudio") return <StudyScene />;
   return <BedroomScene gender={gender} />;
