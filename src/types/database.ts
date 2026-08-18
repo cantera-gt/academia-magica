@@ -1,7 +1,6 @@
 export type UserRole = "admin" | "student";
 export type CharacterGender = "girl" | "boy";
 export type AgeBracket = "4-7" | "7-10" | "10-12";
-export type VisualTheme = "princesa" | "espacial" | "deportivo";
 
 // Personajes fijos en 2D (imagen unica por personaje, sin personalizacion
 // de ropa/color). Se filtran por gender + age_bracket del alumno.
@@ -28,16 +27,6 @@ export interface MyProfile {
   diamonds: number;
   household_id: string;
   birthdate: string | null;
-  visual_theme: VisualTheme;
-  // Nivel/XP: progreso que solo sube (a diferencia de los diamantes, que se
-  // gastan en la tienda). Racha: dias seguidos con al menos un intento.
-  xp_total: number;
-  level: number;
-  level_title: string | null;
-  xp_into_level: number;
-  xp_for_next_level: number | null;
-  current_streak: number;
-  longest_streak: number;
 }
 
 export interface ActiveStudent {
@@ -56,7 +45,6 @@ export interface Subject {
   category: string;
   icon: string | null;
   color: string | null;
-  description: string | null;
   sort_order: number;
   active: boolean;
 }
@@ -188,15 +176,6 @@ export interface AttemptResult {
   diamonds_earned: number;
   correct_answer: { value: string };
   explanation: string | null;
-  // Nivel/XP y racha diaria (ver submit_exercise_attempt).
-  xp_earned: number;
-  xp_total: number;
-  level: number;
-  leveled_up: boolean;
-  level_title: string | null;
-  current_streak: number;
-  streak_extended: boolean;
-  streak_started: boolean;
 }
 
 export type ItemCategory =
@@ -245,161 +224,18 @@ export interface RoomPosition3D {
   y: number;
   z?: number;
   rotationY?: number;
+  // Escala del item colocado en el cuarto 2D (1 = tamano por defecto).
+  // Opcional para no romper posiciones ya guardadas antes de este campo.
+  scale?: number;
 }
 
 export interface InventoryItem {
   id: string;
   item_id: string;
   placed_in_room: boolean;
-  // true si es una prenda (color_ropa) o accesorio actualmente puesto en el personaje
+  // true si es una prenda (color_ropa) o accesorio actualmente puesto en el personaje,
+  // o el fondo actualmente activo (category === "fondo") de una zona
   equipped: boolean;
   position: RoomPosition3D | null;
   store_items: StoreItem;
-}
-
-// Estadisticas agregadas para el Panel para padres (tiempo, precision,
-// racha, diamantes y progreso por materia). Ver RPC public.my_parent_stats().
-export interface ParentStatsSubject {
-  subject_id: string;
-  subject_name: string;
-  subject_icon: string | null;
-  subject_color: string | null;
-  seconds: number;
-  exercises: number;
-  accuracy_pct: number | null;
-  topics_passed: number;
-  expires_at: string | null;
-  subscription_status: SubjectSubscriptionStatus;
-}
-
-export interface ParentStatsDay {
-  day: string;
-  seconds: number;
-  exercises: number;
-}
-
-export interface ParentStats {
-  display_name: string;
-  diamonds_balance: number;
-  generated_at: string;
-  total_seconds: number;
-  total_exercises: number;
-  accuracy_pct: number | null;
-  seconds_last_7d: number;
-  seconds_last_30d: number;
-  diamonds_last_30d: number;
-  current_streak: number;
-  longest_streak: number;
-  last_activity_date: string | null;
-  topics_passed_total: number;
-  achievements_count: number;
-  by_subject: ParentStatsSubject[];
-  daily_last_14d: ParentStatsDay[];
-}
-
-export type SubjectSubscriptionStatus = "activa" | "por_vencer" | "vencida" | "sin_vencimiento";
-
-// Materia asignada a un alumno con su estado de vencimiento (3 meses por
-// compra). Ver RPC public.assigned_subjects_with_status().
-export interface AssignedSubjectWithStatus extends Subject {
-  expires_at: string | null;
-  status: SubjectSubscriptionStatus;
-}
-
-// Resumen de una orden de compra de materias adicionales, para la pagina de
-// pago. Ver RPC public.get_subject_order_summary().
-export interface SubjectOrderSummary {
-  id: string;
-  subject_count: number;
-  total_price_usd: number;
-  currency: string;
-  access_months: number;
-  payment_status: string;
-  subject_names: string[];
-}
-
-// Fila del listado global de suscripciones para el admin. Ver RPC
-// public.admin_list_subject_subscriptions().
-export interface AdminSubjectSubscription {
-  student_id: string;
-  student_name: string;
-  household_id: string;
-  household_name: string;
-  subject_id: string;
-  subject_name: string;
-  subject_icon: string | null;
-  assigned_at: string;
-  expires_at: string | null;
-  days_remaining: number | null;
-  status: SubjectSubscriptionStatus;
-}
-
-export type SubjectOrderPaymentMethod = "paypal" | "manual";
-export type SubjectOrderPaymentStatus = "not_started" | "pending" | "paid" | "failed" | "refunded" | "cancelled";
-
-// Fila del listado de pedidos (PayPal + manuales) para el admin. Ver RPC
-// public.admin_list_subject_orders().
-export interface AdminSubjectOrder {
-  order_id: string;
-  student_id: string;
-  student_name: string;
-  household_id: string;
-  household_name: string;
-  subject_names: string[];
-  subject_count: number;
-  total_price_usd: number;
-  currency: string;
-  access_months: number;
-  payment_status: SubjectOrderPaymentStatus;
-  payment_method: SubjectOrderPaymentMethod;
-  payment_note: string | null;
-  paid_at: string | null;
-  proof_file_path: string | null;
-  paypal_order_id: string | null;
-  created_at: string;
-}
-
-export type AffiliateStatus = "active" | "inactive";
-export type AffiliateCommissionSourceType = "enrollment" | "subject_order";
-export type AffiliateCommissionStatus = "pending" | "paid";
-
-// Fila del listado de afiliadas para el admin. Ver RPC public.admin_list_affiliates().
-export interface AdminAffiliate {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  code: string;
-  commission_rate: number;
-  status: AffiliateStatus;
-  notes: string | null;
-  created_at: string;
-  sales_count: number;
-  total_sales_usd: number;
-  commission_pending_usd: number;
-  commission_paid_usd: number;
-}
-
-// Fila de comisi\u00f3n, para el admin (public.admin_affiliate_commissions) y para
-// la propia afiliada (public.my_affiliate_commissions, sin household_name).
-export interface AffiliateCommission {
-  id: string;
-  source_type: AffiliateCommissionSourceType;
-  sale_amount_usd: number;
-  commission_rate: number;
-  commission_amount_usd: number;
-  status: AffiliateCommissionStatus;
-  paid_at: string | null;
-  paid_note: string | null;
-  created_at: string;
-  household_name?: string;
-}
-
-// Ver RPC public.my_affiliate_profile().
-export interface AffiliateProfile {
-  id: string;
-  name: string;
-  code: string;
-  commission_rate: number;
-  status: AffiliateStatus;
 }
