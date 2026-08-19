@@ -184,16 +184,18 @@ export default async function Home() {
 
           <div className="relative mx-auto h-[410px] w-full max-w-[590px] sm:h-[560px]">
             <div className="absolute inset-x-[4%] bottom-[3%] top-[9%] rotate-2 rounded-[3rem] bg-gradient-to-br from-[#6c5ce7] via-[#725fe5] to-[#4b399a] shadow-[0_30px_90px_rgba(59,42,85,0.3)]" />
-            <div className="absolute left-[5%] top-[8%] z-20 -rotate-6 rounded-2xl bg-white px-4 py-3 shadow-xl">
-              <p className="text-xs font-extrabold text-[#6c5ce7]">RETO SUPERADO</p><p className="font-display text-xl font-extrabold">+10 💎</p>
+            <div className="absolute bottom-[2%] left-[14%] z-30 h-[40%] w-[34%]">
+              <span className="absolute -top-3 left-1/2 z-40 -translate-x-1/2 text-3xl drop-shadow-[0_0_12px_rgba(127,231,196,0.9)] sm:text-4xl" aria-hidden="true">💎</span>
+              <Image src="/personajes2d/boy_4-7_1.webp" alt="Alumno de Academia Mágica de 4 a 7 años" fill priority sizes="200px" className="object-contain object-bottom drop-shadow-[0_20px_20px_rgba(25,17,46,0.32)]" />
             </div>
-            <div className="absolute right-[2%] top-[18%] z-20 rotate-6 rounded-2xl bg-[#ffd93d] px-4 py-3 text-center shadow-xl"><p className="text-xs font-extrabold">ESTUDIA · JUEGA · CREA</p></div>
-            <div className="absolute bottom-[2%] left-[2%] z-30 h-[40%] w-[34%]"><Image src="/personajes2d/boy_4-7_1.webp" alt="Alumno de Academia Mágica de 4 a 7 años" fill priority sizes="200px" className="object-contain object-bottom drop-shadow-[0_20px_20px_rgba(25,17,46,0.32)]" /></div>
-            <div className="absolute bottom-[2%] right-[2%] z-30 h-[40%] w-[34%]"><Image src="/personajes2d/girl_4-7_1.webp" alt="Alumna de Academia Mágica de 4 a 7 años" fill sizes="200px" className="object-contain object-bottom drop-shadow-[0_20px_20px_rgba(25,17,46,0.32)]" /></div>
-            <div className="absolute bottom-[42%] left-[14%] z-20 h-[28%] w-[28%]"><Image src="/personajes2d/girl_7-10_1.webp" alt="Alumna de Academia Mágica de 7 a 10 años" fill sizes="160px" className="object-contain object-bottom drop-shadow-xl" /></div>
-            <div className="absolute bottom-[42%] right-[14%] z-20 h-[28%] w-[28%]"><Image src="/personajes2d/boy_7-10_1.webp" alt="Alumno de Academia Mágica de 7 a 10 años" fill sizes="160px" className="object-contain object-bottom drop-shadow-xl" /></div>
-            <div className="absolute bottom-[70%] left-[28%] z-10 h-[22%] w-[20%]"><Image src="/personajes2d/boy_10-12_1.webp" alt="Alumno de Academia Mágica de 10 a 12 años" fill sizes="110px" className="object-contain object-bottom drop-shadow-lg" /></div>
-            <div className="absolute bottom-[70%] right-[28%] z-10 h-[22%] w-[20%]"><Image src="/personajes2d/girl_10-12_1.webp" alt="Alumna de Academia Mágica de 10 a 12 años" fill sizes="110px" className="object-contain object-bottom drop-shadow-lg" /></div>
+            <div className="absolute bottom-[2%] right-[14%] z-30 h-[40%] w-[34%]">
+              <span className="absolute -top-3 left-1/2 z-40 -translate-x-1/2 text-3xl drop-shadow-[0_0_12px_rgba(127,231,196,0.9)] sm:text-4xl" aria-hidden="true">💎</span>
+              <Image src="/personajes2d/girl_4-7_1.webp" alt="Alumna de Academia Mágica de 4 a 7 años" fill sizes="200px" className="object-contain object-bottom drop-shadow-[0_20px_20px_rgba(25,17,46,0.32)]" />
+            </div>
+            <div className="absolute bottom-[42%] left-[6%] z-20 h-[28%] w-[28%]"><Image src="/personajes2d/girl_7-10_1.webp" alt="Alumna de Academia Mágica de 7 a 10 años" fill sizes="160px" className="object-contain object-bottom drop-shadow-xl" /></div>
+            <div className="absolute bottom-[42%] right-[6%] z-20 h-[28%] w-[28%]"><Image src="/personajes2d/boy_7-10_1.webp" alt="Alumno de Academia Mágica de 7 a 10 años" fill sizes="160px" className="object-contain object-bottom drop-shadow-xl" /></div>
+            <div className="absolute bottom-[70%] left-[2%] z-10 h-[22%] w-[20%]"><Image src="/personajes2d/boy_10-12_1.webp" alt="Alumno de Academia Mágica de 10 a 12 años" fill sizes="110px" className="object-contain object-bottom drop-shadow-lg" /></div>
+            <div className="absolute bottom-[70%] right-[2%] z-10 h-[22%] w-[20%]"><Image src="/personajes2d/girl_10-12_1.webp" alt="Alumna de Academia Mágica de 10 a 12 años" fill sizes="110px" className="object-contain object-bottom drop-shadow-lg" /></div>
             <div className="absolute left-1/2 top-[4%] z-20 -translate-x-1/2 text-5xl drop-shadow-[0_0_18px_rgba(127,231,196,0.95)] sm:text-7xl" aria-hidden="true">💎</div>
           </div>
         </div>
