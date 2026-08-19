@@ -47,6 +47,10 @@ function mathify(text: string): string {
   // punto con una hora y lee "0.25" como "12 y 25" o "0.5" como "5 segundos".
   out = out.replace(/(\d+)\.(\d+)/g, "$1,$2");
 
+  // Porcentaje ("20%", "10 %") -> "20 por ciento". Va antes de las reglas
+  // de division/resta para que el numero no quede pegado al simbolo.
+  out = out.replace(/(\d+(?:,\d+)?)\s?%/g, "$1 por ciento");
+
   // Division escrita con espacios alrededor de la barra ("56 / 8") -> "56
   // dividido entre 8". Va ANTES que la regla de fracciones de abajo (que
   // no lleva espacios) para no pisarse con ella.
