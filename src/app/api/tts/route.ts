@@ -31,8 +31,9 @@ const SUPERSCRIPT_DIGITS: Record<string, string> = {
 
 function mathify(text: string): string {
     // Convierte notacion matematica en frases que un motor de voz lee bien.
-  // Sin esto, simbolos matematicos, la barra de fracciones o los exponentes
-  // se leen literalmente (o se saltean raro) en vez de sonar como una frase.
+  // Sin esto, simbolos matematicos, la barra de fraccion/division, los
+  // numeros decimales o los exponentes se leen literalmente (o se leen
+  // mal, ej como una hora) en vez de sonar como una frase.
   let out = text;
 
   // Exponentes con digitos en superindice (ej "10" + superindice 4 -> "10 a la 4")
@@ -41,14 +42,31 @@ function mathify(text: string): string {
         return `${base} a la ${digits}`;
   });
 
+  // Numeros decimales con punto (0.25, 0.5) -> con coma (0,25 / 0,5), como
+  // se escriben y leen en espanol. Sin esto el motor de voz confunde el
+  // punto con una hora y lee "0.25" como "12 y 25" o "0.5" como "5 segundos".
+  out = out.replace(/(\d+)\.(\d+)/g, "$1,$2");
+
+  // Division escrita con espacios alrededor de la barra ("56 / 8") -> "56
+  // dividido entre 8". Va ANTES que la regla de fracciones de abajo (que
+  // no lleva espacios) para no pisarse con ella.
+  out = out.replace(/(\d+)\s+\/\s+(\d+)/g, "$1 dividido entre $2");
+
+  // Resta escrita "19 - 10" -> "19 menos 10". Sin esto el motor de voz la
+  // lee como un rango ("de 19 a 10").
+  out = out.replace(/(\d+)\s+-\s+(\d+)/g, "$1 menos $2");
+
   // Division (simbolo unicode U+00F7): 23 (div) 5 -> 23 dividido por 5
   out = out.replace(/÷/g, " dividido por ");
 
-  // Multiplicacion escrita como "x" entre numeros: 5 x 10 -> 5 por 10
-  out = out.replace(/(\d)\s*x\s*(\d)/gi, "$1 por $2");
+  // Multiplicacion escrita como "x" o "×" entre numeros: 5 x 10 -> 5 por 10
+  out = out.replace(/(\d)\s*[x×]\s*(\d)/gi, "$1 por $2");
 
-  // Fracciones simples tipo 1/2, 3/4 -> 1 sobre 2, 3 sobre 4
-  out = out.replace(/(\d+)\/(\d+)/g, "$1 sobre $2");
+  // Fracciones simples tipo 1/2, 3/4 (sin espacios) -> 1 de 2, 3 de 4
+  out = out.replace(/(\d+)\/(\d+)/g, "$1 de $2");
+
+  // Espacio para completar (fill in the blank): "___" -> pausa hablada
+  out = out.replace(/_{2,}/g, " espacio en blanco ");
 
   // Igual: lo hacemos explicito para que no se coma el simbolo
   out = out.replace(/=/g, " igual a ");
