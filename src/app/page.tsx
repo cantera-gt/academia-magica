@@ -184,7 +184,7 @@ export default async function Home() {
 
           <div className="relative mx-auto w-full max-w-[640px]">
             <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[3rem] bg-gradient-to-br from-[#7fe7c4]/25 via-transparent to-[#ff9abd]/25 blur-3xl" />
-            <span className="absolute -top-3 left-1/2 z-20 -translate-x-1/2 text-5xl drop-shadow-[0_0_18px_rgba(127,231,196,0.9)] sm:text-6xl" aria-hidden="true">💎</span>
+                        <span className="absolute -top-12 left-1/2 z-20 -translate-x-1/2 text-7xl drop-shadow-[0_0_22px_rgba(127,231,196,0.9)] sm:-top-14 sm:text-8xl" aria-hidden="true">💎</span>
             <Image
               src="/landing/hero-7-10.webp"
               alt="Alumnos y alumnas de Academia Mágica de 7 a 10 años"
