@@ -452,15 +452,16 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="bg-[#2b1d40] px-5 py-10 text-white/65 sm:px-8">
+            <footer className="bg-[#2b1d40] px-5 py-10 text-white/65 sm:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
           <div><p className="font-display text-xl font-extrabold text-white">✨ Academia Mágica</p><p className="mt-1 text-sm">Aprender jugando es posible.</p></div>
           <div className="flex flex-wrap justify-center gap-5 text-sm font-bold">
-            <a href="mailto:businesscatserrano@gmail.com" className="hover:text-white">Contacto</a>
+            <a href="mailto:admin@academiamagicaedu.com" className="hover:text-white">Contacto</a>
             <a href="#acceso-alumnos" className="hover:text-white">Acceso alumnos</a>
             <Link href="/login" className="hover:text-white">Administración</Link>
           </div>
         </div>
+        <p className="mx-auto mt-6 max-w-6xl text-center text-xs text-white/40 sm:text-left">Academia Mágica es propiedad de Telion Empresa Centro Americana. Contacto: admin@academiamagicaedu.com</p>
       </footer>
     </main>
   );
