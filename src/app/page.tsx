@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Subject } from "@/types/database";
 import StudentQuickLogin from "@/components/student-quick-login";
+import LandingLeadCapture from "@/components/landing-lead-capture";
+import { ENROLLMENT_PRICE_TIERS, ENROLLMENT_ACCESS_MONTHS } from "@/lib/enrollment-pricing";
 
 const SITE_URL = "https://academiamagicaedu.com";
 export const metadata: Metadata = {
@@ -152,6 +154,7 @@ export default async function Home() {
           </Link>
           <nav aria-label="Navegación principal" className="flex items-center gap-3">
             <a href="#como-funciona" className="hidden text-sm font-bold text-[#3b2a55]/70 transition hover:text-[#6c5ce7] md:block">Cómo funciona</a>
+            <a href="#precios" className="hidden text-sm font-bold text-[#3b2a55]/70 transition hover:text-[#6c5ce7] md:block">Precios</a>
             <a href="#acceso-alumnos" className="rounded-full border-2 border-[#6c5ce7] px-4 py-2 text-sm font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7] hover:text-white sm:px-5">
               Acceso alumnos
             </a>
@@ -221,6 +224,19 @@ export default async function Home() {
               <p className="font-display text-4xl font-extrabold text-[#2fae82]">72%</p>
               <p className="mt-2 font-bold">De familias con niños de 2 a 8 años ya usan aplicaciones educativas como parte de su rutina.</p>
               <a href="https://www.abcmouse.com/learn/advice/education-app-statistics-every-parent-should-know/77938" target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-bold text-[#2fae82]/70 hover:underline">Age of Learning / ABCmouse, 2025 ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Quién está detrás de Academia Mágica" className="px-5 pb-14 sm:px-8">
+        <div className="mx-auto max-w-4xl rounded-[2.5rem] border border-[#3b2a55]/10 bg-white p-8 shadow-sm sm:p-12">
+          <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-full bg-[#f2e9ff] text-4xl" aria-hidden="true">👨‍👧‍👦</div>
+            <div>
+              <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">Por qué existe Academia Mágica</p>
+              <p className="mt-3 text-lg font-semibold leading-relaxed text-[#3b2a55]/80">&ldquo;La empecé para mis propios hijos porque no encontraba una plataforma que combinara ejercicios de verdad con algo que ellos quisieran abrir todos los días. La seguimos construyendo materia por materia, probando primero en casa antes de sumar cada novedad.&rdquo;</p>
+              <p className="mt-4 font-display font-extrabold text-[#3b2a55]">Pablo Serrano, fundador de Academia Mágica</p>
             </div>
           </div>
         </div>
@@ -311,6 +327,30 @@ export default async function Home() {
         </div>
       </section>
 
+      <section id="precios" className="scroll-mt-20 bg-[#3b2a55] px-5 py-20 text-white sm:px-8 sm:py-28">
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#7fe7c4]">Precio simple, sin sorpresas</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">Cuantas más materias, menos paga cada una</h2>
+            <p className="mt-5 text-lg text-white/75">Un solo pago cubre {ENROLLMENT_ACCESS_MONTHS} meses de acceso completo. Elegís las materias en la matrícula y ves el total antes de pagar, sin cobros escondidos.</p>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-4">
+            {ENROLLMENT_PRICE_TIERS.map((tier) => (
+              <div key={tier.label} className="rounded-3xl bg-white/10 p-6 text-center">
+                <p className="font-bold text-white/65">{tier.label}</p>
+                <p className="font-display mt-2 text-4xl font-extrabold text-[#ffd93d]">${tier.unitPriceUsd}</p>
+                <p className="mt-1 text-sm font-bold text-white/55">por materia</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-[2rem] bg-white p-7 text-center text-[#3b2a55] sm:p-9">
+            <p className="font-display text-xl font-extrabold sm:text-2xl">Ejemplo: 3 materias = ${3 * ENROLLMENT_PRICE_TIERS[0].unitPriceUsd} por {ENROLLMENT_ACCESS_MONTHS} meses (unos ${Math.round((3 * ENROLLMENT_PRICE_TIERS[0].unitPriceUsd) / ENROLLMENT_ACCESS_MONTHS)}/mes)</p>
+            <p className="mt-2 text-[#3b2a55]/65">Podés sumar más materias cuando quieras: cuantas más elijas, menos paga cada una.</p>
+          </div>
+          <div className="mt-10 text-center"><EnrollmentLink>Quiero matricularme</EnrollmentLink></div>
+        </div>
+      </section>
+
       <section className="bg-[#f2e9ff] px-5 py-20 sm:px-8 sm:py-28">
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[.95fr_1.05fr]">
           <div className="grid grid-cols-2 gap-4">
@@ -379,6 +419,12 @@ export default async function Home() {
               </details>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section aria-label="Recibir novedades" className="px-5 pb-4 sm:px-8">
+        <div className="mx-auto max-w-3xl">
+          <LandingLeadCapture />
         </div>
       </section>
 
