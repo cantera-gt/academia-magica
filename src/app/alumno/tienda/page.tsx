@@ -241,7 +241,7 @@ export default function TiendaPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
-          <p className="text-slate-600">Primero elegí tu personaje.</p>
+          <p className="text-slate-600">Primero elige tu personaje.</p>
           <Link href="/alumno/inicio" className="mt-3 inline-block text-purple-600 underline">
             Volver
           </Link>
@@ -320,8 +320,8 @@ export default function TiendaPage() {
                 })}
             </div>
             <p className="text-center text-sm font-semibold text-slate-600 sm:text-left">
-              ¡Así te queda, {profile.display_name}! Comprá accesorios ✨ y
-              tocá &quot;Ponérselo&quot; para probarlos.
+              ¡Así te queda, {profile.display_name}! Compra accesorios ✨ y
+              toca &quot;Ponérselo&quot; para probarlos.
             </p>
           </div>
         )}
@@ -442,7 +442,7 @@ export default function TiendaPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           className="mt-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700"
                         >
-                          {bought ? "¡Comprado! 🎉" : "Ya lo tenés ✓"}
+                          {bought ? "¡Comprado! 🎉" : "Ya lo tienes ✓"}
                         </motion.span>
                       ) : (
                         <motion.button
