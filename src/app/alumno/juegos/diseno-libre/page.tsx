@@ -122,7 +122,7 @@ export default function DisenoLibrePage() {
         </Link>
         <h1 className="mt-3 text-center text-2xl font-bold text-white">Pizarra Libre ✏️</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Dibujá lo que quieras desde cero, sin plantilla.
+          Dibuja lo que quieras desde cero, sin plantilla.
         </p>
 
         <div className="mt-4 overflow-hidden rounded-3xl bg-white shadow-lg">
@@ -210,7 +210,7 @@ export default function DisenoLibrePage() {
                   {result.diamonds_earned > 0
                     ? `+${result.diamonds_earned} 💎`
                     : !hasDrawn
-                      ? "Dibujá algo primero"
+                      ? "Dibuja algo primero"
                       : "Ya llegaste al límite de hoy"}
                 </p>
                 <p className="mt-1 text-xs text-white/70">
