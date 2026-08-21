@@ -32,7 +32,7 @@ export default function StudentQuickLogin() {
     setLoading(false);
     const row = Array.isArray(data) ? data[0] : data;
     if (rpcError || !row) {
-      setError("No encontramos ese usuario. Revisá cómo lo escribiste.");
+      setError("No encontramos ese usuario. Revisa cómo lo escribiste.");
       return;
     }
     setFound(row as FoundStudent);
@@ -49,7 +49,7 @@ export default function StudentQuickLogin() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: pin });
 
     if (signInError) {
-      setError("PIN incorrecto, probá de nuevo.");
+      setError("PIN incorrecto, prueba de nuevo.");
       setLoading(false);
       setPin("");
       return;
@@ -58,7 +58,7 @@ export default function StudentQuickLogin() {
     const { data: isActive } = await supabase.rpc("my_is_active");
     if (isActive === false) {
       await supabase.auth.signOut();
-      setError("Esta cuenta está desactivada. Contactá al administrador de tu familia.");
+      setError("Esta cuenta está desactivada. Contacta con el administrador de tu familia.");
       setLoading(false);
       setPin("");
       return;
@@ -74,7 +74,7 @@ export default function StudentQuickLogin() {
       {step === "username" && (
         <form onSubmit={handleUsernameSubmit} className="mt-3">
           <label htmlFor="quick-username" className="block text-sm font-bold text-[#3b2a55]/70">
-            Escribí tu nombre de usuario para entrar
+            Escribe tu nombre de usuario para entrar
           </label>
           <div className="mt-2 flex gap-2">
             <input
@@ -143,7 +143,7 @@ export default function StudentQuickLogin() {
       {error && <p role="alert" className="mt-3 text-sm font-bold text-red-600">{error}</p>}
 
       <p className="mt-4 text-xs text-[#3b2a55]/50">
-        ¿Todavía no tenés cuenta? <Link href="/matricula" className="font-bold text-[#6c5ce7] hover:underline">Matriculate acá</Link>.{" "}
+        ¿Todavía no tienes cuenta? <Link href="/matricula" className="font-bold text-[#6c5ce7] hover:underline">Matricúlate aquí</Link>.{" "}
         <Link href="/login" className="font-bold text-[#6c5ce7] hover:underline">Acceso administrador</Link>.
       </p>
     </div>
