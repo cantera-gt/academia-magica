@@ -68,10 +68,10 @@ export default function ThemePicker({
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-center text-lg font-extrabold text-slate-800">
-                Elegí tu estilo
+                Elige tu estilo
               </h3>
               <p className="mt-1 text-center text-sm text-slate-500">
-                Cambia los colores de tu app. Podés cambiarlo cuando quieras.
+                Cambia los colores de tu app. Puedes cambiarlo cuando quieras.
               </p>
               <div className="mt-5 grid grid-cols-1 gap-3">
                 {Object.values(THEMES).map((t) => (
