@@ -73,7 +73,7 @@ const OBJECTIONS = [
   {
     icon: "💳",
     title: "“¿Es seguro pagar y cómo empiezo?”",
-    text: "El pago se procesa con PayPal. En cuanto se confirma, el acceso se activa al instante: recibís un correo con el enlace para crear el usuario de tu hijo/a, sin esperar respuesta de nadie.",
+    text: "El pago se procesa con PayPal. En cuanto se confirma, el acceso se activa al instante: recibes un correo con el enlace para crear el usuario de tu hijo/a, sin esperar respuesta de nadie.",
     source: null,
   },
 ];
@@ -82,7 +82,7 @@ const FAQS = [
   { question: "¿Para qué edades está pensada Academia Mágica?", answer: "Está diseñada principalmente para niños y niñas de 4 a 10 años. El contenido se organiza por edades para que cada alumno encuentre un reto adecuado a su momento de aprendizaje." },
   { question: "¿Necesita un adulto estar siempre a su lado?", answer: "Al principio conviene acompañarle para conocer la plataforma. Después puede avanzar con bastante autonomía: las instrucciones son claras y puede pedir ayuda al profesor por voz o texto." },
   { question: "¿El profesor le dice directamente la respuesta?", answer: "No. Está preparado para guiar con preguntas y pequeñas pistas. El objetivo es que el alumno comprenda y llegue a la solución por sí mismo." },
-  { question: "¿Qué puede controlar la familia?", answer: "Desde el panel para padres podés ver tiempo de uso, precisión, racha de días y progreso por materia, además de gestionar el acceso y contratar más materias cuando quieras." },
+  { question: "¿Qué puede controlar la familia?", answer: "Desde el panel para padres puedes ver tiempo de uso, precisión, racha de días y progreso por materia, además de gestionar el acceso y contratar más materias cuando quieras." },
   { question: "¿Dónde funciona?", answer: "Es una aplicación web. Se accede online desde un navegador moderno en ordenador, tableta o móvil, sin instalar un programa especial." },
   { question: "¿Qué pasa apenas termino de pagar?", answer: "El acceso se activa de inmediato. Te llega un correo con la confirmación de la compra y un enlace para crear el usuario con el que tu hijo/a va a entrar a la plataforma. Todo el proceso es automático, sin esperar a que alguien te responda." },
   { question: "¿Cómo puedo conocer el precio y matricularme?", answer: "Pulsa «Quiero matricularme», elige las materias y verás el precio final al instante. El acceso dura 3 meses: 1–3 materias cuestan $10 cada una, 4–6 cuestan $8, 7–10 cuestan $7 y desde 11 cuestan $6. Después puedes continuar al pago seguro con PayPal." },
@@ -174,7 +174,7 @@ export default async function Home() {
               Que aprender deje de ser una pelea y se convierta en su <span className="text-[#6c5ce7]">aventura favorita</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg font-semibold leading-relaxed text-[#3b2a55]/75 sm:text-xl lg:mx-0">
-              Academia Mágica transforma un catálogo creciente de materias en retos, profesores que guían y diamantes que dan ganas de seguir. Pagás, el acceso se activa al instante y tu hijo/a ya puede entrar.
+              Academia Mágica transforma un catálogo creciente de materias en retos, profesores que guían y diamantes que dan ganas de seguir. Pagas, el acceso se activa al instante y tu hijo/a ya puede entrar.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <EnrollmentLink className="w-full text-lg sm:w-auto sm:px-9 sm:py-4">Quiero matricularme</EnrollmentLink>
@@ -248,7 +248,7 @@ export default async function Home() {
             <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ff6b9d]">La situación que conoces</p>
             <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">No le falta capacidad. Le falta una forma de aprender que conecte con él.</h2>
             <div className="mt-6 space-y-4 text-lg leading-relaxed text-[#3b2a55]/75">
-              <p>Le pides que practique y aparece el «ahora no», el aburrimiento o la frustración. No sos el único: 6 de cada 10 padres con hijos en primaria dicen tener dificultades reales para ayudarlos con la tarea.</p>
+              <p>Le pides que practique y aparece el «ahora no», el aburrimiento o la frustración. No eres el único: 6 de cada 10 padres con hijos en primaria dicen tener dificultades reales para ayudarlos con la tarea.</p>
               <p>Las pantallas le atraen, pero no siempre encuentras contenido que le aporte algo de verdad.</p>
               <p>Y tú quieres ayudar, aunque no siempre sabes qué ha entendido, dónde se atasca o cómo motivarle sin terminar discutiendo.</p>
             </div>
@@ -332,7 +332,7 @@ export default async function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#7fe7c4]">Precio simple, sin sorpresas</p>
             <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">Cuantas más materias, menos paga cada una</h2>
-            <p className="mt-5 text-lg text-white/75">Un solo pago cubre {ENROLLMENT_ACCESS_MONTHS} meses de acceso completo. Elegís las materias en la matrícula y ves el total antes de pagar, sin cobros escondidos.</p>
+            <p className="mt-5 text-lg text-white/75">Un solo pago cubre {ENROLLMENT_ACCESS_MONTHS} meses de acceso completo. Eliges las materias en la matrícula y ves el total antes de pagar, sin cobros escondidos.</p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-4">
             {ENROLLMENT_PRICE_TIERS.map((tier) => (
@@ -345,7 +345,7 @@ export default async function Home() {
           </div>
           <div className="mt-8 rounded-[2rem] bg-white p-7 text-center text-[#3b2a55] sm:p-9">
             <p className="font-display text-xl font-extrabold sm:text-2xl">Ejemplo: 3 materias = ${3 * ENROLLMENT_PRICE_TIERS[0].unitPriceUsd} por {ENROLLMENT_ACCESS_MONTHS} meses (unos ${Math.round((3 * ENROLLMENT_PRICE_TIERS[0].unitPriceUsd) / ENROLLMENT_ACCESS_MONTHS)}/mes)</p>
-            <p className="mt-2 text-[#3b2a55]/65">Podés sumar más materias cuando quieras: cuantas más elijas, menos paga cada una.</p>
+            <p className="mt-2 text-[#3b2a55]/65">Puedes sumar más materias cuando quieras: cuantas más elijas, menos paga cada una.</p>
           </div>
           <div className="mt-10 text-center"><EnrollmentLink>Quiero matricularme</EnrollmentLink></div>
         </div>
@@ -431,9 +431,9 @@ export default async function Home() {
       <section id="acceso-alumnos" className="scroll-mt-20 bg-[#f2e9ff] px-5 py-20 sm:px-8 sm:py-28">
         <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-[1fr_.9fr]">
           <div>
-            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#6c5ce7]">¿Ya sos parte de Academia Mágica?</p>
-            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-4xl">Entrá directo desde acá, sin buscar otra página</h2>
-            <p className="mt-4 text-lg leading-relaxed text-[#3b2a55]/70">Si tu hijo/a ya tiene usuario, escribí su nombre de usuario y su PIN acá mismo. Si todavía no se matriculó, hacelo en un par de minutos y el acceso queda listo al instante.</p>
+            <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#6c5ce7]">¿Ya eres parte de Academia Mágica?</p>
+            <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-4xl">Entra directo desde aquí, sin buscar otra página</h2>
+            <p className="mt-4 text-lg leading-relaxed text-[#3b2a55]/70">Si tu hijo/a ya tiene usuario, escribe su nombre de usuario y su PIN aquí mismo. Si todavía no se matriculó, hazlo en un par de minutos y el acceso queda listo al instante.</p>
           </div>
           <StudentQuickLogin />
         </div>
@@ -445,14 +445,14 @@ export default async function Home() {
           <div className="relative mx-auto max-w-3xl">
             <p className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[#ffd93d]">El siguiente paso</p>
             <h2 className="font-display mt-3 text-balance text-3xl font-extrabold sm:text-5xl">¿Quieres que aprender sea el momento que tu hijo espera?</h2>
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">Elegí las materias, pagá con PayPal y el acceso queda activo al instante: te llega un correo con el enlace para crear el usuario de tu hijo/a. Sin esperas, sin trámites manuales.</p>
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">Elige las materias, paga con PayPal y el acceso queda activo al instante: te llega un correo con el enlace para crear el usuario de tu hijo/a. Sin esperas, sin trámites manuales.</p>
             <div className="mt-8"><EnrollmentLink className="text-lg sm:px-10 sm:py-4">Quiero matricularme</EnrollmentLink></div>
             <p className="mt-4 text-sm font-semibold text-white/70">Pago seguro con PayPal · Acceso inmediato · Duración de 3 meses</p>
           </div>
         </div>
       </section>
 
-            <footer className="bg-[#2b1d40] px-5 py-10 text-white/65 sm:px-8">
+      <footer className="bg-[#2b1d40] px-5 py-10 text-white/65 sm:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
           <div><p className="font-display text-xl font-extrabold text-white">✨ Academia Mágica</p><p className="mt-1 text-sm">Aprender jugando es posible.</p></div>
           <div className="flex flex-wrap justify-center gap-5 text-sm font-bold">
