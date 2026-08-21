@@ -29,6 +29,17 @@ const SUPERSCRIPT_DIGITS: Record<string, string> = {
     "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
 };
 
+function blankify(text: string): string {
+    // Espacios en blanco de ejercicios "completa la palabra/frase/serie"
+  // escritos con guiones bajos (ej "El gato ___ (subir) al arbol" o
+  // "2, 4, 6, 8, __"): sin este paso el motor de voz los lee como
+  // "guion bajo" en vez de marcar la pausa donde va la respuesta.
+  // Corre ANTES que stripMarkdown para que su regex de enfasis con "__"
+  // no se coma dos espacios en blanco distintos como si fueran un solo
+  // bloque en negrita cuando hay mas de un hueco en el mismo texto.
+  return text.replace(/_{2,}/g, " espacio en blanco ");
+}
+
 function mathify(text: string): string {
     // Convierte notacion matematica en frases que un motor de voz lee bien.
   // Sin esto, simbolos matematicos, la barra de fraccion/division, los
@@ -69,9 +80,6 @@ function mathify(text: string): string {
   // Fracciones simples tipo 1/2, 3/4 (sin espacios) -> 1 de 2, 3 de 4
   out = out.replace(/(\d+)\/(\d+)/g, "$1 de $2");
 
-  // Espacio para completar (fill in the blank): "___" -> pausa hablada
-  out = out.replace(/_{2,}/g, " espacio en blanco ");
-
   // Igual: lo hacemos explicito para que no se coma el simbolo
   out = out.replace(/=/g, " igual a ");
 
@@ -91,7 +99,7 @@ function stripUnspeakable(text: string): string {
   // "leen" en vez de ignorarlos (ej: 🚀 -> "cohete", ** -> "asterisco
   // asterisco", GU-ten -> "GU guion ten"). Tambien recorta espacios
   // extra que quedan despues de sacar todo eso.
-  return despellify(mathify(stripMarkdown(text)))
+  return despellify(mathify(stripMarkdown(blankify(text))))
       .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}️]/gu, "")
       .replace(/\s+/g, " ")
       .trim();
