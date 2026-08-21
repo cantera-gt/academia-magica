@@ -113,7 +113,7 @@ export default function MemoriaColoresPage() {
         {phase === "idle" && (
           <div className="mt-8 flex flex-col items-center gap-4">
             <p className="text-center text-sm text-white/80">
-              Mirá la secuencia de colores y repetila tocando los mismos botones en orden.
+              Mira la secuencia de colores y repítela tocando los mismos botones en orden.
             </p>
             <motion.button
               onClick={start}
@@ -130,7 +130,7 @@ export default function MemoriaColoresPage() {
         {(phase === "showing" || phase === "input") && (
           <>
             <p className="mt-4 text-center text-sm font-semibold text-white/90">
-              {phase === "showing" ? "Mirá bien..." : "¡Ahora repetí!"}
+              {phase === "showing" ? "Mira bien..." : "¡Ahora repite!"}
             </p>
             <div className="mx-auto mt-4 grid w-64 grid-cols-2 gap-3">
               {PADS.map((pad) => (
