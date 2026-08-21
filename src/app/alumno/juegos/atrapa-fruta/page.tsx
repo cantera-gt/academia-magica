@@ -135,7 +135,7 @@ export default function AtrapaFrutaPage() {
         {!started && (
           <div className="mt-8 flex flex-col items-center gap-4">
             <p className="text-center text-sm text-white/80">
-              Tocá las frutas antes de que caigan. ¡Cuidado con la bomba 💣, resta!
+              Toca las frutas antes de que caigan. ¡Cuidado con la bomba 💣, resta!
             </p>
             <motion.button
               onClick={start}
