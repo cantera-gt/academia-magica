@@ -41,7 +41,7 @@ export function computeTeacherRecommendation(
   if (playable.length === 0) {
     return {
       kind: "no_content",
-      message: `Todavía estoy preparando el material de ${subjectName}. ¡Volvé pronto! 🚧`,
+      message: `Todavía estoy preparando el material de ${subjectName}. ¡Vuelve pronto! 🚧`,
       options: [],
     };
   }
@@ -121,7 +121,7 @@ export function computeTeacherRecommendation(
   if (options.length === 0) {
     return {
       kind: "all_done",
-      message: `¡Hola ${studentName}! Completaste todos los temas de ${subjectName} que tengo para vos. ¡Sos un crack! 🏆 Mientras preparo más, podés repasar cualquiera para practicar.`,
+      message: `¡Hola ${studentName}! Has completado todos los temas de ${subjectName} que tengo para ti. ¡Eres un crack! 🏆 Mientras preparo más, puedes repasar cualquiera para practicar.`,
       options: playable.map((t) => ({
         kind: "replay",
         topic: t,
@@ -148,7 +148,7 @@ export function computeTeacherRecommendation(
     primary.kind !== "review" &&
     options.every((o) => o.topic.topic_id !== reviewCandidates[0].topic_id)
   ) {
-    message += ` También podrías repasar «${reviewCandidates[0].name}» si querés reforzarlo.`;
+    message += ` También podrías repasar «${reviewCandidates[0].name}» si quieres reforzarlo.`;
   }
 
   return {
