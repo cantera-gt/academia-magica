@@ -125,7 +125,7 @@ export default function TresEnRayaPage() {
         </Link>
         <h1 className="mt-3 text-center text-2xl font-bold text-white">Tres en Raya ❌⭕</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Vos sos ❌. La profe Susan es ⭕. ¡Empezás vos!
+          Tú eres ❌. La profe Susan es ⭕. ¡Empiezas tú!
         </p>
 
         <div className="mx-auto mt-5 grid w-72 grid-cols-3 gap-2">
@@ -164,7 +164,7 @@ export default function TresEnRayaPage() {
                   ? "¡Ganaste!"
                   : winner === "draw"
                     ? "¡Empate!"
-                    : "Ganó la profe, ¡probá de nuevo!"}
+                    : "Ganó la profe, ¡prueba de nuevo!"}
               </p>
               {saving ? (
                 <p className="text-sm text-white/80">Calculando premio...</p>
