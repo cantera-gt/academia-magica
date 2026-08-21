@@ -316,7 +316,7 @@ export default function CuartoPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
-          <p className="text-slate-600">Primero elegí tu personaje.</p>
+          <p className="text-slate-600">Primero elige tu personaje.</p>
           <Link href="/alumno/inicio" className="mt-3 inline-block text-purple-600 underline">
             Volver
           </Link>
@@ -386,7 +386,7 @@ export default function CuartoPage() {
             <div className="relative flex h-full min-h-[300px] flex-col items-center justify-center text-center">
               <p className="text-5xl drop-shadow">🪄</p>
               <p className="mt-2 rounded-full bg-white/85 px-4 py-1 font-medium text-slate-600 shadow">
-                Arrastrá items de tu biblioteca acá abajo para decorar
+                Arrastra items de tu biblioteca aquí abajo para decorar
               </p>
             </div>
           )}
@@ -499,7 +499,7 @@ export default function CuartoPage() {
           </button>
           {dirty && (
             <span className="text-xs font-semibold text-amber-600">
-              Tenés cambios sin guardar
+              Tienes cambios sin guardar
             </span>
           )}
         </div>
@@ -510,11 +510,11 @@ export default function CuartoPage() {
             <h2 className="mb-3 text-lg font-bold text-slate-800">Tu biblioteca de objetos</h2>
             {zoneInventory.length === 0 ? (
               <p className="rounded-xl bg-white p-5 text-sm text-slate-500 shadow">
-                Todavía no compraste nada para esta zona. Andá a la tienda a gastar tus diamantes.
+                Todavía no has comprado nada para esta zona. Ve a la tienda a gastar tus diamantes.
               </p>
             ) : libraryItems.length === 0 ? (
               <p className="rounded-xl bg-white p-5 text-sm text-slate-500 shadow">
-                Ya colocaste todo lo que tenés para esta zona.
+                Ya colocaste todo lo que tienes para esta zona.
               </p>
             ) : (
               <motion.div
@@ -550,7 +550,7 @@ export default function CuartoPage() {
                           whileDrag={{ scale: 1.15, zIndex: 50, cursor: "grabbing", boxShadow: "0 12px 24px rgba(0,0,0,0.25)" }}
                           transition={SPRING_PLAYFUL}
                           style={{ touchAction: "none" }}
-                          title="Arrastrá al cuarto, o tocá para colocarlo"
+                          title="Arrastra al cuarto, o toca para colocarlo"
                           className="flex cursor-grab flex-col items-center gap-1"
                         >
                           {inv.store_items.image_url ? (
@@ -677,7 +677,7 @@ export default function CuartoPage() {
               </h3>
               <p className="mt-2 text-sm text-slate-500">
                 Vas a recibir{" "}
-                <strong>{Math.floor(confirmSell.store_items.price_diamonds * 0.8)} 💎</strong> (perdés
+                <strong>{Math.floor(confirmSell.store_items.price_diamonds * 0.8)} 💎</strong> (pierdes
                 un 20% del precio original de {confirmSell.store_items.price_diamonds} 💎). Esta acción
                 no se puede deshacer.
               </p>
