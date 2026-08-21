@@ -38,7 +38,7 @@ export default function LandingLeadCapture() {
       <div className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 text-center shadow-sm sm:p-8">
         <p className="text-3xl" aria-hidden="true">✅</p>
         <p className="font-display mt-2 text-lg font-extrabold">¡Listo, ya quedaste anotado/a!</p>
-        <p className="mt-1 text-[#3b2a55]/65">Te vamos a escribir con novedades y materias nuevas. Cuando quieras, podés matricularte cuando estés listo/a.</p>
+        <p className="mt-1 text-[#3b2a55]/65">Te vamos a escribir con novedades y materias nuevas. Cuando quieras, puedes matricularte cuando estés listo/a.</p>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function LandingLeadCapture() {
   return (
     <div className="rounded-3xl border border-[#3b2a55]/10 bg-white p-6 shadow-sm sm:p-8">
       <p className="font-display text-lg font-extrabold">¿Todavía no estás seguro/a?</p>
-      <p className="mt-1 text-[#3b2a55]/65">Dejanos tu email y te avisamos cuando sumemos materias nuevas, sin compromiso.</p>
+      <p className="mt-1 text-[#3b2a55]/65">Déjanos tu email y te avisamos cuando sumemos materias nuevas, sin compromiso.</p>
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:flex-row">
         <label className="sr-only" htmlFor="landing-lead-email">Tu email</label>
         <input
@@ -63,7 +63,7 @@ export default function LandingLeadCapture() {
           disabled={status === "submitting"}
           className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-2xl border-2 border-[#6c5ce7] px-6 py-3 font-extrabold text-[#6c5ce7] transition hover:bg-[#6c5ce7] hover:text-white disabled:opacity-60"
         >
-          {status === "submitting" ? "Enviando…" : "Avisame"}
+          {status === "submitting" ? "Enviando…" : "Avísame"}
         </button>
       </form>
       {error && <p role="alert" className="mt-3 text-sm font-bold text-[#c0392b]">{error}</p>}
