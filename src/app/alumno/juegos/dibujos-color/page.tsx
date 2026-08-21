@@ -320,7 +320,7 @@ export default function DibujosColorPage() {
         </Link>
         <h1 className="mt-3 text-center text-2xl font-bold text-white">Pizarra para Pintar 🎨</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Elegí un color y tocá el dibujo para pintarlo.
+          Elige un color y toca el dibujo para pintarlo.
         </p>
 
         <div className="mt-4 flex justify-center gap-2">
@@ -398,7 +398,7 @@ export default function DibujosColorPage() {
                   {result.diamonds_earned > 0
                     ? `+${result.diamonds_earned} 💎`
                     : filledCount < 3
-                      ? "Pintá al menos 3 partes para ganar diamantes"
+                      ? "Pinta al menos 3 partes para ganar diamantes"
                       : "Ya llegaste al límite de hoy"}
                 </p>
                 <p className="mt-1 text-xs text-white/70">
