@@ -125,7 +125,7 @@ export default function LaberintoPage() {
 
         <h1 className="mt-3 text-center text-2xl font-bold text-white">Laberinto Mágico 🌟</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Llevá a la exploradora 🧒 desde la entrada hasta el tesoro 💎.
+          Lleva a la exploradora 🧒 desde la entrada hasta el tesoro 💎.
         </p>
 
         <div
