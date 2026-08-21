@@ -115,7 +115,7 @@ export default function SumaVelozPage() {
         {!started && (
           <div className="mt-8 flex flex-col items-center gap-4">
             <p className="text-center text-sm text-white/80">
-              Resolvé todas las cuentas que puedas en {ROUND_SECONDS} segundos.
+              Resuelve todas las cuentas que puedas en {ROUND_SECONDS} segundos.
             </p>
             <motion.button
               onClick={start}
