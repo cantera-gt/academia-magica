@@ -152,7 +152,7 @@ export default function TeacherChatWidget({
         const question = rawText.trim();
         if (!question || loading) return;
 
-      const FALLBACK = "Uy, se me trabó la lengua. ¿Me lo podés preguntar de nuevo?";
+      const FALLBACK = "Uy, se me trabó la lengua. ¿Me lo puedes preguntar de nuevo?";
         const nextMessages = [...messages, { role: "user" as const, content: question }];
         setMessages(nextMessages);
         setInputValue("");
@@ -275,7 +275,7 @@ export default function TeacherChatWidget({
                                               )}
                                               <div className="flex-1 leading-tight">
                                                               <p className="text-sm font-bold">{teacher?.name ?? "Tu profe"}</p>
-                                                              <p className="text-[11px] text-white/70">Preguntame tus dudas</p>
+                                                              <p className="text-[11px] text-white/70">Pregúntame tus dudas</p>
                                               </div>
                                               <button
                                                                 onClick={() => setOpen(false)}
@@ -290,8 +290,8 @@ export default function TeacherChatWidget({
                                   {messages.length === 0 && (
                                                   <div className="space-y-2">
                                                                     <div className="rounded-2xl rounded-bl-none bg-slate-100 p-3 text-sm text-slate-600">
-                                                                                        ¿Tenés una duda de {subjectName}? Preguntame por texto o con el micrófono 🎤 —
-                                                                                        te voy a ayudar a encontrar la respuesta vos mismo/a.
+                                                                                        ¿Tienes una duda de {subjectName}? Pregúntame por texto o con el micrófono 🎤 —
+                                                                                        te voy a ayudar a encontrar la respuesta tú mismo/a.
                                                                     </div>
                                                                     <div className="flex flex-wrap gap-2">
                                                                       {QUICK_REPLIES.map((qr) => (
@@ -357,7 +357,7 @@ export default function TeacherChatWidget({
                                                                 type="text"
                                                                 value={inputValue}
                                                                 onChange={(e) => setInputValue(e.target.value)}
-                                                                placeholder={listening ? "Escuchando..." : "Escribí tu pregunta..."}
+                                                                placeholder={listening ? "Escuchando..." : "Escribe tu pregunta..."}
                                                                 disabled={loading}
                                                                 className="min-w-0 flex-1 rounded-full border border-slate-200 px-3 py-2 text-sm focus:border-purple-400 focus:outline-none"
                                                               />
