@@ -42,16 +42,16 @@ function approxAgeFromBracket(bracket: string | null | undefined): number | null
 // misma tarjeta. El array crece con el indice del combo (module), asi que
 // nunca se repite dos veces seguidas mientras la racha avanza.
 const CORRECT_PRAISES = [
-  "\u00a1Correcto!",
-  "\u00a1Genial!",
-  "\u00a1Sos un crack!",
-  "\u00a1Imparable!",
-  "\u00a1As\u00ed se hace!",
-  "\u00a1Excelente!",
-  "\u00a1Diste en el clavo!",
+  "¡Correcto!",
+  "¡Genial!",
+  "¡Eres un crack!",
+  "¡Imparable!",
+  "¡Así se hace!",
+  "¡Excelente!",
+  "¡Diste en el clavo!",
 ];
-const CORRECT_ICONS = ["\ud83c\udf89", "\u2728", "\ud83c\udf1f", "\ud83e\udd73", "\ud83d\udca5", "\ud83d\ude80", "\u2b50"];
-const INCORRECT_PRAISES = ["\u00a1Casi!", "\u00a1Por poco!", "\u00a1Casi lo ten\u00e9s!", "Segu\u00ed as\u00ed"];
+const CORRECT_ICONS = ["🎉", "✨", "🌟", "🥳", "💥", "🚀", "⭐"];
+const INCORRECT_PRAISES = ["¡Casi!", "¡Por poco!", "¡Casi lo tienes!", "Sigue así"];
 
 type Stage =
   | "loading"
@@ -452,7 +452,7 @@ export default function TemaPage() {
                     {subjectTheme.missionLabel}
                   </p>
                   <p className="text-sm text-white/90">
-                    Conseguí {practiceList.length}{" "}
+                    Consigue {practiceList.length}{" "}
                     {practiceList.length === 1
                       ? subjectTheme.unitLabel.toLowerCase()
                       : subjectTheme.unitLabelPlural}{" "}
@@ -563,7 +563,7 @@ export default function TemaPage() {
               <h1 className="text-2xl font-bold">¡Práctica completa!</h1>
               <p className="text-white/80">
                 Ahora viene el Test final ({examList.length} pregunta
-                {examList.length !== 1 ? "s" : ""}). ¡Respondé con atención!
+                {examList.length !== 1 ? "s" : ""}). ¡Responde con atención!
               </p>
               <motion.button
                 onClick={startExam}
@@ -658,7 +658,7 @@ export default function TemaPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700"
                   >
-                    💡 {current.prompt.hint_after_fail ?? "¡Casi! Fijate bien y probá de nuevo."}
+                    💡 {current.prompt.hint_after_fail ?? "¡Casi! Fíjate bien y prueba de nuevo."}
                   </motion.p>
                 )}
 
@@ -755,7 +755,7 @@ export default function TemaPage() {
                       value={textValue}
                       onChange={(e) => setTextValue(e.target.value)}
                       disabled={submitting}
-                      placeholder="Escribí tu respuesta..."
+                      placeholder="Escribe tu respuesta..."
                       className="rounded-xl border-2 border-purple-200 px-4 py-3 text-lg text-slate-800 outline-none focus:border-purple-400"
                     />
                     <motion.button
@@ -949,7 +949,7 @@ export default function TemaPage() {
                   </div>
                   {!finishResult.passed && (
                     <p className="text-sm text-white/70">
-                      Necesitás 60% o más para aprobar el Test. ¡Volvé a intentarlo!
+                      Necesitas 60% o más para aprobar el Test. ¡Vuelve a intentarlo!
                     </p>
                   )}
                 </>
