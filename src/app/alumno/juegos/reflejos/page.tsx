@@ -119,7 +119,7 @@ export default function ReflejosPage() {
 
         <h1 className="mt-3 text-center text-2xl font-bold text-white">Ojo de Halcón 🦅</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Esperá a que se ponga verde y tocá lo más rápido que puedas.
+          Espera a que se ponga verde y toca lo más rápido que puedas.
         </p>
 
         {phase === "idle" && (
@@ -150,7 +150,7 @@ export default function ReflejosPage() {
             }}
             className="mx-auto mt-10 flex h-56 w-56 items-center justify-center rounded-full text-center text-xl font-extrabold text-white shadow-2xl"
           >
-            {phase === "waiting" && "Esperá... 👀"}
+            {phase === "waiting" && "Espera... 👀"}
             {phase === "ready" && "¡AHORA! 👆"}
             {phase === "early" && "Muy pronto 😅"}
             {phase === "hit" && `${lastMs} ms ⚡`}
