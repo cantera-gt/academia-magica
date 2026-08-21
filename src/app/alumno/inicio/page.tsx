@@ -126,7 +126,7 @@ export default function AlumnoInicioPage() {
           transition={{ duration: 0.3 }}
           className="text-center text-3xl font-bold text-white"
         >
-          ¡Hola, {profile.display_name}! ¿Sos nena o nene?
+          ¡Hola, {profile.display_name}! ¿Eres nena o nene?
         </motion.h1>
         <motion.div
           initial="initial"
@@ -169,7 +169,7 @@ export default function AlumnoInicioPage() {
           transition={{ duration: 0.3 }}
           className="text-center text-3xl font-bold text-white"
         >
-          ¿Cuántos años tenés?
+          ¿Cuántos años tienes?
         </motion.h1>
         <motion.div
           initial="initial"
@@ -216,7 +216,7 @@ export default function AlumnoInicioPage() {
           transition={{ duration: 0.3 }}
           className="text-center text-3xl font-bold text-white"
         >
-          Elegí tu personaje
+          Elige tu personaje
         </motion.h1>
         <motion.div
           initial="initial"
@@ -336,7 +336,7 @@ export default function AlumnoInicioPage() {
             animate={{ opacity: 1 }}
             className="mt-4 rounded-xl bg-white p-5 text-sm text-slate-500 shadow"
           >
-            Todavía no tenés materias asignadas. Pedile a tu administrador
+            Todavía no tienes materias asignadas. Pídele a tu administrador
             que te asigne algunas desde su panel.
           </motion.p>
         )}
@@ -372,7 +372,7 @@ export default function AlumnoInicioPage() {
                 </span>
                 {blocked ? (
                   <span className="text-[11px] font-bold text-red-600">
-                    Pedile a tu familia que renueve esta materia
+                    Pídele a tu familia que renueve esta materia
                   </span>
                 ) : (
                   scores[s.id] && scores[s.id].topics_total > 0 && (
