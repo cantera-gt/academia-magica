@@ -108,14 +108,14 @@ export default function AfiliadaPanelPage() {
   function copyLink() {
     if (!referralLink) return;
     navigator.clipboard.writeText(referralLink).then(
-      () => setNotice("Enlace copiado. ¡Compartilo donde quieras!"),
+      () => setNotice("Enlace copiado. ¡Compártelo donde quieras!"),
       () => setNotice("No se pudo copiar el enlace."),
     );
   }
 
   function shareWhatsApp() {
     if (!referralLink) return;
-    const message = `¡Hola! 🪄✨ Te quiero recomendar Academia Mágica, la plataforma donde mi hijo/a estudia jugando y le encanta. Entrá acá: ${referralLink}`;
+    const message = `¡Hola! 🪄✨ Te quiero recomendar Academia Mágica, la plataforma donde mi hijo/a estudia jugando y le encanta. Entra aquí: ${referralLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   }
 
@@ -147,7 +147,7 @@ export default function AfiliadaPanelPage() {
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-violet-300">🪄 Panel de afiliada</p>
             <h1 className="mt-1 font-display text-2xl font-extrabold">¡Hola, {profile.name}!</h1>
-            <p className="mt-0.5 text-sm text-violet-200/80">Cada familia que se une por tu enlace queda con vos para siempre.</p>
+            <p className="mt-0.5 text-sm text-violet-200/80">Cada familia que se une por tu enlace queda contigo para siempre.</p>
           </div>
           <button onClick={signOut} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold transition hover:bg-white/20">
             Cerrar sesión
@@ -158,7 +158,7 @@ export default function AfiliadaPanelPage() {
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
         {profile.status === "inactive" && (
           <div role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-            Tu cuenta está pausada por Academia Mágica. Tus ventas anteriores siguen registradas, pero contactá al equipo para reactivarla.
+            Tu cuenta está pausada por Academia Mágica. Tus ventas anteriores siguen registradas, pero contacta al equipo para reactivarla.
           </div>
         )}
 
@@ -230,7 +230,7 @@ export default function AfiliadaPanelPage() {
           <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-6">
             <h2 className="font-display text-lg font-extrabold text-[#1e1b4b]">Historial de ventas y comisiones</h2>
             <p className="mt-1 text-sm text-[#3b2a55]/60">
-              Todas las familias que se matriculan o compran desde tu enlace quedan asociadas a vos para siempre, incluidas sus renovaciones.
+              Todas las familias que se matriculan o compran desde tu enlace quedan asociadas a ti para siempre, incluidas sus renovaciones.
             </p>
             <div className="mt-4 overflow-x-auto">
               <table className="min-w-full divide-y divide-violet-100 text-sm">
@@ -245,7 +245,7 @@ export default function AfiliadaPanelPage() {
                 </thead>
                 <tbody className="divide-y divide-violet-50">
                   {commissions.length === 0 && (
-                    <tr><td colSpan={5} className="py-8 text-center text-[#3b2a55]/40">Todavía no tenés ventas. ¡Compartí tu enlace!</td></tr>
+                    <tr><td colSpan={5} className="py-8 text-center text-[#3b2a55]/40">Todavía no tienes ventas. ¡Comparte tu enlace!</td></tr>
                   )}
                   {commissions.map((c) => (
                     <tr key={c.id}>
@@ -268,7 +268,7 @@ export default function AfiliadaPanelPage() {
           <aside className="space-y-5">
             <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-violet-100">
               <h2 className="font-display text-lg font-extrabold text-[#1e1b4b]">Tu enlace</h2>
-              <p className="mt-1 text-sm text-[#3b2a55]/60">Compartilo por WhatsApp, redes o donde prefieras.</p>
+              <p className="mt-1 text-sm text-[#3b2a55]/60">Compártelo por WhatsApp, redes o donde prefieras.</p>
               <code className="mt-3 block break-all rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2.5 text-xs text-[#3b2a55]/80">{referralLink || "…"}</code>
               <button
                 onClick={shareWhatsApp}
