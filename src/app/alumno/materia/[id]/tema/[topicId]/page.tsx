@@ -117,10 +117,26 @@ export default function TemaPage() {
 
   const NEUTRAL_ES_VOICE = "es-ES-ElviraNeural";
   const NEUTRAL_DE_VOICE = "de-DE-KatjaNeural";
+  const NEUTRAL_EN_VOICE = "en-GB-RyanNeural";
+
+  // En las materias de idiomas el enunciado esta escrito en espanol y solo
+  // la palabra que se aprende va entre comillas (ej: ¿Que animal sabe
+  // «swim» (nadar)?). Leer TODO con la voz del idioma extranjero hacia que
+  // el espanol sonara a palabras inventadas, asi que el enunciado se lee
+  // con voz espanola y solo lo entrecomillado con la voz del idioma.
+  const LANGUAGE_SLUGS = new Set(["ingles", "aleman"]);
+  const isLanguageSubject = !!subjectSlug && LANGUAGE_SLUGS.has(subjectSlug);
 
   function defaultVoice(): string {
+    if (isLanguageSubject) return NEUTRAL_ES_VOICE;
     if (teacher?.voice_name) return teacher.voice_name;
     return subjectSlug === "aleman" ? NEUTRAL_DE_VOICE : NEUTRAL_ES_VOICE;
+  }
+
+  function quotedVoice(): string | undefined {
+    if (!isLanguageSubject) return undefined;
+    if (teacher?.voice_name && teacher.voice_name !== NEUTRAL_ES_VOICE) return teacher.voice_name;
+    return subjectSlug === "aleman" ? NEUTRAL_DE_VOICE : NEUTRAL_EN_VOICE;
   }
 
   function speakPrompt() {
@@ -129,7 +145,8 @@ export default function TemaPage() {
       current.prompt.text,
       defaultVoice(),
       () => setPromptSpeaking(true),
-      () => setPromptSpeaking(false)
+      () => setPromptSpeaking(false),
+      quotedVoice()
     );
   }
 
