@@ -19,7 +19,11 @@ export async function speakText(
   text: string,
   voiceName: string,
   onStart?: () => void,
-  onEnd?: () => void
+  onEnd?: () => void,
+  // Voz distinta para lo que va entre comillas. Se usa en las materias de
+  // idiomas: el enunciado esta en espanol y solo la palabra entrecomillada
+  // esta en ingles/aleman, asi que cada parte se lee con su voz.
+  quotedVoice?: string
 ) {
   stopSpeaking();
   const myGeneration = speechGeneration;
@@ -28,7 +32,7 @@ export async function speakText(
     const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: voiceName }),
+      body: JSON.stringify({ text, voice: voiceName, quotedVoice }),
     });
 
     // Ya se pidio hablar otra cosa mientras esperabamos esta respuesta:
