@@ -11,6 +11,13 @@ import { stripMarkdown } from "@/lib/text-sanitize";
 // (ej. Alemán, Arte, Música...) pero el alumno igual puede preguntar.
 const NEUTRAL_VOICE = "es-ES-ElviraNeural";
 
+// El profesor responde SIEMPRE en espanol, incluso en Ingles o Aleman. Si
+// se lee su respuesta con la voz del idioma extranjero (James en Ingles,
+// por ejemplo), el espanol suena a palabras inventadas. Por eso en esas
+// materias la respuesta se lee con voz espanola y solo lo que va entre
+// comillas se lee con la voz del profesor, que es la del idioma.
+const LANGUAGE_SLUGS = new Set(["ingles", "aleman"]);
+
 // Respuestas rapidas para que arrancar la charla no dependa de escribir o
 // hablar — util sobre todo para los mas chicos (4-7) que recien aprenden
 // a escribir.
@@ -148,6 +155,19 @@ export default function TeacherChatWidget({
         setListening(false);
   }
 
+  const isLanguageSubject = !!subjectSlug && LANGUAGE_SLUGS.has(subjectSlug);
+
+  function replyVoice(): string {
+    if (isLanguageSubject) return NEUTRAL_VOICE;
+    return teacher?.voice_name ?? NEUTRAL_VOICE;
+  }
+
+  function replyQuotedVoice(): string | undefined {
+    if (!isLanguageSubject) return undefined;
+    if (teacher?.voice_name && teacher.voice_name !== NEUTRAL_VOICE) return teacher.voice_name;
+    return undefined;
+  }
+
   async function sendMessage(rawText: string) {
         const question = rawText.trim();
         if (!question || loading) return;
@@ -229,9 +249,10 @@ export default function TeacherChatWidget({
 
           speakText(
                     finalText,
-                    teacher?.voice_name ?? NEUTRAL_VOICE,
+                    replyVoice(),
                     () => setSpeaking(true),
-                    () => setSpeaking(false)
+                    () => setSpeaking(false),
+                    replyQuotedVoice()
                   );
       } catch {
               setMessages((m) => [...m, { role: "assistant", content: FALLBACK }]);
@@ -247,7 +268,7 @@ export default function TeacherChatWidget({
   }
 
   function replay(text: string) {
-        speakText(text, teacher?.voice_name ?? NEUTRAL_VOICE, () => setSpeaking(true), () => setSpeaking(false));
+        speakText(text, replyVoice(), () => setSpeaking(true), () => setSpeaking(false), replyQuotedVoice());
   }
 
   return (
