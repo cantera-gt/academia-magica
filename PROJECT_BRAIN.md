@@ -172,10 +172,14 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   `supabase/migrations/README.md`.
 - Migración posterior: `20260819120000_teacher_multi_subject_greetings.sql` (saludo por
   combinación profesor+materia; documenta un cambio aplicado en producción en 3 pasos).
-- **Deuda pendiente:** tres RPCs viven solo en Supabase, sin migración en el repo —
-  `submit_landing_lead` (`src/components/landing-lead-capture.tsx`), `my_garage` y
-  `save_vehicle_design` (`src/app/alumno/garaje/page.tsx`). Todas las tablas que usa el código sí
-  están creadas por migración.
+- Migraciones de puesta al día (10/09), obtenidas por introspección de Supabase y idempotentes,
+  porque los objetos ya existían en producción:
+  `20260820120000_landing_leads_capture.sql` (tabla `landing_leads`, RLS, y la RPC
+  `submit_landing_lead`) y `20260909120000_garaje_vehicle_designs.sql` (valor `garaje` del enum
+  `item_zone`, columnas `store_items.vehicle_slot` y `vehicle_variant`, tabla `vehicle_designs`
+  con RLS, y las RPCs `my_garage` y `save_vehicle_design`).
+- **Sin deuda de esquema conocida:** todos los RPCs y tablas que usa el código están definidos en
+  `supabase/migrations/`.
 - Restos por limpiar: `racha-nivel-xp.patch` commiteado por error en la raíz, y 9 ramas remotas
   del 11/08 ya fusionadas por squash.
 - No verificable desde el código: si `PAYPAL_ENV` está en `live`, si Resend tiene el dominio
