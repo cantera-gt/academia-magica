@@ -12,7 +12,7 @@ Este archivo es el índice estable del proyecto. Las notas extensas, investigaci
 
 - Web pública: https://academiamagicaedu.com — dominio propio, fijado en código desde `8644dc0`
   (`src/app/layout.tsx`, `robots.ts`, `sitemap.ts` y remitente de emails).
-- Despliegue Vercel: https://academia-magica-oficial.vercel.app/
+- Despliegue Vercel: proyecto `academia-magica-oficial`, enlazado a `cantera-gt/academia-magica`.
 - GitHub: `cantera-gt/academia-magica`
 - Supabase: proyecto `wlxgvbabljflvhtxuzue`
 - Frontend: Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 y Framer Motion.
@@ -150,36 +150,50 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   parches sueltos): el código nunca se trabaja ahí.
 - Claude escribe los archivos directamente en el repo local y deja el commit hecho. Pablo revisa
   el diff en GitHub Desktop y pulsa **Push**. Claude nunca empuja a `origin`.
-- Un aviso por lote: qué archivos se tocaron, qué hace cada uno y qué hay que comprobar. No se
-  dejan cambios en el repo sin avisar en el chat.
+- **Antes de escribir nada, `git pull`.** Buena parte del trabajo entra por la cuenta `cantera-gt`,
+  a veces desde la web de GitHub ("Add files via upload"), así que la copia local se queda atrás
+  sin avisar. Trabajar sobre una copia vieja produce diagnósticos falsos y conflictos.
+- Un aviso por lote: qué archivos se tocaron, qué hace cada uno y qué hay que comprobar.
 - Las migraciones SQL las **aplica Pablo** en el editor SQL de Supabase. Claude escribe el `.sql`
   en `supabase/migrations/`, explica qué hace y en qué orden, y no da el cambio por cerrado hasta
   que Pablo confirma que se aplicó. Claude no escribe en la base de datos de producción.
-- Todo cambio de esquema o contenido masivo va en una migración `AAAAMMDDHHMMSS_descripcion.sql`,
-  reversible y validada. Nada de DDL suelto ni cambios a mano en el panel de Supabase sin su
-  migración correspondiente en este repo.
 - Antes de avisar, Claude verifica lo que pueda desde el repo local (`npm run lint`,
-  `npm run build`). Si no ha podido verificar, lo dice explícitamente en el aviso.
-  `.github/workflows/verify.yml` repite lint + build en GitHub al empujar a `main`.
+  `npm run build`). Si no ha podido verificar, lo dice. `.github/workflows/verify.yml` repite
+  lint + build en GitHub al empujar a `main`.
 - Nunca se escriben secretos, tokens ni claves `service_role` en archivos, Git ni conversaciones.
-  Viven cifrados en Vercel.
-- El trabajo a medias no se queda en parches sueltos en el escritorio: o se commitea o se descarta.
 
-## Deuda conocida (10/09/2026)
+## Estado a 10/09/2026
 
-Detalle completo en el documento de proyecto `claude/estado-real-2026-09-10.md`.
-
-- Último commit: `8644dc0`, 17/08/2026. `main` y `origin/main` alineados; árbol de trabajo limpio.
-- **El esquema base no está versionado.** El código llama 55 RPCs y este repo define 15; usa 12
-  tablas y crea 4. `subjects`, `profiles`, `topics`, `exercises`, `store_items`,
-  `student_inventory`, `topic_progress`, `student_subjects`, `characters` y `student_characters`
-  no aparecen en ninguna migración. Hay un baseline preparado y sin commitear
-  (`20260818000000_baseline_schema.sql`, 3666 líneas: 35 tablas, ~76 funciones, triggers y RLS).
-- Ninguna migración posterior al 11/08/2026, pese a que después se añadieron pedidos por materia,
-  suscripciones y caducidad de acceso, racha y XP, temas visuales, minijuegos y afiliados.
-- Cuatro parches del 17–18/08/2026 sin aplicar, en `…\Academia-Magica\_temp-github-upload\`:
-  baseline de schema, rediseño del panel de afiliada y dos de remitente de email.
+- Último commit en `origin/main`: `1e96dcd`, 09/09/2026. Casi todo el trabajo desde el 18/08 va
+  firmado por la cuenta `cantera-gt`.
+- **El esquema ya está versionado.** `20260818000000_baseline_schema.sql` (3666 líneas) es la foto
+  completa del schema de producción — extensiones, tablas, constraints, índices, ~76 funciones,
+  triggers, RLS y políticas — obtenida por introspección de Postgres. Ver
+  `supabase/migrations/README.md`.
+- Migración posterior: `20260819120000_teacher_multi_subject_greetings.sql` (saludo por
+  combinación profesor+materia; documenta un cambio aplicado en producción en 3 pasos).
+- **Deuda pendiente:** tres RPCs viven solo en Supabase, sin migración en el repo —
+  `submit_landing_lead` (`src/components/landing-lead-capture.tsx`), `my_garage` y
+  `save_vehicle_design` (`src/app/alumno/garaje/page.tsx`). Todas las tablas que usa el código sí
+  están creadas por migración.
 - Restos por limpiar: `racha-nivel-xp.patch` commiteado por error en la raíz, y 9 ramas remotas
   del 11/08 ya fusionadas por squash.
-- No verificable desde el código: qué migraciones están realmente aplicadas en Supabase, qué
-  commit sirve Vercel, si `PAYPAL_ENV` está en `live` y si Resend tiene el dominio verificado.
+- No verificable desde el código: si `PAYPAL_ENV` está en `live`, si Resend tiene el dominio
+  verificado y qué commit sirve Vercel en cada momento.
+
+## Construido entre el 18/08 y el 09/09/2026
+
+- **Landing comercial v2**: hero con fotografía real de los personajes, precios, historia del
+  fundador, footer con contacto y aviso de propiedad, y captura de email para visitantes
+  indecisos (`src/components/landing-lead-capture.tsx`).
+- **Español de España (tuteo)** en toda la aplicación: landing, alumno, panel de padres, tienda,
+  cuarto, juegos, afiliados, admin, y también el prompt y las recomendaciones del profesor IA.
+- **Juegos de recreo ampliados a diez**: memoria, memoria-colores, puzzle, reflejos, suma-veloz,
+  atrapa-fruta, laberinto, tres-en-raya, diseño-libre y dibujos-color.
+- **Voz y TTS**: cada materia con dos o más profesores y saludo propio por materia; voz inglesa
+  para materias de idioma; arreglos de eco por doble reproducción, de porcentajes y de lectura
+  de restas, divisiones, fracciones y decimales.
+- **Cuarto**: fondos equipables (categoría `fondo`) y escalado de objetos en el inventario.
+- **Garaje** (09/09): ruta `/alumno/garaje`, coche en SVG por piezas tocable y pintable
+  (`src/components/vehicle-svg.tsx`), catálogo de piezas y geometría de chasis
+  (`src/lib/vehicle.ts`), con compra de piezas y premio.
