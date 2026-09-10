@@ -46,7 +46,7 @@ export default async function SubjectOrderPaymentPage({
           <p className="text-5xl">🪄</p>
           <h1 className="font-display mt-5 text-3xl font-extrabold">Enlace de pago no válido</h1>
           <p className="mt-4 text-[#3b2a55]/65">
-            Volvé al Panel para padres para elegir las materias otra vez.
+            Vuelve al Panel para padres para elegir las materias otra vez.
           </p>
           <Link
             href="/alumno/panel-padres"
@@ -78,7 +78,7 @@ export default async function SubjectOrderPaymentPage({
             role="status"
             className="mt-5 rounded-2xl bg-amber-50 p-4 font-bold text-amber-900"
           >
-            El pago se canceló en PayPal y no se realizó ningún cargo. Podés intentarlo de nuevo.
+            El pago se canceló en PayPal y no se realizó ningún cargo. Puedes intentarlo de nuevo.
           </p>
         )}
 

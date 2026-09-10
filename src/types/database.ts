@@ -245,13 +245,17 @@ export interface RoomPosition3D {
   y: number;
   z?: number;
   rotationY?: number;
+  // Escala del item colocado en el cuarto 2D (1 = tamano por defecto).
+  // Opcional para no romper posiciones ya guardadas antes de este campo.
+  scale?: number;
 }
 
 export interface InventoryItem {
   id: string;
   item_id: string;
   placed_in_room: boolean;
-  // true si es una prenda (color_ropa) o accesorio actualmente puesto en el personaje
+  // true si es una prenda (color_ropa) o accesorio actualmente puesto en el personaje,
+  // o el fondo actualmente activo (category === "fondo") de una zona
   equipped: boolean;
   position: RoomPosition3D | null;
   store_items: StoreItem;
@@ -380,7 +384,7 @@ export interface AdminAffiliate {
   commission_paid_usd: number;
 }
 
-// Fila de comisi\u00f3n, para el admin (public.admin_affiliate_commissions) y para
+// Fila de comisión, para el admin (public.admin_affiliate_commissions) y para
 // la propia afiliada (public.my_affiliate_commissions, sin household_name).
 export interface AffiliateCommission {
   id: string;

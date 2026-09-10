@@ -167,7 +167,12 @@ export default function TiendaPage() {
     setBuyingId(null);
   }
 
-  const EQUIPPABLE: ItemCategory[] = ["accesorio", "color_ropa"];
+  // "fondo" se agrega aca porque ahora tambien se "equipa" (activa) desde la
+  // tienda igual que un color de ropa o un accesorio: solo un fondo activo
+  // por zona a la vez. RoomScene en /alumno/cuarto lee el item con
+  // equipped=true de categoria "fondo" para esa zona y lo muestra en vez de
+  // la escena SVG generica.
+  const EQUIPPABLE: ItemCategory[] = ["accesorio", "color_ropa", "fondo"];
 
   async function toggleEquip(item: StoreItem) {
     if (equippingId) return;
@@ -202,6 +207,19 @@ export default function TiendaPage() {
             }
           }
         }
+        // Un fondo solo puede tener uno activo por zona: desequipa en el
+        // estado local cualquier otro fondo de la misma zona.
+        if (item.category === "fondo") {
+          for (const other of items) {
+            if (
+              other.category === "fondo" &&
+              other.zone === item.zone &&
+              other.id !== item.id
+            ) {
+              next.delete(other.id);
+            }
+          }
+        }
         next.add(item.id);
       } else {
         next.delete(item.id);
@@ -223,7 +241,7 @@ export default function TiendaPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
-          <p className="text-slate-600">Primero elegí tu personaje.</p>
+          <p className="text-slate-600">Primero elige tu personaje.</p>
           <Link href="/alumno/inicio" className="mt-3 inline-block text-purple-600 underline">
             Volver
           </Link>
@@ -302,8 +320,8 @@ export default function TiendaPage() {
                 })}
             </div>
             <p className="text-center text-sm font-semibold text-slate-600 sm:text-left">
-              ¡Así te queda, {profile.display_name}! Comprá accesorios ✨ y
-              tocá &quot;Ponérselo&quot; para probarlos.
+              ¡Así te queda, {profile.display_name}! Compra accesorios ✨ y
+              toca &quot;Ponérselo&quot; para probarlos.
             </p>
           </div>
         )}
@@ -363,6 +381,8 @@ export default function TiendaPage() {
                 const isEquipping = equippingId === item.id;
                 const bought = justBought === item.id;
                 const isEquippable = EQUIPPABLE.includes(item.category);
+                const equipVerb = item.category === "fondo" ? "Usar" : "Ponérselo";
+                const equippedVerb = item.category === "fondo" ? "En uso ✓" : "Puesto ✓";
 
                 return (
                   <motion.div
@@ -413,7 +433,7 @@ export default function TiendaPage() {
                               : "bg-slate-100 text-slate-600"
                           }`}
                         >
-                          {isEquipping ? "..." : isEquipped ? "Puesto ✓" : "Ponérselo"}
+                          {isEquipping ? "..." : isEquipped ? equippedVerb : equipVerb}
                         </motion.button>
                       ) : isOwned ? (
                         <motion.span
@@ -422,7 +442,7 @@ export default function TiendaPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           className="mt-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700"
                         >
-                          {bought ? "¡Comprado! 🎉" : "Ya lo tenés ✓"}
+                          {bought ? "¡Comprado! 🎉" : "Ya lo tienes ✓"}
                         </motion.span>
                       ) : (
                         <motion.button

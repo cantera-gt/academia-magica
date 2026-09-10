@@ -154,14 +154,8 @@ const studentAge = ageFromBirthdate(profile?.birthdate) ?? approxAgeFromBracket(
 
   const groupedByModule = useMemo(() => {
     const groups: { age: number | null; items: SubjectTopic[]; total: number; passedCount: number }[] = [];
-    const visibleTopics =
-      studentAge == null
-        ? topics
-        : topics.filter(
-            (t) =>
-              t.recommended_age == null ||
-              (t.recommended_age >= studentAge - 1 && t.recommended_age <= studentAge + 1)
-          );
+      const visibleTopics =
+      studentAge == null ? topics : topics.filter(() => true); // se ve el currículo completo, no solo ±1 año
     for (const t of visibleTopics) {
       const age = t.recommended_age ?? null;
       let group = groups.find((g) => g.age === age);
@@ -265,7 +259,7 @@ const studentAge = ageFromBirthdate(profile?.birthdate) ?? approxAgeFromBracket(
             variants={fadeSlideUp}
           >
             <h2 className="mb-1 text-lg font-bold text-slate-800">
-              {myTeacher ? "Cambiá tu profe" : "Elegí tu profe"} de {subject?.name ?? "esta materia"}
+              {myTeacher ? "Cambia tu profe" : "Elige tu profe"} de {subject?.name ?? "esta materia"}
             </h2>
             <p className="mb-4 text-sm text-slate-500">
               Te va a acompañar en cada ejercicio.
@@ -325,7 +319,7 @@ const studentAge = ageFromBirthdate(profile?.birthdate) ?? approxAgeFromBracket(
               Todavía no hay temas de {subject?.name ?? "esta materia"}.
             </p>
             <p className="mt-1 text-sm text-slate-400">
-              ¡Volvé pronto, tu administrador está preparando más!
+              ¡Vuelve pronto, tu administrador está preparando más!
             </p>
           </motion.div>
         )}

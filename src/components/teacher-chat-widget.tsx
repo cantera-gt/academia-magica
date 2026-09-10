@@ -11,6 +11,13 @@ import { stripMarkdown } from "@/lib/text-sanitize";
 // (ej. Alemán, Arte, Música...) pero el alumno igual puede preguntar.
 const NEUTRAL_VOICE = "es-ES-ElviraNeural";
 
+// El profesor responde SIEMPRE en espanol, incluso en Ingles o Aleman. Si
+// se lee su respuesta con la voz del idioma extranjero (James en Ingles,
+// por ejemplo), el espanol suena a palabras inventadas. Por eso en esas
+// materias la respuesta se lee con voz espanola y solo lo que va entre
+// comillas se lee con la voz del profesor, que es la del idioma.
+const LANGUAGE_SLUGS = new Set(["ingles", "aleman"]);
+
 // Respuestas rapidas para que arrancar la charla no dependa de escribir o
 // hablar — util sobre todo para los mas chicos (4-7) que recien aprenden
 // a escribir.
@@ -148,11 +155,24 @@ export default function TeacherChatWidget({
         setListening(false);
   }
 
+  const isLanguageSubject = !!subjectSlug && LANGUAGE_SLUGS.has(subjectSlug);
+
+  function replyVoice(): string {
+    if (isLanguageSubject) return NEUTRAL_VOICE;
+    return teacher?.voice_name ?? NEUTRAL_VOICE;
+  }
+
+  function replyQuotedVoice(): string | undefined {
+    if (!isLanguageSubject) return undefined;
+    if (teacher?.voice_name && teacher.voice_name !== NEUTRAL_VOICE) return teacher.voice_name;
+    return undefined;
+  }
+
   async function sendMessage(rawText: string) {
         const question = rawText.trim();
         if (!question || loading) return;
 
-      const FALLBACK = "Uy, se me trabó la lengua. ¿Me lo podés preguntar de nuevo?";
+      const FALLBACK = "Uy, se me trabó la lengua. ¿Me lo puedes preguntar de nuevo?";
         const nextMessages = [...messages, { role: "user" as const, content: question }];
         setMessages(nextMessages);
         setInputValue("");
@@ -229,9 +249,10 @@ export default function TeacherChatWidget({
 
           speakText(
                     finalText,
-                    teacher?.voice_name ?? NEUTRAL_VOICE,
+                    replyVoice(),
                     () => setSpeaking(true),
-                    () => setSpeaking(false)
+                    () => setSpeaking(false),
+                    replyQuotedVoice()
                   );
       } catch {
               setMessages((m) => [...m, { role: "assistant", content: FALLBACK }]);
@@ -247,7 +268,7 @@ export default function TeacherChatWidget({
   }
 
   function replay(text: string) {
-        speakText(text, teacher?.voice_name ?? NEUTRAL_VOICE, () => setSpeaking(true), () => setSpeaking(false));
+        speakText(text, replyVoice(), () => setSpeaking(true), () => setSpeaking(false), replyQuotedVoice());
   }
 
   return (
@@ -275,7 +296,7 @@ export default function TeacherChatWidget({
                                               )}
                                               <div className="flex-1 leading-tight">
                                                               <p className="text-sm font-bold">{teacher?.name ?? "Tu profe"}</p>
-                                                              <p className="text-[11px] text-white/70">Preguntame tus dudas</p>
+                                                              <p className="text-[11px] text-white/70">Pregúntame tus dudas</p>
                                               </div>
                                               <button
                                                                 onClick={() => setOpen(false)}
@@ -290,8 +311,8 @@ export default function TeacherChatWidget({
                                   {messages.length === 0 && (
                                                   <div className="space-y-2">
                                                                     <div className="rounded-2xl rounded-bl-none bg-slate-100 p-3 text-sm text-slate-600">
-                                                                                        ¿Tenés una duda de {subjectName}? Preguntame por texto o con el micrófono 🎤 —
-                                                                                        te voy a ayudar a encontrar la respuesta vos mismo/a.
+                                                                                        ¿Tienes una duda de {subjectName}? Pregúntame por texto o con el micrófono 🎤 —
+                                                                                        te voy a ayudar a encontrar la respuesta tú mismo/a.
                                                                     </div>
                                                                     <div className="flex flex-wrap gap-2">
                                                                       {QUICK_REPLIES.map((qr) => (
@@ -357,7 +378,7 @@ export default function TeacherChatWidget({
                                                                 type="text"
                                                                 value={inputValue}
                                                                 onChange={(e) => setInputValue(e.target.value)}
-                                                                placeholder={listening ? "Escuchando..." : "Escribí tu pregunta..."}
+                                                                placeholder={listening ? "Escuchando..." : "Escribe tu pregunta..."}
                                                                 disabled={loading}
                                                                 className="min-w-0 flex-1 rounded-full border border-slate-200 px-3 py-2 text-sm focus:border-purple-400 focus:outline-none"
                                                               />

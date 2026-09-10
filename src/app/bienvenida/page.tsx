@@ -61,7 +61,7 @@ function BienvenidaContent() {
 
   useEffect(() => {
     if (!ref || !token) {
-      setLoadError("Este enlace está incompleto. Revisá el correo de confirmación de compra y volvé a intentarlo.");
+      setLoadError("Este enlace está incompleto. Revisa el correo de confirmación de compra y vuelve a intentarlo.");
       setLoading(false);
       return;
     }
@@ -89,11 +89,11 @@ function BienvenidaContent() {
 
     const cleanUsername = sanitizeUsername(username);
     if (!cleanUsername) {
-      setSubmitError("Elegí un nombre de usuario válido (solo letras, números y guion bajo).");
+      setSubmitError("Elige un nombre de usuario válido (solo letras, números y guion bajo).");
       return;
     }
     if (!displayName.trim()) {
-      setSubmitError("Escribí el nombre del alumno o alumna.");
+      setSubmitError("Escribe el nombre del alumno o alumna.");
       return;
     }
     if (!/^\d{6}$/.test(pin)) {
@@ -118,7 +118,7 @@ function BienvenidaContent() {
     setSubmitting(false);
 
     if (error || result?.error) {
-      setSubmitError(result?.error ?? error?.message ?? "No se pudo crear el usuario. Probá de nuevo.");
+      setSubmitError(result?.error ?? error?.message ?? "No se pudo crear el usuario. Prueba de nuevo.");
       return;
     }
 
@@ -146,9 +146,9 @@ function BienvenidaContent() {
             <h1 className="font-display mt-4 text-2xl font-extrabold">No pudimos abrir este enlace</h1>
             <p className="mt-3 text-[#3b2a55]/70">{loadError}</p>
             <p className="mt-6 text-sm text-[#3b2a55]/60">
-              Si ya creaste el usuario antes, iniciá sesión directamente en{" "}
+              Si ya creaste el usuario antes, inicia sesión directamente en{" "}
               <Link href="/alumno" className="font-bold text-[#6c5ce7] hover:underline">Acceso alumnos</Link>.
-              Si el problema persiste, escribinos a{" "}
+              Si el problema persiste, escríbenos a{" "}
               <a href="mailto:businesscatserrano@gmail.com" className="font-bold text-[#6c5ce7] hover:underline">businesscatserrano@gmail.com</a>.
             </p>
           </div>
@@ -159,7 +159,7 @@ function BienvenidaContent() {
             <p className="text-5xl">🎉</p>
             <h1 className="font-display mt-4 text-2xl font-extrabold">¡Listo! El usuario ya está creado</h1>
             <p className="mt-3 text-[#3b2a55]/70">
-              Guardá estos datos: van a ser necesarios para entrar cada vez.
+              Guarda estos datos: van a ser necesarios para entrar cada vez.
             </p>
             <div className="mt-6 rounded-2xl bg-[#f2e9ff] p-5 text-left">
               <p className="text-xs font-extrabold uppercase tracking-wide text-[#6c5ce7]">Usuario</p>
@@ -180,7 +180,7 @@ function BienvenidaContent() {
           <div className="rounded-[2rem] bg-white p-8 shadow-xl sm:p-10">
             <h1 className="font-display text-2xl font-extrabold">¡Pago confirmado! 🎉</h1>
             <p className="mt-2 text-[#3b2a55]/70">
-              Creá el usuario con el que {data.student_first_name || "tu hijo/a"} va a entrar a Academia Mágica.
+              Crea el usuario con el que {data.student_first_name || "tu hijo/a"} va a entrar a Academia Mágica.
             </p>
             <div className="mt-5 rounded-2xl bg-[#fff7e6] p-4 text-sm">
               <p><strong>Materias:</strong> {data.subject_names.join(", ") || "—"}</p>

@@ -27,7 +27,7 @@ async function sendConfirmationEmail(reference: string, paymentToken: string) {
 
     const subjectNames = ((data.subject_names ?? []) as string[]).join(", ");
     const claimUrl = `${SITE_URL}/bienvenida?ref=${encodeURIComponent(reference)}&pt=${encodeURIComponent(paymentToken)}`;
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "Academia Mágica <notificaciones@academiamagicaedu.com>";
+    const fromAddress = process.env.RESEND_FROM_EMAIL || "Academia Mágica <admin@academiamagicaedu.com>";
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#3b2a55;">

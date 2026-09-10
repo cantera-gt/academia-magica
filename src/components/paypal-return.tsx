@@ -47,7 +47,7 @@ export default function PayPalReturn({
     <h1 className="font-display mt-2 text-3xl font-extrabold">{message}</h1>
     {state === "loading" && <p className="mt-4 text-[#3b2a55]/65">No cierres esta ventana todavía.</p>}
     {state === "success" && <>
-      <p className="mt-4 text-[#3b2a55]/65">Tu matrícula ya figura como pagada y el acceso está listo. Te enviamos un correo con los detalles, pero podés continuar ahora mismo:</p>
+      <p className="mt-4 text-[#3b2a55]/65">Tu matrícula ya figura como pagada y el acceso está listo. Te enviamos un correo con los detalles, pero puedes continuar ahora mismo:</p>
       <Link href={claimUrl} className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[#6c5ce7] px-7 py-3.5 font-extrabold text-white shadow-lg transition hover:brightness-105 sm:w-auto">Crear el usuario de mi hijo/a →</Link>
       <p className="mt-4"><Link href="/" className="font-bold text-[#6c5ce7] hover:underline">Volver a Academia Mágica</Link></p>
     </>}

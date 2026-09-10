@@ -8,7 +8,7 @@ import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 
 const SIZE = 3;
-const TILE_EMOJIS = ["\ud83e\udd8b", "\ud83c\udf08", "\ud83c\udf4e", "\ud83d\udc2c", "\ud83c\udf88", "\ud83c\udf1f", "\ud83c\udf40", "\ud83c\udf38"];
+const TILE_EMOJIS = ["🦋", "🌈", "🍎", "🐬", "🎈", "🌟", "🍀", "🌸"];
 const SOLVED = [1, 2, 3, 4, 5, 6, 7, 8, 0];
 
 function shuffledBoard(): number[] {
@@ -86,14 +86,14 @@ export default function PuzzlePage() {
       <div className="mx-auto max-w-md">
         <div className="flex items-center justify-between text-white">
           <Link href="/alumno/juegos" className="text-sm text-white/70 hover:text-white">
-            {"\u2190 Juegos"}
+            {"← Juegos"}
           </Link>
           <span className="text-sm font-semibold">Movimientos: {moves}</span>
         </div>
 
-        <h1 className="mt-3 text-center text-2xl font-bold text-white">{"Rompecabezas M\u00e1gico \ud83e\udde9"}</h1>
+        <h1 className="mt-3 text-center text-2xl font-bold text-white">{"Rompecabezas Mágico 🧩"}</h1>
         <p className="mt-1 text-center text-sm text-white/80">
-          Deslizá las piezas hasta ordenarlas del 1 al 8.
+          Desliza las piezas hasta ordenarlas del 1 al 8.
         </p>
 
         <div className="mx-auto mt-6 grid w-full max-w-xs grid-cols-3 gap-2">
@@ -128,16 +128,16 @@ export default function PuzzlePage() {
               transition={SPRING_PLAYFUL}
               className="mt-6 flex flex-col items-center gap-3 rounded-3xl bg-white/15 p-6 text-center text-white backdrop-blur"
             >
-              <span className="text-5xl">{"\ud83c\udf89"}</span>
-              <p className="text-lg font-bold">{"\u00a1Lo resolviste en "}{moves}{" movimientos!"}</p>
+              <span className="text-5xl">{"🎉"}</span>
+              <p className="text-lg font-bold">{"¡Lo resolviste en "}{moves}{" movimientos!"}</p>
               {saving ? (
                 <p className="text-sm text-white/80">Calculando premio...</p>
               ) : result ? (
                 <>
                   <p className="text-2xl font-bold">
                     {result.diamonds_earned > 0
-                      ? `+${result.diamonds_earned} \ud83d\udc8e`
-                      : "Ya llegaste al l\u00edmite de hoy"}
+                      ? `+${result.diamonds_earned} 💎`
+                      : "Ya llegaste al límite de hoy"}
                   </p>
                   <p className="text-xs text-white/70">
                     Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}

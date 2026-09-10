@@ -25,7 +25,7 @@ export default function AfiliadaLoginPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: pin });
 
     if (signInError) {
-      setError("Código o PIN incorrectos. Revisá con Academia Mágica si no los recordás.");
+      setError("Código o PIN incorrectos. Revísalos con Academia Mágica si no los recuerdas.");
       setLoading(false);
       setPin("");
       return;

@@ -81,10 +81,10 @@ export default function AdminNewOrderPage() {
     e.preventDefault();
     setError(null);
 
-    if (!studentId) { setError("Elegí un alumno."); return; }
-    if (selectedSubjects.size === 0) { setError("Elegí al menos una materia."); return; }
-    if (!totalPrice || Number(totalPrice) <= 0) { setError("Indicá un importe válido."); return; }
-    if (!accessMonths || accessMonths < 1) { setError("Indicá los meses de acceso."); return; }
+    if (!studentId) { setError("Elige un alumno."); return; }
+    if (selectedSubjects.size === 0) { setError("Elige al menos una materia."); return; }
+    if (!totalPrice || Number(totalPrice) <= 0) { setError("Indica un importe válido."); return; }
+    if (!accessMonths || accessMonths < 1) { setError("Indica los meses de acceso."); return; }
 
     setSubmitting(true);
     try {
@@ -134,7 +134,7 @@ export default function AdminNewOrderPage() {
 
       <h1 className="mt-3 font-display text-2xl font-extrabold text-slate-950">Añadir nuevo pedido</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Registrá un pago hecho fuera de PayPal (efectivo, transferencia, Bizum…) con nota y comprobante.
+        Registra un pago hecho fuera de PayPal (efectivo, transferencia, Bizum…) con nota y comprobante.
       </p>
 
       {loadingOptions ? (

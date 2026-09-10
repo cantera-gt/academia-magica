@@ -7,20 +7,37 @@
 
 let currentAudio: HTMLAudioElement | null = null;
 
+// Numero de "ronda" de habla: se incrementa cada vez que se pide hablar
+// algo nuevo o que se corta el audio. Si un pedido anterior (todavia
+// esperando la respuesta del servidor) termina de resolver DESPUES de que
+// arranco uno nuevo, se descarta en vez de reproducirse: sin esto, dos
+// toques rapidos del boton de audio (muy comun con chicos impacientes)
+// podian terminar con dos audios reproduciendose superpuestos ("eco").
+let speechGeneration = 0;
+
 export async function speakText(
   text: string,
   voiceName: string,
   onStart?: () => void,
-  onEnd?: () => void
+  onEnd?: () => void,
+  // Voz distinta para lo que va entre comillas. Se usa en las materias de
+  // idiomas: el enunciado esta en espanol y solo la palabra entrecomillada
+  // esta en ingles/aleman, asi que cada parte se lee con su voz.
+  quotedVoice?: string
 ) {
   stopSpeaking();
+  const myGeneration = speechGeneration;
 
   try {
     const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: voiceName }),
+      body: JSON.stringify({ text, voice: voiceName, quotedVoice }),
     });
+
+    // Ya se pidio hablar otra cosa mientras esperabamos esta respuesta:
+    // descartamos este audio para no superponerlo con el nuevo.
+    if (myGeneration !== speechGeneration) return;
 
     if (!res.ok) {
       onEnd?.();
@@ -28,6 +45,9 @@ export async function speakText(
     }
 
     const blob = await res.blob();
+
+    if (myGeneration !== speechGeneration) return;
+
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     currentAudio = audio;
@@ -51,6 +71,7 @@ export async function speakText(
 }
 
 export function stopSpeaking() {
+  speechGeneration++;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;

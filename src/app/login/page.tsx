@@ -69,7 +69,7 @@ export default function LoginPage() {
         );
         if (signInError) {
           setError(
-            "Ese email ya está registrado. Si es tuyo, iniciá sesión; si todavía no confirmaste el email, revisá tu correo."
+            "Ese email ya está registrado. Si es tuyo, inicia sesión; si todavía no confirmaste el email, revisa tu correo."
           );
           setSubmitting(false);
           return;
@@ -91,7 +91,7 @@ export default function LoginPage() {
 
     setAwaitingConfirmation(true);
     setInfo(
-      "Te enviamos un email para confirmar tu cuenta. Abrilo, confirmá, y después tocá el botón de abajo."
+      "Te enviamos un email para confirmar tu cuenta. Ábrelo, confirma, y después toca el botón de abajo."
     );
     setSubmitting(false);
   }
@@ -167,7 +167,7 @@ export default function LoginPage() {
           >
             <h1 className="mt-4 text-2xl font-bold text-white">
               {awaitingConfirmation
-                ? "Confirmá tu email"
+                ? "Confirma tu email"
                 : needsSetup
                 ? "Crear cuenta de administrador"
                 : "Ingreso administrador"}
@@ -176,7 +176,7 @@ export default function LoginPage() {
               {awaitingConfirmation
                 ? "Te faltaba este último paso."
                 : needsSetup
-                ? "Academia Mágica todavía no tiene un administrador. Creá tu cuenta."
+                ? "Academia Mágica todavía no tiene un administrador. Crea tu cuenta."
                 : "Panel de gestión de Academia Mágica"}
             </p>
 

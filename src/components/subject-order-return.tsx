@@ -25,7 +25,7 @@ export default function SubjectOrderReturn({
         if (!response.ok) throw new Error(data.error ?? "No se pudo confirmar el pago");
         if (active) {
           setState("success");
-          setMessage("¡Pago confirmado! Ya tenés acceso a las nuevas materias.");
+          setMessage("¡Pago confirmado! Ya tienes acceso a las nuevas materias.");
         }
       })
       .catch((cause) => {
@@ -67,7 +67,7 @@ export default function SubjectOrderReturn({
       {state === "error" && (
         <>
           <p className="mt-4 text-[#3b2a55]/65">
-            No vuelvas a pagar. Guardá el número de orden y contactá con nosotros para revisar la
+            No vuelvas a pagar. Guarda el número de orden y contacta con nosotros para revisar la
             operación.
           </p>
           <p className="mt-2 text-xs text-[#3b2a55]/50">Orden: {orderId}</p>
