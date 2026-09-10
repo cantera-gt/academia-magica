@@ -1,6 +1,6 @@
 # Academia Mágica — cerebro del proyecto
 
-Última actualización: 2026-08-11
+Última actualización: 2026-09-10
 
 ## Propósito
 
@@ -10,7 +10,9 @@ Este archivo es el índice estable del proyecto. Las notas extensas, investigaci
 
 ## Producción y repositorios
 
-- Web: https://academia-magica-oficial.vercel.app/
+- Web pública: https://academiamagicaedu.com — dominio propio, fijado en código desde `8644dc0`
+  (`src/app/layout.tsx`, `robots.ts`, `sitemap.ts` y remitente de emails).
+- Despliegue Vercel: https://academia-magica-oficial.vercel.app/
 - GitHub: `cantera-gt/academia-magica`
 - Supabase: proyecto `wlxgvbabljflvhtxuzue`
 - Frontend: Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 y Framer Motion.
@@ -137,3 +139,47 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 - `20260811202000_paypal_sandbox_checkout.sql`
 - `20260811202500_harden_paypal_server_mutations.sql`
 - `20260811210000_paypal_verified_webhook_events.sql`
+
+## Circuito de entrega (cómo trabajamos)
+
+Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este repo.
+
+- El repo de trabajo es `C:\Users\pablo\academia-magica`: conectado a la sesión de Claude y
+  añadido a GitHub Desktop en la rama `main`. La carpeta
+  `…\CEREBROCLAUDE\proyectos\Academia-Magica` es solo material de apoyo (imágenes, currículos,
+  parches sueltos): el código nunca se trabaja ahí.
+- Claude escribe los archivos directamente en el repo local y deja el commit hecho. Pablo revisa
+  el diff en GitHub Desktop y pulsa **Push**. Claude nunca empuja a `origin`.
+- Un aviso por lote: qué archivos se tocaron, qué hace cada uno y qué hay que comprobar. No se
+  dejan cambios en el repo sin avisar en el chat.
+- Las migraciones SQL las **aplica Pablo** en el editor SQL de Supabase. Claude escribe el `.sql`
+  en `supabase/migrations/`, explica qué hace y en qué orden, y no da el cambio por cerrado hasta
+  que Pablo confirma que se aplicó. Claude no escribe en la base de datos de producción.
+- Todo cambio de esquema o contenido masivo va en una migración `AAAAMMDDHHMMSS_descripcion.sql`,
+  reversible y validada. Nada de DDL suelto ni cambios a mano en el panel de Supabase sin su
+  migración correspondiente en este repo.
+- Antes de avisar, Claude verifica lo que pueda desde el repo local (`npm run lint`,
+  `npm run build`). Si no ha podido verificar, lo dice explícitamente en el aviso.
+  `.github/workflows/verify.yml` repite lint + build en GitHub al empujar a `main`.
+- Nunca se escriben secretos, tokens ni claves `service_role` en archivos, Git ni conversaciones.
+  Viven cifrados en Vercel.
+- El trabajo a medias no se queda en parches sueltos en el escritorio: o se commitea o se descarta.
+
+## Deuda conocida (10/09/2026)
+
+Detalle completo en el documento de proyecto `claude/estado-real-2026-09-10.md`.
+
+- Último commit: `8644dc0`, 17/08/2026. `main` y `origin/main` alineados; árbol de trabajo limpio.
+- **El esquema base no está versionado.** El código llama 55 RPCs y este repo define 15; usa 12
+  tablas y crea 4. `subjects`, `profiles`, `topics`, `exercises`, `store_items`,
+  `student_inventory`, `topic_progress`, `student_subjects`, `characters` y `student_characters`
+  no aparecen en ninguna migración. Hay un baseline preparado y sin commitear
+  (`20260818000000_baseline_schema.sql`, 3666 líneas: 35 tablas, ~76 funciones, triggers y RLS).
+- Ninguna migración posterior al 11/08/2026, pese a que después se añadieron pedidos por materia,
+  suscripciones y caducidad de acceso, racha y XP, temas visuales, minijuegos y afiliados.
+- Cuatro parches del 17–18/08/2026 sin aplicar, en `…\Academia-Magica\_temp-github-upload\`:
+  baseline de schema, rediseño del panel de afiliada y dos de remitente de email.
+- Restos por limpiar: `racha-nivel-xp.patch` commiteado por error en la raíz, y 9 ramas remotas
+  del 11/08 ya fusionadas por squash.
+- No verificable desde el código: qué migraciones están realmente aplicadas en Supabase, qué
+  commit sirve Vercel, si `PAYPAL_ENV` está en `live` y si Resend tiene el dominio verificado.
