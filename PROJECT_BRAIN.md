@@ -1,6 +1,6 @@
 # Academia Mágica — cerebro del proyecto
 
-Última actualización: 2026-09-10
+Última actualización: 2026-09-14
 
 ## Propósito
 
@@ -162,7 +162,7 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   lint + build en GitHub al empujar a `main`.
 - Nunca se escriben secretos, tokens ni claves `service_role` en archivos, Git ni conversaciones.
 
-## Estado a 10/09/2026
+## Estado a 14/09/2026
 
 - Último commit en `origin/main`: `1e96dcd`, 09/09/2026. Casi todo el trabajo desde el 18/08 va
   firmado por la cuenta `cantera-gt`.
@@ -178,8 +178,16 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   `submit_landing_lead`) y `20260909120000_garaje_vehicle_designs.sql` (valor `garaje` del enum
   `item_zone`, columnas `store_items.vehicle_slot` y `vehicle_variant`, tabla `vehicle_designs`
   con RLS, y las RPCs `my_garage` y `save_vehicle_design`).
+- `20260910120000_barajar_opciones_por_alumno.sql`: baraja las opciones de elección múltiple al
+  servirlas, con semilla `md5(alumno + ejercicio + posición)` — orden distinto por niño y estable
+  entre recargas. El contenido se generó con la correcta la primera en el 92,2 % de las preguntas
+  de tres opciones; ahora queda repartido (33,9 / 33,0 / 33,1 medido sobre producción).
+- `20260914120000_sesiones_de_tema.sql`: tabla `topic_sessions` y RPCs `my_topic_session`,
+  `save_topic_session` y `clear_topic_session`, para retomar un tema a medias.
 - **Sin deuda de esquema conocida:** todos los RPCs y tablas que usa el código están definidos en
   `supabase/migrations/`.
+- **Sesgo pendiente, de contenido:** el 62,8 % de los 6.329 enunciados de Verdadero/Falso son
+  verdaderos. No se arregla barajando; hay que reescribir enunciados.
 - Restos por limpiar: `racha-nivel-xp.patch` commiteado por error en la raíz, y 9 ramas remotas
   del 11/08 ya fusionadas por squash.
 - No verificable desde el código: si `PAYPAL_ENV` está en `live`, si Resend tiene el dominio
@@ -201,3 +209,7 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
 - **Garaje** (09/09): ruta `/alumno/garaje`, coche en SVG por piezas tocable y pintable
   (`src/components/vehicle-svg.tsx`), catálogo de piezas y geometría de chasis
   (`src/lib/vehicle.ts`), con compra de piezas y premio.
+- **Reanudar un tema a medias** (14/09): si el alumno dejó un tema sin cerrar, al volver ve
+  «¿Seguimos donde lo dejaste?» con su progreso, y elige seguir o empezar de nuevo. El punto de
+  retorno se guarda tras cada ejercicio y se borra al cerrar el tema. Se le pregunta en vez de
+  continuar sin más: si abandonó porque se atascó, devolverle al mismo muro es el peor recibimiento.

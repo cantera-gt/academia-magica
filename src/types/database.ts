@@ -407,3 +407,16 @@ export interface AffiliateProfile {
   commission_rate: number;
   status: AffiliateStatus;
 }
+
+// Ver RPC public.my_topic_session(). Es la sesion a medias de un tema: por
+// donde iba el alumno cuando lo dejo. Se borra al cerrar el tema o al
+// empezar de nuevo, asi que null significa "empieza desde el principio".
+export interface TopicSession {
+  topic_id: string;
+  phase: "practice" | "exam";
+  exercise_index: number;
+  practice_correct: number;
+  exam_correct: number;
+  diamonds_earned: number;
+  updated_at: string;
+}

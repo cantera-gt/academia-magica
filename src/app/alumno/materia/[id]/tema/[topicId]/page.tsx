@@ -14,6 +14,7 @@ import type {
   TopicDetail,
   MyProfile,
   ExerciseOption,
+  TopicSession,
 } from "@/types/database";
 import DragDropExercise from "@/components/drag-drop-exercise";
 import { staggerContainer, staggerItem, fadeSlideUp, SPRING_PLAYFUL, EASE_OUT } from "@/lib/motion";
@@ -61,6 +62,7 @@ type Stage =
   | "lesson_intro"
   | "exam_intro"
   | "summary"
+  | "resume"
   | "empty"
   | "error";
 
@@ -97,6 +99,10 @@ export default function TemaPage() {
   const [speaking, setSpeaking] = useState(false);
   const [promptSpeaking, setPromptSpeaking] = useState(false);
   const [pendingLessonName, setPendingLessonName] = useState<string | null>(null);
+
+  // Sesion a medias: por donde iba el alumno la ultima vez que dejo este
+  // tema sin cerrar. null = empieza desde el principio.
+  const [savedSession, setSavedSession] = useState<TopicSession | null>(null);
 
   // Andamiaje adaptativo: cuantas veces fallo el alumno ESTE ejercicio en
   // fila. 0 = intento normal. 1 = ya mostramos pista + resaltamos la
@@ -208,16 +214,79 @@ export default function TemaPage() {
       setCharacter(null);
     }
 
+    const { data: sessionData } = await supabase.rpc("my_topic_session", {
+      p_topic_id: topicId,
+    });
+    const session = (sessionData as TopicSession | null) ?? null;
+    setSavedSession(session);
+
     const list = (data as PlayableTopicExercise[]) ?? [];
     setExercises(list);
-    setStage(list.length === 0 ? "empty" : "intro");
+    // Si dejo el tema a medias no le tiramos directo al primer ejercicio:
+    // le preguntamos si sigue o empieza de nuevo. Si abandono porque se
+    // atasco, obligarle a volver al mismo muro seria el peor recibimiento.
+    setStage(list.length === 0 ? "empty" : session ? "resume" : "intro");
   }, [supabase, topicId, subjectId]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  // Deja constancia de por donde va. No bloqueamos la UI: si falla, el
+  // alumno sigue jugando y como mucho pierde el punto de retorno.
+  const saveSession = useCallback(
+    (p: Phase, i: number, pc: number, ec: number, diamonds: number) => {
+      supabase
+        .rpc("save_topic_session", {
+          p_topic_id: topicId,
+          p_phase: p,
+          p_index: i,
+          p_practice_correct: pc,
+          p_exam_correct: ec,
+          p_diamonds: diamonds,
+        })
+        .then(() => {});
+    },
+    [supabase, topicId]
+  );
+
+  const clearSession = useCallback(() => {
+    supabase.rpc("clear_topic_session", { p_topic_id: topicId }).then(() => {});
+    setSavedSession(null);
+  }, [supabase, topicId]);
+
+  // Retoma la sesion guardada. Si el indice se fue de rango porque el tema
+  // cambio de contenido desde la ultima vez, empieza de cero en vez de
+  // dejar al alumno en una pantalla vacia.
+  function resumeRound() {
+    const session = savedSession;
+    if (!session) {
+      startRound();
+      return;
+    }
+
+    const list = session.phase === "exam" ? examList : practiceList;
+    if (list.length === 0 || session.exercise_index >= list.length) {
+      startRound();
+      return;
+    }
+
+    setPhase(session.phase);
+    setIndex(session.exercise_index);
+    setPracticeCorrect(session.practice_correct);
+    setExamCorrect(session.exam_correct);
+    setDiamondsThisRound(session.diamonds_earned);
+    setFinishResult(null);
+    setTextValue("");
+    setFailStreak(0);
+    setReducedOptions(null);
+    setRevealCorrectLabel(null);
+    setStartedAt(Date.now());
+    setStage("playing");
+  }
+
   function startRound() {
+    clearSession();
     setPhase("practice");
     setIndex(0);
     setPracticeCorrect(0);
@@ -237,6 +306,7 @@ export default function TemaPage() {
   }
 
   function startExam() {
+    saveSession("exam", 0, practiceCorrect, examCorrect, diamondsThisRound);
     setPhase("exam");
     setIndex(0);
     setTextValue("");
@@ -259,6 +329,8 @@ export default function TemaPage() {
     if (!error && data) {
       setFinishResult(data as FinishTopicResult);
     }
+    // El tema queda cerrado: ya no hay nada "a medias" que retomar.
+    clearSession();
     setStage("summary");
   }
 
@@ -335,6 +407,7 @@ export default function TemaPage() {
         !!current?.lesson_id &&
         !!next?.lesson_id &&
         next.lesson_id !== current.lesson_id;
+      saveSession(phase, index + 1, practiceCorrect, examCorrect, diamondsThisRound);
       setIndex((i) => i + 1);
       setTextValue("");
       setResult(null);
@@ -445,6 +518,77 @@ export default function TemaPage() {
               >
                 Volver a los temas
               </Link>
+            </motion.div>
+          )}
+
+          {stage === "resume" && savedSession && (
+            <motion.div
+              key="resume"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={fadeSlideUp}
+              className="mt-6 flex flex-col items-center gap-4"
+            >
+              <div className="w-full rounded-2xl bg-black/15 p-6 text-center text-white">
+                <span className="text-5xl">{"\uD83D\uDD16"}</span>
+                <h2 className="mt-3 text-2xl font-black">
+                  {"\u00bfSeguimos donde lo dejaste?"}
+                </h2>
+                <p className="mt-2 text-white/80">
+                  {savedSession.phase === "exam"
+                    ? "Te quedaste en el test final."
+                    : "Te quedaste a mitad de la pr\u00e1ctica."}
+                </p>
+
+                <div className="mt-4 inline-flex flex-wrap justify-center gap-2 text-sm font-bold">
+                  <span className="rounded-full bg-white/20 px-3 py-1">
+                    {"Ejercicio "}
+                    {Math.min(
+                      savedSession.exercise_index + 1,
+                      (savedSession.phase === "exam" ? examList.length : practiceList.length) || 1
+                    )}
+                    {" de "}
+                    {savedSession.phase === "exam" ? examList.length : practiceList.length}
+                  </span>
+                  <span className="rounded-full bg-white/20 px-3 py-1">
+                    {"\u2705 "}
+                    {savedSession.practice_correct + savedSession.exam_correct}
+                    {" aciertos"}
+                  </span>
+                  {savedSession.diamonds_earned > 0 && (
+                    <span className="rounded-full bg-white/20 px-3 py-1">
+                      {"\uD83D\uDC8E "}
+                      {savedSession.diamonds_earned}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
+                  <motion.button
+                    onClick={resumeRound}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={SPRING_PLAYFUL}
+                    className="rounded-xl bg-white px-8 py-3 text-lg font-bold text-purple-700 shadow-lg"
+                  >
+                    {"Seguir \uD83D\uDC49"}
+                  </motion.button>
+                  <motion.button
+                    onClick={startRound}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={SPRING_PLAYFUL}
+                    className="rounded-xl bg-white/20 px-8 py-3 text-lg font-bold text-white"
+                  >
+                    {"Empezar de nuevo \uD83D\uDD04"}
+                  </motion.button>
+                </div>
+
+                <p className="mt-4 text-xs text-white/60">
+                  {"Si empiezas de nuevo, los diamantes que ya ganaste siguen siendo tuyos."}
+                </p>
+              </div>
             </motion.div>
           )}
 
