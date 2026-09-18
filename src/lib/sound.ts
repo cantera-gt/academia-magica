@@ -69,3 +69,43 @@ export function playLevelUpSound() {
     tone(ac, f, i * 0.09, 0.28, "triangle", 0.18)
   );
 }
+
+// --- Recreo -----------------------------------------------------------
+// Los diez minijuegos no sonaban nada, mientras el motor de ejercicios si.
+// Para un nino de 4 a 10 anos eso hacia que el recreo se sintiera mas
+// muerto que la clase, justo al reves de lo que deberia.
+
+// Toque corto al interactuar: voltear una carta, pisar una casilla, atrapar.
+export function playTapSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  tone(ac, 660, 0, 0.07, "triangle", 0.09);
+}
+
+// Victoria: fanfarria de cuatro notas, mas larga y brillante que un acierto
+// suelto, para que ganar se note distinto de responder bien.
+export function playWinSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  const base = 523.25; // Do5
+  [base, base * 1.26, base * 1.5, base * 2].forEach((f, i) =>
+    tone(ac, f, i * 0.09, 0.3, "triangle", 0.17)
+  );
+  tone(ac, base * 2, 0.36, 0.45, "sine", 0.12);
+}
+
+// Derrota: descendente y breve. Que se entienda que se acabo, sin castigar.
+export function playLoseSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  [392, 330, 262].forEach((f, i) => tone(ac, f, i * 0.1, 0.22, "sine", 0.11));
+}
+
+// Record batido: campanilla sobre la fanfarria. Suena a logro, no a punto.
+export function playRecordSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  [1046.5, 1318.5, 1568].forEach((f, i) =>
+    tone(ac, f, 0.45 + i * 0.07, 0.35, "triangle", 0.14)
+  );
+}

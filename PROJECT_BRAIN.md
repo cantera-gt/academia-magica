@@ -1,6 +1,6 @@
 # Academia Mágica — cerebro del proyecto
 
-Última actualización: 2026-09-14
+Última actualización: 2026-09-18
 
 ## Propósito
 
@@ -140,6 +140,24 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
 - `20260811202500_harden_paypal_server_mutations.sql`
 - `20260811210000_paypal_verified_webhook_events.sql`
 
+## Recreo (los diez minijuegos)
+
+- `moves` es una **puntuación normalizada donde menos es mejor**, rango útil 4–40. Los juegos que
+  no cuentan movimientos reales convierten su marca a esa escala (p. ej. `20 - aciertos * 2`).
+  Puzzle y Laberinto mandaban movimientos crudos —el puzzle promedia 149— y por eso siempre
+  cobraban el mínimo; desde el 18/09 también normalizan. Respetar el rango importa: de él dependen
+  el premio y el récord.
+- Topes: 5 partidas por juego y 12 en total al día. El global se enseña ahora al alcanzarlo, que
+  antes era silencio y parecía que la app se había roto.
+- Perder llegando lejos (`moves <= 28`) paga 1 diamante, para que intentarlo de verdad no valga
+  cero. Memoria de Colores figuraba con cero diamantes repartidos, pero la causa no era la
+  dificultad: ese alumno llevaba 19 partidas ese día y el tope global son 12.
+- La puntuación nunca baja de 4. Memoria de Colores y Dibujos podían mandar 0 al ganar bien, y
+  como la marca personal es `min(moves)`, un 0 es imbatible: habría matado el récord de esos dos
+  juegos para siempre.
+- Uso real a 14/09: 33 partidas de 3 niños, última el 09/09; `dibujos-color` y `diseno-libre`
+  nunca se habían jugado. El problema del recreo no es que falten juegos.
+
 ## Circuito de entrega (cómo trabajamos)
 
 Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este repo.
@@ -162,7 +180,7 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   lint + build en GitHub al empujar a `main`.
 - Nunca se escriben secretos, tokens ni claves `service_role` en archivos, Git ni conversaciones.
 
-## Estado a 14/09/2026
+## Estado a 18/09/2026
 
 - Último commit en `origin/main`: `1e96dcd`, 09/09/2026. Casi todo el trabajo desde el 18/08 va
   firmado por la cuenta `cantera-gt`.
@@ -184,6 +202,9 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   de tres opciones; ahora queda repartido (33,9 / 33,0 / 33,1 medido sobre producción).
 - `20260914120000_sesiones_de_tema.sql`: tabla `topic_sessions` y RPCs `my_topic_session`,
   `save_topic_session` y `clear_topic_session`, para retomar un tema a medias.
+- `20260918120000_recreo_premios_y_records.sql`: reescribe `finish_game` — premio por
+  esfuerzo al perder llegando lejos, marca personal y récord por juego, y el tope global del día
+  expuesto al cliente.
 - **Sin deuda de esquema conocida:** todos los RPCs y tablas que usa el código están definidos en
   `supabase/migrations/`.
 - **Sesgo pendiente, de contenido:** el 62,8 % de los 6.329 enunciados de Verdadero/Falso son

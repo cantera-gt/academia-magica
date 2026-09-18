@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
+import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
 
 // Simon Dice: la pantalla muestra una secuencia de colores que se va
 // alargando, y el alumno tiene que repetirla tocando los mismos botones en
@@ -66,9 +67,12 @@ export default function MemoriaColoresPage() {
 
   async function finish(finalRounds: number) {
     const won = finalRounds >= 3;
-    const moves = Math.max(0, 40 - finalRounds * 4);
+    const moves = Math.max(4, 40 - finalRounds * 4);
     setSaving(true);
     const res = await finishGame(supabase, "memoriacolores", won, moves);
+    if (won) playWinSound();
+    else playLoseSound();
+    if (res?.is_record) playRecordSound();
     setResult(res);
     setSaving(false);
   }
@@ -171,6 +175,14 @@ export default function MemoriaColoresPage() {
                   <p className="text-xs text-white/70">
                     Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}
                   </p>
+                  {result.is_record && (
+                    <p className="mt-1 text-base font-black">{"\uD83C\uDFC6 \u00a1Nuevo r\u00e9cord!"}</p>
+                  )}
+                  {result.capped && (
+                    <p className="mt-1 text-xs text-white/70">
+                      {"Ya ganaste todos los diamantes del recreo de hoy. Ma\u00f1ana m\u00e1s \u2014 puedes seguir jugando igual."}
+                    </p>
+                  )}
                 </>
               ) : null}
               <motion.button

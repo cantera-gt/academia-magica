@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
+import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
 
 // Tres en Raya contra la profe: IA simple (gana si puede, bloquea si hace
 // falta, si no juega centro/esquina). El alumno siempre empieza.
@@ -67,6 +68,9 @@ export default function TresEnRayaPage() {
       const effectiveMoves = finalWinner === "draw" ? 16 : finalWinner === "player" ? moves : 20;
       setSaving(true);
       const res = await finishGame(supabase, "tresenraya", won, effectiveMoves);
+      if (won) playWinSound();
+      else playLoseSound();
+      if (res?.is_record) playRecordSound();
       setResult(res);
       setSaving(false);
     },
@@ -180,6 +184,14 @@ export default function TresEnRayaPage() {
                   <p className="text-xs text-white/70">
                     Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}
                   </p>
+                  {result.is_record && (
+                    <p className="mt-1 text-base font-black">{"\uD83C\uDFC6 \u00a1Nuevo r\u00e9cord!"}</p>
+                  )}
+                  {result.capped && (
+                    <p className="mt-1 text-xs text-white/70">
+                      {"Ya ganaste todos los diamantes del recreo de hoy. Ma\u00f1ana m\u00e1s \u2014 puedes seguir jugando igual."}
+                    </p>
+                  )}
                 </>
               ) : null}
               <motion.button

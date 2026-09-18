@@ -5,6 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
+import { finishGame as saveGame, type FinishGameResult } from "@/lib/finish-game";
+import { playWinSound, playRecordSound } from "@/lib/sound";
 
 const EMOJIS = ["🦄", "🐉", "🌟", "🎈", "🍀", "💎"];
 
@@ -23,13 +25,6 @@ function shuffledDeck(): CardState[] {
   return pairs.map((emoji, i) => ({ key: `${i}-${emoji}-${Math.random()}`, emoji, matched: false }));
 }
 
-type FinishGameResult = {
-  diamonds_earned: number;
-  total_diamonds: number;
-  plays_today: number;
-  daily_cap: number;
-};
-
 export default function MemoriaPage() {
   const supabase = createClient();
   const [deck, setDeck] = useState<CardState[]>(() => shuffledDeck());
@@ -45,12 +40,10 @@ export default function MemoriaPage() {
   const finishGame = useCallback(
     async (finalMoves: number) => {
       setSaving(true);
-      const { data } = await supabase.rpc("finish_game", {
-        p_game_code: "memoria",
-        p_won: true,
-        p_moves: finalMoves,
-      });
-      if (data) setResult(data as FinishGameResult);
+      const res = await saveGame(supabase, "memoria", true, finalMoves);
+      playWinSound();
+      if (res?.is_record) playRecordSound();
+      setResult(res);
       setSaving(false);
     },
     [supabase]
@@ -168,6 +161,14 @@ export default function MemoriaPage() {
                   <p className="text-xs text-white/70">
                     Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}
                   </p>
+                  {result.is_record && (
+                    <p className="mt-1 text-base font-black">{"\uD83C\uDFC6 \u00a1Nuevo r\u00e9cord!"}</p>
+                  )}
+                  {result.capped && (
+                    <p className="mt-1 text-xs text-white/70">
+                      {"Ya ganaste todos los diamantes del recreo de hoy. Ma\u00f1ana m\u00e1s \u2014 puedes seguir jugando igual."}
+                    </p>
+                  )}
                 </>
               ) : null}
               <motion.button

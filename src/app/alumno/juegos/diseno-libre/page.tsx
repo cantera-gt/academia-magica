@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
+import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
 
 // Pizarra en blanco para dibujar libremente con el dedo/mouse (canvas 2D).
 // Sin plantillas: el alumno diseña lo que quiera desde cero.
@@ -110,6 +111,9 @@ export default function DisenoLibrePage() {
   async function finish() {
     setSaving(true);
     const res = await finishGame(supabase, "disenolibre", hasDrawn, hasDrawn ? 8 : 40);
+    if (hasDrawn) playWinSound();
+    else playLoseSound();
+    if (res?.is_record) playRecordSound();
     setResult(res);
     setSaving(false);
   }
@@ -216,6 +220,14 @@ export default function DisenoLibrePage() {
                 <p className="mt-1 text-xs text-white/70">
                   Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}
                 </p>
+                {result.is_record && (
+                  <p className="mt-1 text-base font-black">{"\uD83C\uDFC6 \u00a1Nuevo r\u00e9cord!"}</p>
+                )}
+                {result.capped && (
+                  <p className="mt-1 text-xs text-white/70">
+                    {"Ya ganaste todos los diamantes del recreo de hoy. Ma\u00f1ana m\u00e1s \u2014 puedes seguir jugando igual."}
+                  </p>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

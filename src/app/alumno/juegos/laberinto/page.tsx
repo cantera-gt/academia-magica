@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
+import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
 
 // Laberinto Magico: laberinto generado al azar (backtracking) del tamano
 // SIZE x SIZE. El alumno lo recorre con flechas desde la entrada (arriba
@@ -63,7 +64,10 @@ export default function LaberintoPage() {
   const finish = useCallback(
     async (finalMoves: number) => {
       setSaving(true);
-      const res = await finishGame(supabase, "laberinto", true, finalMoves);
+      const res = await finishGame(supabase, "laberinto", true, Math.max(4, Math.min(40, Math.round(finalMoves / 2))));
+      if (true) playWinSound();
+      else playLoseSound();
+      if (res?.is_record) playRecordSound();
       setResult(res);
       setSaving(false);
     },
@@ -209,6 +213,14 @@ export default function LaberintoPage() {
                   <p className="text-xs text-white/70">
                     Partidas jugadas hoy: {result.plays_today}/{result.daily_cap}
                   </p>
+                  {result.is_record && (
+                    <p className="mt-1 text-base font-black">{"\uD83C\uDFC6 \u00a1Nuevo r\u00e9cord!"}</p>
+                  )}
+                  {result.capped && (
+                    <p className="mt-1 text-xs text-white/70">
+                      {"Ya ganaste todos los diamantes del recreo de hoy. Ma\u00f1ana m\u00e1s \u2014 puedes seguir jugando igual."}
+                    </p>
+                  )}
                 </>
               ) : null}
               <motion.button
