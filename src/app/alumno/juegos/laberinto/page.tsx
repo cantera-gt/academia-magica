@@ -7,21 +7,23 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
 // Laberinto Magico: laberinto generado al azar (backtracking) del tamano
 // SIZE x SIZE. El alumno lo recorre con flechas desde la entrada (arriba
 // a la izquierda) hasta la salida (abajo a la derecha).
 
+// Tamano por defecto; la edad lo ajusta al generar cada laberinto.
 const SIZE = 7;
 const CELL = 40;
 
 type Walls = { N: boolean; E: boolean; S: boolean; W: boolean };
 
-function generateMaze(): Walls[][] {
-  const grid: Walls[][] = Array.from({ length: SIZE }, () =>
-    Array.from({ length: SIZE }, () => ({ N: true, E: true, S: true, W: true }))
+function generateMaze(size: number = SIZE): Walls[][] {
+  const grid: Walls[][] = Array.from({ length: size }, () =>
+    Array.from({ length: size }, () => ({ N: true, E: true, S: true, W: true }))
   );
-  const visited = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
+  const visited = Array.from({ length: size }, () => Array(size).fill(false));
   const stack: [number, number][] = [[0, 0]];
   visited[0][0] = true;
 
@@ -36,7 +38,7 @@ function generateMaze(): Walls[][] {
     const [r, c] = stack[stack.length - 1];
     const options = dirs
       .map((d) => ({ ...d, nr: r + d.dr, nc: c + d.dc }))
-      .filter((d) => d.nr >= 0 && d.nr < SIZE && d.nc >= 0 && d.nc < SIZE && !visited[d.nr][d.nc]);
+      .filter((d) => d.nr >= 0 && d.nr < size && d.nc >= 0 && d.nc < size && !visited[d.nr][d.nc]);
 
     if (options.length === 0) {
       stack.pop();
@@ -54,6 +56,11 @@ function generateMaze(): Walls[][] {
 
 export default function LaberintoPage() {
   const supabase = createClient();
+  const { difficulty } = useStudentDifficulty();
+  // 5x5 se recorre entero de un vistazo, que es lo que necesita un nino de
+  // cinco anos para no perderse; 9x9 obliga a planificar y es lo que evita
+  // que uno de diez lo resuelva sin pensar.
+  const size = byDifficulty(difficulty, 5, SIZE, 9);
   const [maze, setMaze] = useState<Walls[][]>(() => generateMaze());
   const [pos, setPos] = useState({ r: 0, c: 0 });
   const [moves, setMoves] = useState(0);
@@ -81,17 +88,17 @@ export default function LaberintoPage() {
         if (maze[p.r][p.c][dir]) return p;
         const nr = p.r + dr;
         const nc = p.c + dc;
-        if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return p;
+        if (nr < 0 || nr >= size || nc < 0 || nc >= size) return p;
         const nextMoves = moves + 1;
         setMoves(nextMoves);
-        if (nr === SIZE - 1 && nc === SIZE - 1) {
+        if (nr === size - 1 && nc === size - 1) {
           setWon(true);
           finish(nextMoves);
         }
         return { r: nr, c: nc };
       });
     },
-    [maze, moves, won, finish]
+    [maze, moves, won, finish, size]
   );
 
   useEffect(() => {
@@ -106,7 +113,7 @@ export default function LaberintoPage() {
   }, [move]);
 
   function restart() {
-    setMaze(generateMaze());
+    setMaze(generateMaze(size));
     setPos({ r: 0, c: 0 });
     setMoves(0);
     setWon(false);
@@ -134,7 +141,7 @@ export default function LaberintoPage() {
 
         <div
           className="relative mx-auto mt-4 rounded-2xl bg-white/90 p-1 shadow-lg"
-          style={{ width: SIZE * CELL + 8, height: SIZE * CELL + 8 }}
+          style={{ width: size * CELL + 8, height: size * CELL + 8 }}
         >
           {cells.map(({ r, c, walls }) => (
             <div
@@ -152,7 +159,7 @@ export default function LaberintoPage() {
               }}
               className="flex items-center justify-center text-lg"
             >
-              {r === SIZE - 1 && c === SIZE - 1 && "💎"}
+              {r === size - 1 && c === size - 1 && "💎"}
               {pos.r === r && pos.c === c && (
                 <motion.span layoutId="explorer" transition={SPRING_PLAYFUL} className="text-xl">
                   🧒

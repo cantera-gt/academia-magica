@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
+// Rondas y espera por defecto; la edad los ajusta dentro del componente.
 const TOTAL_ROUNDS = 5;
 const EARLY_PENALTY_MS = 1200;
 const MIN_DELAY = 700;
@@ -18,6 +20,14 @@ type Phase = "idle" | "waiting" | "ready" | "early" | "hit" | "done";
 export default function ReflejosPage() {
   const supabase = createClient();
   const [phase, setPhase] = useState<Phase>("idle");
+  const { difficulty } = useStudentDifficulty();
+  // Menos rondas para los pequenos: cinco intentos de atencion sostenida son
+  // muchos a los cinco anos. Y espera mas corta y variable para los mayores,
+  // que es lo que vuelve el juego imprevisible en vez de rutinario.
+  const totalRounds = byDifficulty(difficulty, 4, TOTAL_ROUNDS, 6);
+  const minDelay = byDifficulty(difficulty, 900, MIN_DELAY, 500);
+  const maxDelay = byDifficulty(difficulty, 2400, MAX_DELAY, 2000);
+
   const [round, setRound] = useState(0);
   const [times, setTimes] = useState<number[]>([]);
   const [lastMs, setLastMs] = useState<number | null>(null);
@@ -37,12 +47,12 @@ export default function ReflejosPage() {
   const startRound = useCallback(() => {
     setPhase("waiting");
     setLastMs(null);
-    const delay = MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY);
+    const delay = minDelay + Math.random() * (maxDelay - minDelay);
     timeoutRef.current = setTimeout(() => {
       readyAt.current = performance.now();
       setPhase("ready");
     }, delay);
-  }, []);
+  }, [minDelay, maxDelay]);
 
   useEffect(() => () => clearTimer(), [clearTimer]);
 
@@ -85,7 +95,7 @@ export default function ReflejosPage() {
   function advance(nextTimes: number[]) {
     const nextRound = round + 1;
     setTimeout(() => {
-      if (nextRound >= TOTAL_ROUNDS) {
+      if (nextRound >= totalRounds) {
         setRound(nextRound);
         setPhase("done");
         finish(nextTimes);
@@ -116,7 +126,7 @@ export default function ReflejosPage() {
           </Link>
           {phase !== "idle" && phase !== "done" && (
             <span className="text-sm font-semibold">
-              Ronda {Math.min(round + 1, TOTAL_ROUNDS)}/{TOTAL_ROUNDS}
+              Ronda {Math.min(round + 1, totalRounds)}/{totalRounds}
             </span>
           )}
         </div>

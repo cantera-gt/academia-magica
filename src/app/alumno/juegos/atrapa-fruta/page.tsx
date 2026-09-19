@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
 // Atrapa la Fruta: caen frutas (y alguna bomba) desde arriba, hay que
 // tocarlas antes de que lleguen abajo. Tocar una fruta suma, tocar una
@@ -31,6 +32,14 @@ export default function AtrapaFrutaPage() {
   const supabase = createClient();
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
+  const { difficulty } = useStudentDifficulty();
+  // Los pequenos necesitan que la fruta caiga despacio para llegar a tocarla,
+  // y menos bombas: a esa edad fallar por una bomba se vive como injusticia.
+  const bombChance = byDifficulty(difficulty, 0.12, 0.22, 0.3);
+  const fallBase = byDifficulty(difficulty, 2.8, 2.1, 1.6);
+  const fallSpread = byDifficulty(difficulty, 1.2, 1.1, 1.0);
+  const spawnMs = byDifficulty(difficulty, 850, 650, 520);
+
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [items, setItems] = useState<FallingItem[]>([]);
   const [correct, setCorrect] = useState(0);
@@ -75,7 +84,7 @@ export default function AtrapaFrutaPage() {
   useEffect(() => {
     if (!started || finished) return;
     spawnRef.current = setInterval(() => {
-      const isBomb = Math.random() < 0.22;
+      const isBomb = Math.random() < bombChance;
       const emoji = isBomb ? BOMB : FRUITS[Math.floor(Math.random() * FRUITS.length)];
       setItems((prev) => [
         ...prev,
@@ -84,14 +93,14 @@ export default function AtrapaFrutaPage() {
           emoji,
           isBomb,
           x: 8 + Math.random() * 80,
-          duration: 2.1 + Math.random() * 1.1,
+          duration: fallBase + Math.random() * fallSpread,
         },
       ]);
-    }, 650);
+    }, spawnMs);
     return () => {
       if (spawnRef.current) clearInterval(spawnRef.current);
     };
-  }, [started, finished]);
+  }, [started, finished, bombChance, fallBase, fallSpread, spawnMs]);
 
   useEffect(() => {
     if (started && !finished && secondsLeft === 0) {

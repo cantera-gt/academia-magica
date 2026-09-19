@@ -7,15 +7,19 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
 const ROUND_SECONDS = 30;
 
 type Question = { text: string; answer: number; options: number[] };
 
-function makeQuestion(): Question {
-  const useSum = Math.random() < 0.6;
-  let a = 1 + Math.floor(Math.random() * 18);
-  let b = 1 + Math.floor(Math.random() * 18);
+// Pequenos: solo sumas hasta 9, que es lo que se trabaja a esa edad y la
+// resta todavia no esta asentada. Medianos: como hasta ahora. Mayores:
+// numeros hasta 30 y mitad de restas, que si no se aburren.
+function makeQuestion(maxOperand = 18, sumChance = 0.6): Question {
+  const useSum = Math.random() < sumChance;
+  let a = 1 + Math.floor(Math.random() * maxOperand);
+  let b = 1 + Math.floor(Math.random() * maxOperand);
   if (!useSum && b > a) [a, b] = [b, a];
   const answer = useSum ? a + b : a - b;
 
@@ -35,6 +39,9 @@ export default function SumaVelozPage() {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
+  const { difficulty } = useStudentDifficulty();
+  const maxOperand = byDifficulty(difficulty, 9, 18, 30);
+  const sumChance = byDifficulty(difficulty, 1, 0.6, 0.5);
   const [question, setQuestion] = useState<Question>(() => makeQuestion());
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
@@ -88,7 +95,7 @@ export default function SumaVelozPage() {
     setSecondsLeft(ROUND_SECONDS);
     setCorrect(0);
     setWrong(0);
-    setQuestion(makeQuestion());
+    setQuestion(makeQuestion(maxOperand, sumChance));
     setResult(null);
   }
 
@@ -99,7 +106,7 @@ export default function SumaVelozPage() {
     setTimeout(() => setFlash(null), 200);
     if (isCorrect) setCorrect((c) => c + 1);
     else setWrong((w) => w + 1);
-    setQuestion(makeQuestion());
+    setQuestion(makeQuestion(maxOperand, sumChance));
   }
 
   return (

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playLoseSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
 // Simon Dice: la pantalla muestra una secuencia de colores que se va
 // alargando, y el alumno tiene que repetirla tocando los mismos botones en
@@ -31,6 +32,13 @@ export default function MemoriaColoresPage() {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<FinishGameResult | null>(null);
 
+  const { difficulty } = useStudentDifficulty();
+  // Ritmo del destello. A los pequenos les hace falta ver cada color mas
+  // tiempo y con mas pausa entre uno y otro; a los mayores, ir rapido es
+  // justo lo que hace el juego interesante.
+  const litMs = byDifficulty(difficulty, 620, 420, 300);
+  const gapMs = byDifficulty(difficulty, 320, 200, 140);
+
   const cancelledRef = useRef(false);
 
   const playSequence = useCallback(async (seq: number[]) => {
@@ -39,15 +47,15 @@ export default function MemoriaColoresPage() {
     for (const step of seq) {
       if (cancelledRef.current) return;
       setLitPad(step);
-      await new Promise((r) => setTimeout(r, 420));
+      await new Promise((r) => setTimeout(r, litMs));
       if (cancelledRef.current) return;
       setLitPad(null);
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, gapMs));
     }
     if (cancelledRef.current) return;
     setUserStep(0);
     setPhase("input");
-  }, []);
+  }, [litMs, gapMs]);
 
   useEffect(() => {
     cancelledRef.current = false;

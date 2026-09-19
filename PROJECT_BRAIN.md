@@ -1,6 +1,6 @@
 # Academia Mágica — cerebro del proyecto
 
-Última actualización: 2026-09-18
+Última actualización: 2026-09-18 (2)
 
 ## Propósito
 
@@ -157,6 +157,39 @@ La ruta / es una landing de venta dirigida a madres, padres y familias. Mantiene
   juegos para siempre.
 - Uso real a 14/09: 33 partidas de 3 niños, última el 09/09; `dibujos-color` y `diseno-libre`
   nunca se habían jugado. El problema del recreo no es que falten juegos.
+
+### Dificultad por edad (18/09)
+
+`src/lib/age.ts` concentra la edad del alumno y la traduce a **tres tramos**, no cinco: con un
+rango de 4 a 12 años, más granularidad da ilusión de precisión sin mejorar nada y multiplica lo
+que hay que probar.
+
+| Tramo | Edad | Criterio |
+|---|---|---|
+| `peque` | 4–6 | Leen poco, memoria de trabajo corta, motricidad fina en desarrollo |
+| `medio` | 7–8 | **Es la dificultad que tenían todos los juegos hasta ahora** |
+| `mayor` | 9+ | El juego de `medio` se les queda corto y lo abandonan |
+
+Sin fecha de nacimiento se aproxima por tramo; sin ninguna de las dos, `medio`. El hook
+`useStudentDifficulty` arranca en `medio` mientras carga el perfil, para que el juego sea jugable
+desde el primer fotograma en vez de dejar al niño mirando una pantalla vacía.
+
+| Juego | peque | medio | mayor |
+|---|---|---|---|
+| Memoria | 4 parejas | 6 | 8 |
+| Memoria de Colores | destello 620/320 ms | 420/200 | 300/140 |
+| Suma Veloz | hasta 9, solo sumas | hasta 18, 60 % sumas | hasta 30, 50 % sumas |
+| Reflejos | 4 rondas, espera 900–2400 ms | 5, 700–2200 | 6, 500–2000 |
+| Atrapa la Fruta | 12 % bombas, caída 2,8–4,0 s | 22 %, 2,1–3,2 | 30 %, 1,6–2,6 |
+| Laberinto | 5×5 | 7×7 | 9×9 |
+
+**Fuera de la adaptación, a propósito:** Puzzle (cambiar la rejilla 3×3 recalibraría toda su
+puntuación y merece su propio paso), Tres en Raya (lo que habría que graduar es la IA, no una
+constante) y Dibujos y Diseño Libre (son creativos: no hay dificultad que graduar).
+
+**Pendiente de comprobar con niños reales.** Los números salen de criterio pedagógico, no de
+datos: con 33 partidas de 3 niños no hay muestra para calibrar. Cuando haya uso, mirar
+`game_plays` por tramo de edad y ajustar.
 
 ## Circuito de entrega (cómo trabajamos)
 

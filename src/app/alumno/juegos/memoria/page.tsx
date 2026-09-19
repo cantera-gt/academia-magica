@@ -7,8 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import { SPRING_PLAYFUL } from "@/lib/motion";
 import { finishGame as saveGame, type FinishGameResult } from "@/lib/finish-game";
 import { playWinSound, playRecordSound } from "@/lib/sound";
+import { useStudentDifficulty, byDifficulty } from "@/lib/age";
 
-const EMOJIS = ["🦄", "🐉", "🌟", "🎈", "🍀", "💎"];
+// Ocho simbolos disponibles; cada partida usa los primeros N segun la edad.
+const EMOJIS = ["🦄", "🐉", "🌟", "🎈", "🍀", "💎", "🐢", "🌺"];
 
 interface CardState {
   key: string;
@@ -16,8 +18,11 @@ interface CardState {
   matched: boolean;
 }
 
-function shuffledDeck(): CardState[] {
-  const pairs = [...EMOJIS, ...EMOJIS];
+// Parejas segun edad: 4 para los pequenos (8 cartas caben de un vistazo y no
+// exceden su memoria de trabajo), 6 como hasta ahora, 8 para los mayores.
+function shuffledDeck(pairCount = 6): CardState[] {
+  const chosen = EMOJIS.slice(0, pairCount);
+  const pairs = [...chosen, ...chosen];
   for (let i = pairs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
@@ -27,6 +32,8 @@ function shuffledDeck(): CardState[] {
 
 export default function MemoriaPage() {
   const supabase = createClient();
+  const { difficulty } = useStudentDifficulty();
+  const pairCount = byDifficulty(difficulty, 4, 6, 8);
   const [deck, setDeck] = useState<CardState[]>(() => shuffledDeck());
   const [flipped, setFlipped] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -83,7 +90,7 @@ export default function MemoriaPage() {
   }
 
   function playAgain() {
-    setDeck(shuffledDeck());
+    setDeck(shuffledDeck(pairCount));
     setFlipped([]);
     setMoves(0);
     setLocked(false);
