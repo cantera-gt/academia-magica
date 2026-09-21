@@ -10,45 +10,34 @@ import { SPRING_PLAYFUL, fadeOnly, staggerContainer, staggerItem } from "@/lib/m
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { themeOf } from "@/lib/theme";
 import DiamondCounter from "@/components/diamond-counter";
-import VehicleSvg from "@/components/vehicle-svg";
+import VehicleCanvas from "@/components/vehicle-canvas";
 import {
+  MODELS,
+  MODEL_ORDER,
   PALETTE,
-  REGION_LABEL,
-  REGION_ORDER,
-  SLOT_LABEL,
-  SLOT_ORDER,
-  VARIANTS,
+  customCount,
   defaultDesign,
-  isVariantAvailable,
   mergeDesign,
-  ownedKey,
-  type PaintRegion,
+  paintableLayers,
   type VehicleDesign,
-  type VehicleSlot,
+  type VehicleModel,
 } from "@/lib/vehicle";
 
 /**
- * El garaje: el coche del alumno, pintable pieza a pieza.
+ * El garaje: el coche del alumno, para pintarlo a su gusto.
+ *
+ * No se cambian piezas, se cambian COLORES. Las capas del coche vienen de un
+ * render 3D despiezado, y solo traen lo que se veia en la imagen original, asi
+ * que sustituir una rueda dejaria un agujero a la vista.
  *
  * Dos formas de elegir que se pinta, a proposito:
- *   1. tocando directamente la pieza en el coche (lo divertido)
+ *   1. tocando directamente la zona en el coche (lo divertido)
  *   2. con los botones grandes de abajo (lo que funciona con 4 años)
  * Las dos mueven el mismo estado.
  *
- * Los colores son gratis. Las piezas de pago se compran aqui mismo con
- * purchase_store_item, sin tener que salir a la tienda.
+ * Pintar es gratis. Lo que da diamantes es guardar el coche, y paga mas cuanto
+ * mas trabajado este.
  */
-
-type GarageItem = {
-  id: string;
-  name: string;
-  description: string | null;
-  price_diamonds: number;
-  vehicle_slot: string;
-  vehicle_variant: string;
-};
-
-type Tab = "pintar" | "piezas";
 
 export default function GarajePage() {
   const router = useRouter();
@@ -57,16 +46,11 @@ export default function GarajePage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [design, setDesign] = useState<VehicleDesign>(defaultDesign(null));
   const [saved, setSaved] = useState<VehicleDesign>(defaultDesign(null));
-  const [owned, setOwned] = useState<Set<string>>(new Set());
-  const [items, setItems] = useState<GarageItem[]>([]);
+  const [zone, setZone] = useState<string>("carroceria");
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>("pintar");
-  const [region, setRegion] = useState<PaintRegion>("carroceria");
   const [driving, setDriving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [reward, setReward] = useState<FinishGameResult | null>(null);
-  const [buying, setBuying] = useState<GarageItem | null>(null);
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -83,22 +67,10 @@ export default function GarajePage() {
     setProfile(prof);
 
     const { data: garage } = await supabase.rpc("my_garage");
-    const g = (garage ?? {}) as { design?: unknown; owned?: string[] };
+    const g = (garage ?? {}) as { design?: unknown };
     const merged = mergeDesign(g.design, prof?.gender ?? null);
     setDesign(merged);
     setSaved(merged);
-    setOwned(new Set(g.owned ?? []));
-
-    if (prof?.gender) {
-      const { data: si } = await supabase
-        .from("store_items")
-        .select("id, name, description, price_diamonds, vehicle_slot, vehicle_variant")
-        .eq("zone", "garaje")
-        .eq("gender", prof.gender)
-        .eq("active", true);
-      setItems(((si as unknown) as GarageItem[]) ?? []);
-    }
-
     setLoading(false);
   }, [supabase, router]);
 
@@ -106,52 +78,37 @@ export default function GarajePage() {
     load();
   }, [load]);
 
-  const itemFor = useCallback(
-    (slot: VehicleSlot, variant: string) =>
-      items.find((i) => i.vehicle_slot === slot && i.vehicle_variant === variant) ?? null,
-    [items]
-  );
+  const zones = useMemo(() => paintableLayers(design.model), [design.model]);
 
+  // Si al cambiar de coche la zona elegida no existe, vuelve a la carroceria.
+  useEffect(() => {
+    if (!zones.some((z) => z.id === zone)) setZone(zones[0]?.id ?? "carroceria");
+  }, [zones, zone]);
+
+  const base = useMemo(() => defaultDesign(profile?.gender ?? null), [profile?.gender]);
+  const worked = useMemo(() => customCount(design, base), [design, base]);
   const dirty = useMemo(
     () => JSON.stringify(design) !== JSON.stringify(saved),
     [design, saved]
   );
 
-  /** Cuantas ranuras estan en algo distinto a lo de serie. Cuanto mas trabajado
-   *  esta el coche, mas diamantes da al guardarlo. */
-  const customCount = useMemo(() => {
-    const base = defaultDesign(profile?.gender ?? null);
-    let n = 0;
-    for (const slot of SLOT_ORDER) if (design.parts[slot] !== base.parts[slot]) n++;
-    for (const r of REGION_ORDER) if (design.colors[r] !== base.colors[r]) n++;
-    if (design.matricula.trim()) n++;
-    return n;
-  }, [design, profile?.gender]);
-
   function paint(color: string) {
-    setDesign((d) => ({ ...d, colors: { ...d.colors, [region]: color } }));
+    setDesign((d) => ({ ...d, colors: { ...d.colors, [zone]: color } }));
     setReward(null);
   }
 
-  function chooseVariant(slot: VehicleSlot, variant: string) {
-    setDesign((d) => ({ ...d, parts: { ...d.parts, [slot]: variant } }));
+  function clearZone() {
+    setDesign((d) => {
+      const colors = { ...d.colors };
+      delete colors[zone];
+      return { ...d, colors };
+    });
     setReward(null);
   }
 
-  async function buy(item: GarageItem) {
-    if (busy) return;
-    setBusy(true);
-    setError(null);
-    const { error: e } = await supabase.rpc("purchase_store_item", { p_item_id: item.id });
-    if (e) {
-      setError("No se ha podido comprar. ¿Te faltan diamantes?");
-    } else {
-      setOwned((prev) => new Set(prev).add(ownedKey(item.vehicle_slot as VehicleSlot, item.vehicle_variant)));
-      setProfile((p) => (p ? { ...p, diamonds: p.diamonds - item.price_diamonds } : p));
-      chooseVariant(item.vehicle_slot as VehicleSlot, item.vehicle_variant);
-      setBuying(null);
-    }
-    setBusy(false);
+  function chooseModel(model: VehicleModel) {
+    setDesign((d) => (d.model === model ? d : { ...d, model, colors: {} }));
+    setReward(null);
   }
 
   async function save() {
@@ -168,8 +125,11 @@ export default function GarajePage() {
     setDesign(stored);
     setSaved(stored);
 
-    // Menos "movimientos" = mas diamantes, asi que un coche mas trabajado premia mas.
-    const moves = Math.max(0, 40 - customCount * 5);
+    // Menos "movimientos" = mas diamantes, asi que un coche mas trabajado
+    // premia mas. El suelo de 4 es el contrato de finish_game: moves nunca
+    // puede ser 0, porque min(moves) es la marca personal y un 0 seria
+    // imbatible para siempre.
+    const moves = Math.max(4, 40 - worked * 5);
     const res = await finishGame(supabase, "garaje", true, moves);
     setReward(res);
     if (res) setProfile((p) => (p ? { ...p, diamonds: res.total_diamonds } : p));
@@ -189,11 +149,11 @@ export default function GarajePage() {
     );
   }
 
-  if (!profile?.gender) {
+  if (!profile) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center">
         <div>
-          <p className="text-slate-600">Primero elige tu personaje.</p>
+          <p className="text-slate-600">No hemos podido cargar tu perfil.</p>
           <Link href="/alumno/inicio" className="mt-3 inline-block text-purple-600 underline">
             Volver
           </Link>
@@ -203,6 +163,7 @@ export default function GarajePage() {
   }
 
   const theme = themeOf(profile.visual_theme);
+  const zoneLabel = zones.find((z) => z.id === zone)?.label ?? "Carrocería";
 
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
@@ -229,269 +190,186 @@ export default function GarajePage() {
       </header>
 
       <div className="mx-auto max-w-3xl p-4 sm:p-6">
-        {/* ------------------------- EL COCHE ------------------------- */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-200 to-slate-300 p-3 shadow-inner">
-          <VehicleSvg
-            design={design}
-            selectedRegion={tab === "pintar" ? region : null}
-            onSelectRegion={(r) => {
-              setRegion(r);
-              setTab("pintar");
-            }}
-            driving={driving}
-          />
-          <p className="pb-1 text-center text-xs font-semibold text-slate-500">
+        {/* El coche */}
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-b from-slate-200 to-slate-300 p-4 shadow-inner">
+          <motion.div
+            animate={driving ? { x: [0, 26, -18, 0] } : { x: 0 }}
+            transition={driving ? { duration: 2.4, ease: "easeInOut" } : SPRING_PLAYFUL}
+          >
+            <VehicleCanvas
+              model={design.model}
+              colors={design.colors}
+              onPickZone={setZone}
+              className="mx-auto max-w-xl select-none"
+            />
+          </motion.div>
+          <p className="mt-1 text-center text-sm text-slate-600">
             Toca una parte del coche para pintarla
           </p>
         </div>
 
-        <div className="mt-3 flex flex-wrap justify-center gap-2">
-          <motion.button
-            onClick={drive}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            transition={SPRING_PLAYFUL}
-            className="rounded-2xl bg-amber-400 px-5 py-2.5 text-sm font-bold text-amber-950 shadow"
+        {/* Elegir coche */}
+        <section className="mt-6">
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+            Tu coche
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {MODEL_ORDER.map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => chooseModel(m)}
+                className={`rounded-2xl px-4 py-3 text-sm font-bold shadow transition ${
+                  design.model === m
+                    ? "bg-purple-600 text-white"
+                    : "bg-white text-slate-600 hover:bg-purple-50"
+                }`}
+              >
+                {MODELS[m].emoji} {MODELS[m].label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Que pinto */}
+        <section className="mt-6">
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+            ¿Qué pintas?
+          </h2>
+          <motion.div
+            variants={staggerContainer(0.06)}
+            initial="initial"
+            animate="animate"
+            className="flex flex-wrap gap-2"
           >
-            🏁 ¡Arrancar!
-          </motion.button>
-          <motion.button
+            {zones.map((z) => (
+              <motion.button
+                key={z.id}
+                variants={staggerItem}
+                type="button"
+                onClick={() => setZone(z.id)}
+                className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold shadow transition ${
+                  zone === z.id
+                    ? "bg-purple-600 text-white"
+                    : "bg-white text-slate-600 hover:bg-purple-50"
+                }`}
+              >
+                <span>{z.emoji}</span>
+                <span>{z.label}</span>
+                {design.colors[z.id] && (
+                  <span
+                    className="h-4 w-4 rounded-full border-2 border-white shadow"
+                    style={{ backgroundColor: design.colors[z.id] }}
+                  />
+                )}
+              </motion.button>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* Paleta */}
+        <section className="mt-6 rounded-3xl bg-white p-4 shadow">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+              Color de: {zoneLabel}
+            </h2>
+            {design.colors[zone] && (
+              <button
+                type="button"
+                onClick={clearZone}
+                className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-200"
+              >
+                Quitar pintura
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-6 gap-2 sm:grid-cols-9">
+            {PALETTE.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => paint(c)}
+                aria-label={`Pintar de ${c}`}
+                className={`aspect-square rounded-xl border-4 transition ${
+                  design.colors[zone] === c
+                    ? "border-purple-600 scale-110"
+                    : "border-white hover:scale-105"
+                } shadow`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Matricula */}
+        <section className="mt-6 rounded-3xl bg-white p-4 shadow">
+          <label
+            htmlFor="matricula"
+            className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-500"
+          >
+            Tu matrícula
+          </label>
+          <input
+            id="matricula"
+            value={design.matricula}
+            maxLength={10}
+            onChange={(e) => {
+              const v = e.target.value.toUpperCase().replace(/[^A-Z0-9ÁÉÍÓÚÑ ]/g, "").slice(0, 10);
+              setDesign((d) => ({ ...d, matricula: v }));
+              setReward(null);
+            }}
+            placeholder="MI COCHE"
+            className="w-full rounded-2xl border-2 border-slate-200 px-4 py-3 text-center text-xl font-black tracking-widest text-slate-700 outline-none focus:border-purple-400"
+          />
+        </section>
+
+        {/* Acciones */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
             onClick={save}
             disabled={saving || !dirty}
-            whileHover={{ scale: dirty ? 1.04 : 1 }}
-            whileTap={{ scale: dirty ? 0.96 : 1 }}
-            transition={SPRING_PLAYFUL}
-            className={`rounded-2xl px-5 py-2.5 text-sm font-bold shadow transition ${
-              dirty ? `${theme.accentSolid} text-white` : "bg-slate-200 text-slate-400"
-            }`}
+            className="rounded-full bg-purple-600 px-6 py-3 font-bold text-white shadow disabled:opacity-40"
           >
-            {saving ? "Guardando..." : dirty ? "💾 Guardar mi coche" : "✅ Guardado"}
-          </motion.button>
+            {saving ? "Guardando..." : dirty ? "Guardar mi coche 💎" : "Guardado"}
+          </button>
+          <button
+            type="button"
+            onClick={drive}
+            className="rounded-full bg-white px-6 py-3 font-bold text-slate-600 shadow hover:bg-slate-50"
+          >
+            ¡A rodar! 🏁
+          </button>
+          <span className="text-sm text-slate-500">
+            {worked === 0
+              ? "Píntalo a tu gusto y gana diamantes"
+              : `${worked} ${worked === 1 ? "cambio" : "cambios"} en tu coche`}
+          </span>
         </div>
 
+        {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
+
         <AnimatePresence>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mt-3 rounded-2xl bg-rose-50 px-4 py-2 text-center text-sm font-semibold text-rose-700"
-            >
-              {error}
-            </motion.p>
-          )}
           {reward && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={SPRING_PLAYFUL}
-              className="mt-3 rounded-2xl bg-white px-5 py-3 text-center shadow"
+              variants={fadeOnly}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="mt-4 rounded-3xl bg-amber-50 p-4 text-center shadow"
             >
-              <p className="text-lg font-bold text-slate-800">
-                {reward.diamonds_earned > 0
-                  ? `¡Coche guardado! +${reward.diamonds_earned} 💎`
-                  : "¡Coche guardado! Ya has llegado al premio máximo de hoy."}
+              <p className="text-lg font-bold text-amber-700">
+                ¡Coche guardado! +{reward.diamonds_earned} 💎
               </p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Veces que has guardado hoy: {reward.plays_today}/{reward.daily_cap}
-              </p>
+              {reward.capped && (
+                <p className="mt-1 text-sm text-amber-600">
+                  Ya has ganado todos los diamantes de hoy en los juegos. Mañana más.
+                </p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* ------------------------- PESTAÑAS ------------------------- */}
-        <div className="mt-5 flex gap-2">
-          {(["pintar", "piezas"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 rounded-2xl px-4 py-3 text-sm font-bold transition ${
-                tab === t ? `${theme.accentSolid} text-white shadow` : "bg-white text-slate-500 shadow-sm"
-              }`}
-            >
-              {t === "pintar" ? "🎨 Pintar" : "🔧 Piezas"}
-            </button>
-          ))}
-        </div>
-
-        {/* ------------------------- PINTAR ------------------------- */}
-        {tab === "pintar" && (
-          <motion.div
-            initial="initial"
-            animate="animate"
-            variants={fadeOnly}
-            className="mt-4 rounded-3xl bg-white p-4 shadow"
-          >
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-              ¿Qué parte pintas?
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {REGION_ORDER.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRegion(r)}
-                  className={`flex items-center gap-1.5 rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-                    region === r
-                      ? `${theme.accentSolid} text-white shadow`
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  <span>{REGION_LABEL[r].emoji}</span>
-                  {REGION_LABEL[r].label}
-                  <span
-                    className="ml-1 h-4 w-4 rounded-full border-2 border-white/70 shadow-inner"
-                    style={{ backgroundColor: design.colors[r] }}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-4 text-xs font-bold uppercase tracking-wide text-slate-400">
-              Elige el color
-            </p>
-            <div className="mt-2 grid grid-cols-9 gap-2">
-              {PALETTE.map((col) => (
-                <motion.button
-                  key={col}
-                  onClick={() => paint(col)}
-                  whileTap={{ scale: 0.88 }}
-                  transition={SPRING_PLAYFUL}
-                  style={{ backgroundColor: col }}
-                  aria-label={`Pintar de ${col}`}
-                  className={`aspect-square rounded-full border-4 transition ${
-                    design.colors[region] === col
-                      ? "border-slate-800 scale-110"
-                      : "border-white shadow"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <p className="mt-5 text-xs font-bold uppercase tracking-wide text-slate-400">
-              Matrícula
-            </p>
-            <input
-              value={design.matricula}
-              onChange={(e) => {
-                setDesign((d) => ({ ...d, matricula: e.target.value.toUpperCase().slice(0, 10) }));
-                setReward(null);
-              }}
-              placeholder="TU NOMBRE"
-              maxLength={10}
-              className="mt-2 w-full rounded-2xl border-2 border-slate-200 px-4 py-2.5 text-center text-lg font-bold tracking-widest text-slate-700 outline-none focus:border-slate-400"
-            />
-          </motion.div>
-        )}
-
-        {/* ------------------------- PIEZAS ------------------------- */}
-        {tab === "piezas" && (
-          <motion.div
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer(0.05)}
-            className="mt-4 space-y-3"
-          >
-            {SLOT_ORDER.map((slot) => (
-              <motion.div key={slot} variants={staggerItem} className="rounded-3xl bg-white p-4 shadow">
-                <p className="text-sm font-bold text-slate-700">
-                  {SLOT_LABEL[slot].emoji} {SLOT_LABEL[slot].label}
-                </p>
-                <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                  {VARIANTS[slot]
-                    .filter((v) => !v.onlyFor || v.onlyFor === profile.gender)
-                    .map((v) => {
-                      const has = isVariantAvailable(slot, v, owned);
-                      const active = design.parts[slot] === v.id;
-                      const item = itemFor(slot, v.id);
-                      return (
-                        <motion.button
-                          key={v.id}
-                          whileTap={{ scale: 0.94 }}
-                          transition={SPRING_PLAYFUL}
-                          onClick={() => (has ? chooseVariant(slot, v.id) : item && setBuying(item))}
-                          className={`flex min-w-[92px] shrink-0 flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center transition ${
-                            active
-                              ? `${theme.accentSolid} text-white shadow`
-                              : has
-                                ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                : "bg-slate-50 text-slate-400"
-                          }`}
-                        >
-                          <span className="text-2xl">{has ? v.emoji : "🔒"}</span>
-                          <span className="text-[11px] font-bold leading-tight">{v.label}</span>
-                          {!has && item && (
-                            <span className="text-[11px] font-bold text-amber-600">
-                              {item.price_diamonds} 💎
-                            </span>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
       </div>
-
-      {/* ------------------------- COMPRAR PIEZA ------------------------- */}
-      <AnimatePresence>
-        {buying && (
-          <motion.div
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={fadeOnly}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
-            onClick={() => !busy && setBuying(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={SPRING_PLAYFUL}
-              className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-4xl">🔒</p>
-              <h3 className="mt-2 text-lg font-extrabold text-slate-800">{buying.name}</h3>
-              {buying.description && (
-                <p className="mt-1 text-sm text-slate-500">{buying.description}</p>
-              )}
-              <p className="mt-3 text-2xl font-bold text-amber-600">
-                {buying.price_diamonds} 💎
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                Tienes {profile.diamonds} 💎
-              </p>
-
-              {profile.diamonds < buying.price_diamonds ? (
-                <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                  Te faltan {buying.price_diamonds - profile.diamonds} 💎. Haz más ejercicios y
-                  vuelve a por ella.
-                </p>
-              ) : (
-                <motion.button
-                  onClick={() => buy(buying)}
-                  disabled={busy}
-                  whileTap={{ scale: 0.96 }}
-                  transition={SPRING_PLAYFUL}
-                  className={`mt-4 w-full rounded-2xl ${theme.accentSolid} px-5 py-3 font-bold text-white shadow`}
-                >
-                  {busy ? "Comprando..." : "Comprar y ponerla"}
-                </motion.button>
-              )}
-
-              <button
-                onClick={() => !busy && setBuying(null)}
-                className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-500"
-              >
-                Ahora no
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   );
 }

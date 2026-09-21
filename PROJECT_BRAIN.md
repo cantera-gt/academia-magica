@@ -244,6 +244,10 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   verdaderos. No se arregla barajando; hay que reescribir enunciados.
 - Restos por limpiar: `racha-nivel-xp.patch` commiteado por error en la raíz, y 9 ramas remotas
   del 11/08 ya fusionadas por squash.
+- **Una ruta construida y sin enlazar no la detecta nada**: ni `tsc`, ni el lint, ni el build, que
+  la compila tan contento y la lista entre las rutas generadas. El garaje estuvo doce días así.
+  Cuando se dé por terminada una pantalla, comprobar que algo lleva a ella:
+  `grep -rn "alumno/<ruta>" src/`.
 - No verificable desde el código: si `PAYPAL_ENV` está en `live`, si Resend tiene el dominio
   verificado y qué commit sirve Vercel en cada momento.
 
@@ -260,9 +264,24 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
   para materias de idioma; arreglos de eco por doble reproducción, de porcentajes y de lectura
   de restas, divisiones, fracciones y decimales.
 - **Cuarto**: fondos equipables (categoría `fondo`) y escalado de objetos en el inventario.
-- **Garaje** (09/09): ruta `/alumno/garaje`, coche en SVG por piezas tocable y pintable
-  (`src/components/vehicle-svg.tsx`), catálogo de piezas y geometría de chasis
-  (`src/lib/vehicle.ts`), con compra de piezas y premio.
+- **Garaje** (09/09, rehecho el 21/09): ruta `/alumno/garaje`. Dos coches reales —un deportivo
+  tuneado y un Fórmula 1— hechos de renders 3D despiezados en capas PNG transparentes que se
+  apilan en el mismo lienzo (`public/garaje/<modelo>/*.webp`, 324 KB los dos). El niño no cambia
+  piezas: cambia **colores**, tocando la zona en el propio coche o con los botones grandes.
+  El teñido (`src/components/vehicle-canvas.tsx`) convierte cada píxel a HSL, le pone el tono
+  elegido y **conserva su luminancia**, que es donde vive el volumen del render; y solo toca los
+  píxeles que ya tenían color (saturación ≥ 0,20), así que franjas blancas, cromados y neumáticos
+  no se manchan. Catálogo en `src/lib/vehicle.ts`. Pintar es gratis; guardar el coche paga vía
+  `finish_game` y paga más cuanto más trabajado esté.
+  - **Por qué no hay piezas intercambiables**: las capas solo contienen lo que se veía en la
+    imagen original, las zonas tapadas no están reconstruidas. Quitar una rueda deja el hueco a
+    la vista. Para intercambiar piezas harían falta piezas generadas por separado, no recortadas
+    de un coche ya montado.
+  - Los 46 items de tienda de la zona `garaje` quedaron **desactivados**, no borrados
+    (`20260921120000_garaje_por_colores.sql`). Nadie había comprado ninguno: la página llevaba
+    desde el 09/09 sin un solo enlace que llevara a ella.
+  - **Pendiente**: `output/coches-plataforma/02-deportivo-r8.png` es un Audi R8 reconocible y el
+    descapotable rosa tira al coche de Barbie. Antes de meterlos hay que pedirlos genéricos.
 - **Reanudar un tema a medias** (14/09): si el alumno dejó un tema sin cerrar, al volver ve
   «¿Seguimos donde lo dejaste?» con su progreso, y elige seguir o empezar de nuevo. El punto de
   retorno se guarda tras cada ejercicio y se borra al cerrar el tema. Se le pregunta en vez de
