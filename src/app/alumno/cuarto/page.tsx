@@ -351,6 +351,12 @@ export default function CuartoPage() {
             <DiamondCounter value={profile.diamonds} />
           </div>
           <Link
+            href="/alumno/garaje"
+            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
+          >
+            Mi garaje 🚗
+          </Link>
+          <Link
             href="/alumno/tienda"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
           >
