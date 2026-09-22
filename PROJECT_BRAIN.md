@@ -282,6 +282,26 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
     desde el 09/09 sin un solo enlace que llevara a ella.
   - **Pendiente**: `output/coches-plataforma/02-deportivo-r8.png` es un Audi R8 reconocible y el
     descapotable rosa tira al coche de Barbie. Antes de meterlos hay que pedirlos genéricos.
+- **Mundo Mágico** (22/09): ruta `/alumno/mundo-magico`, hermana del garaje. Cinco personajes
+  (Superhéroe, Superheroína, Prisma, Bruma y Voltio), cada uno con dos vestuarios, hechos de
+  renders 3D despiezados en capas (`public/mundo/<personaje>/<vestuario>/*.webp`, 699 KB los
+  cinco; al abrir solo se carga un vestuario, ~70 KB). El niño elige personaje y ropa y pinta
+  cada prenda tocándola o con los botones grandes.
+  - **El teñido aquí es exacto, al contrario que en el garaje**: las capas vienen en versión
+    neutra (gris con luces y sombras), así que pintar es multiplicar RGB por el color elegido
+    (`src/components/hero-canvas.tsx`). No hizo falta el apaño en HSL de los coches.
+  - El color de fábrica de cada prenda (`color` en `src/lib/heroes.ts`) se calculó comparando la
+    capa neutra con la de color original; reconstruye el personaje con un error de 1 a 17 sobre
+    255. Por eso no se guardan las capas de color y el peso se queda en la mitad.
+  - Las cabezas y la piel no se pintan. La excepción es Prisma, que es de cristal.
+  - Tampoco hay piezas intercambiables: se cambia el vestuario entero, igual que en el garaje y
+    por el mismo motivo.
+  - Guardado en `hero_designs` con `my_hero` / `save_hero_design`
+    (`20260922120000_mundo_magico_personajes.sql`). Si la migración no está aplicada la página
+    funciona igual y solo falla el guardado, con aviso.
+  - **Pendiente**: el Superhéroe y la Superheroína salen de fábrica con traje azul y capa roja,
+    que es la silueta de Superman. Se aleja cambiando el campo `color` de `traje` y `capa` en
+    `src/lib/heroes.ts`; es una línea por prenda.
 - **Reanudar un tema a medias** (14/09): si el alumno dejó un tema sin cerrar, al volver ve
   «¿Seguimos donde lo dejaste?» con su progreso, y elige seguir o empezar de nuevo. El punto de
   retorno se guarda tras cada ejercicio y se borra al cerrar el tema. Se le pregunta en vez de

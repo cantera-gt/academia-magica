@@ -10,45 +10,42 @@ import { SPRING_PLAYFUL, fadeOnly, staggerContainer, staggerItem } from "@/lib/m
 import { finishGame, type FinishGameResult } from "@/lib/finish-game";
 import { themeOf } from "@/lib/theme";
 import DiamondCounter from "@/components/diamond-counter";
-import VehicleCanvas from "@/components/vehicle-canvas";
+import HeroCanvas from "@/components/hero-canvas";
 import {
-  MODELS,
-  MODEL_ORDER,
+  HEROES,
+  HERO_ORDER,
+  OUTFIT_ORDER,
   PALETTE,
   customCount,
   defaultDesign,
   mergeDesign,
   paintableLayers,
-  type VehicleDesign,
-  type VehicleModel,
-} from "@/lib/vehicle";
+  type HeroDesign,
+  type HeroId,
+  type OutfitId,
+} from "@/lib/heroes";
 
 /**
- * El garaje: el coche del alumno, para pintarlo a su gusto.
+ * Mundo Magico: el personaje del alumno.
  *
- * No se cambian piezas, se cambian COLORES. Las capas del coche vienen de un
- * render 3D despiezado, y solo traen lo que se veia en la imagen original, asi
- * que sustituir una rueda dejaria un agujero a la vista.
+ * Hermano del garaje. Se elige personaje y vestuario, y se pinta cada prenda
+ * tocandola en el propio muñeco o con los botones grandes de abajo.
  *
- * Dos formas de elegir que se pinta, a proposito:
- *   1. tocando directamente la zona en el coche (lo divertido)
- *   2. con los botones grandes de abajo (lo que funciona con 4 años)
- * Las dos mueven el mismo estado.
- *
- * Pintar es gratis. Lo que da diamantes es guardar el coche, y paga mas cuanto
- * mas trabajado este.
+ * Si la migracion de hero_designs todavia no esta aplicada, la pagina funciona
+ * igual y solo falla el guardado: se avisa y ya. Preferible a una pantalla en
+ * blanco por un RPC que no existe.
  */
 
-export default function GarajePage() {
+export default function MundoMagicoPage() {
   const router = useRouter();
   const supabase = createClient();
 
   const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [design, setDesign] = useState<VehicleDesign>(defaultDesign(null));
-  const [saved, setSaved] = useState<VehicleDesign>(defaultDesign(null));
-  const [zone, setZone] = useState<string>("carroceria");
+  const [design, setDesign] = useState<HeroDesign>(defaultDesign(null));
+  const [saved, setSaved] = useState<HeroDesign>(defaultDesign(null));
+  const [piece, setPiece] = useState<string>("traje");
   const [loading, setLoading] = useState(true);
-  const [driving, setDriving] = useState(false);
+  const [posing, setPosing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [reward, setReward] = useState<FinishGameResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,8 +63,8 @@ export default function GarajePage() {
     const prof = p as MyProfile | null;
     setProfile(prof);
 
-    const { data: garage } = await supabase.rpc("my_garage");
-    const g = (garage ?? {}) as { design?: unknown };
+    const { data: h } = await supabase.rpc("my_hero");
+    const g = (h ?? {}) as { design?: unknown };
     const merged = mergeDesign(g.design, prof?.gender ?? null);
     setDesign(merged);
     setSaved(merged);
@@ -78,12 +75,15 @@ export default function GarajePage() {
     load();
   }, [load]);
 
-  const zones = useMemo(() => paintableLayers(design.model), [design.model]);
+  const pieces = useMemo(
+    () => paintableLayers(design.hero, design.outfit),
+    [design.hero, design.outfit]
+  );
 
-  // Si al cambiar de coche la zona elegida no existe, vuelve a la carroceria.
+  // Al cambiar de personaje o vestuario, la prenda elegida puede no existir.
   useEffect(() => {
-    if (!zones.some((z) => z.id === zone)) setZone(zones[0]?.id ?? "carroceria");
-  }, [zones, zone]);
+    if (!pieces.some((p) => p.id === piece)) setPiece(pieces[0]?.id ?? "traje");
+  }, [pieces, piece]);
 
   const base = useMemo(() => defaultDesign(profile?.gender ?? null), [profile?.gender]);
   const worked = useMemo(() => customCount(design, base), [design, base]);
@@ -93,21 +93,26 @@ export default function GarajePage() {
   );
 
   function paint(color: string) {
-    setDesign((d) => ({ ...d, colors: { ...d.colors, [zone]: color } }));
+    setDesign((d) => ({ ...d, colors: { ...d.colors, [piece]: color } }));
     setReward(null);
   }
 
-  function clearZone() {
+  function clearPiece() {
     setDesign((d) => {
       const colors = { ...d.colors };
-      delete colors[zone];
+      delete colors[piece];
       return { ...d, colors };
     });
     setReward(null);
   }
 
-  function chooseModel(model: VehicleModel) {
-    setDesign((d) => (d.model === model ? d : { ...d, model, colors: {} }));
+  function chooseHero(hero: HeroId) {
+    setDesign((d) => (d.hero === hero ? d : { ...d, hero, colors: {} }));
+    setReward(null);
+  }
+
+  function chooseOutfit(outfit: OutfitId) {
+    setDesign((d) => (d.outfit === outfit ? d : { ...d, outfit, colors: {} }));
     setReward(null);
   }
 
@@ -115,9 +120,9 @@ export default function GarajePage() {
     if (saving) return;
     setSaving(true);
     setError(null);
-    const { data, error: e } = await supabase.rpc("save_vehicle_design", { p_design: design });
+    const { data, error: e } = await supabase.rpc("save_hero_design", { p_design: design });
     if (e) {
-      setError("No se ha podido guardar el coche.");
+      setError("No se ha podido guardar tu personaje. Puedes seguir jugando.");
       setSaving(false);
       return;
     }
@@ -125,26 +130,20 @@ export default function GarajePage() {
     setDesign(stored);
     setSaved(stored);
 
-    // Menos "movimientos" = mas diamantes, asi que un coche mas trabajado
-    // premia mas. El suelo de 4 es el contrato de finish_game: moves nunca
-    // puede ser 0, porque min(moves) es la marca personal y un 0 seria
-    // imbatible para siempre.
-    const moves = Math.max(4, 40 - worked * 5);
-    const res = await finishGame(supabase, "garaje", true, moves);
+    // Menos "movimientos" = mas diamantes. El suelo de 4 es el contrato de
+    // finish_game: moves nunca puede ser 0, porque min(moves) es la marca
+    // personal y un 0 seria imbatible para siempre.
+    const moves = Math.max(4, 40 - worked * 4);
+    const res = await finishGame(supabase, "mundo-magico", true, moves);
     setReward(res);
     if (res) setProfile((p) => (p ? { ...p, diamonds: res.total_diamonds } : p));
     setSaving(false);
   }
 
-  function drive() {
-    setDriving(true);
-    window.setTimeout(() => setDriving(false), 2600);
-  }
-
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-slate-500">Abriendo el garaje...</p>
+        <p className="text-slate-500">Entrando en Mundo Mágico...</p>
       </main>
     );
   }
@@ -163,7 +162,8 @@ export default function GarajePage() {
   }
 
   const theme = themeOf(profile.visual_theme);
-  const zoneLabel = zones.find((z) => z.id === zone)?.label ?? "Carrocería";
+  const spec = HEROES[design.hero];
+  const pieceLabel = pieces.find((p) => p.id === piece)?.label ?? "Traje";
 
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
@@ -174,64 +174,85 @@ export default function GarajePage() {
           <Link href="/alumno/inicio" className="text-sm text-white/70 hover:text-white">
             ← Mi inicio
           </Link>
-          <h1 className="mt-1 text-2xl font-bold">Mi garaje 🔧</h1>
+          <h1 className="mt-1 text-2xl font-bold">Mundo Mágico ✨</h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-white/15 px-4 py-2 backdrop-blur">
             <DiamondCounter value={profile.diamonds} />
           </div>
           <Link
-            href="/alumno/mundo-magico"
+            href="/alumno/garaje"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
           >
-            Mundo Mágico ✨
-          </Link>
-          <Link
-            href="/alumno/cuarto"
-            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
-          >
-            Mi cuarto 🏠
+            Mi garaje 🚗
           </Link>
         </div>
       </header>
 
       <div className="mx-auto max-w-3xl p-4 sm:p-6">
-        {/* El coche */}
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-b from-slate-200 to-slate-300 p-4 shadow-inner">
+        {/* El personaje */}
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-b from-indigo-100 to-purple-200 p-4 shadow-inner">
           <motion.div
-            animate={driving ? { x: [0, 26, -18, 0] } : { x: 0 }}
-            transition={driving ? { duration: 2.4, ease: "easeInOut" } : SPRING_PLAYFUL}
+            className="flex h-[360px] items-end justify-center sm:h-[440px]"
+            animate={posing ? { y: [0, -18, 0, -9, 0] } : { y: 0 }}
+            transition={posing ? { duration: 1.6, ease: "easeInOut" } : SPRING_PLAYFUL}
           >
-            <VehicleCanvas
-              model={design.model}
+            <HeroCanvas
+              hero={design.hero}
+              outfit={design.outfit}
               colors={design.colors}
-              onPickZone={setZone}
-              className="mx-auto max-w-xl select-none"
+              onPickPiece={setPiece}
+              className="select-none drop-shadow-xl"
             />
           </motion.div>
-          <p className="mt-1 text-center text-sm text-slate-600">
-            Toca una parte del coche para pintarla
+          <p className="mt-1 text-center text-sm text-indigo-900/70">
+            {design.nombre.trim()
+              ? `${design.nombre.trim()} — toca una prenda para pintarla`
+              : "Toca una prenda para pintarla"}
           </p>
         </div>
 
-        {/* Elegir coche */}
+        {/* Elegir personaje */}
         <section className="mt-6">
           <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">
-            Tu coche
+            Tu personaje
           </h2>
           <div className="flex flex-wrap gap-2">
-            {MODEL_ORDER.map((m) => (
+            {HERO_ORDER.map((h) => (
               <button
-                key={m}
+                key={h}
                 type="button"
-                onClick={() => chooseModel(m)}
+                onClick={() => chooseHero(h)}
                 className={`rounded-2xl px-4 py-3 text-sm font-bold shadow transition ${
-                  design.model === m
+                  design.hero === h
                     ? "bg-purple-600 text-white"
                     : "bg-white text-slate-600 hover:bg-purple-50"
                 }`}
               >
-                {MODELS[m].emoji} {MODELS[m].label}
+                {HEROES[h].emoji} {HEROES[h].label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Vestuario */}
+        <section className="mt-6">
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+            Su ropa
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {OUTFIT_ORDER.map((o) => (
+              <button
+                key={o}
+                type="button"
+                onClick={() => chooseOutfit(o)}
+                className={`rounded-2xl px-4 py-3 text-sm font-bold shadow transition ${
+                  design.outfit === o
+                    ? "bg-purple-600 text-white"
+                    : "bg-white text-slate-600 hover:bg-purple-50"
+                }`}
+              >
+                {spec.outfits[o].label}
               </button>
             ))}
           </div>
@@ -243,31 +264,29 @@ export default function GarajePage() {
             ¿Qué pintas?
           </h2>
           <motion.div
-            variants={staggerContainer(0.06)}
+            variants={staggerContainer(0.05)}
             initial="initial"
             animate="animate"
             className="flex flex-wrap gap-2"
           >
-            {zones.map((z) => (
+            {pieces.map((p) => (
               <motion.button
-                key={z.id}
+                key={p.id}
                 variants={staggerItem}
                 type="button"
-                onClick={() => setZone(z.id)}
+                onClick={() => setPiece(p.id)}
                 className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold shadow transition ${
-                  zone === z.id
+                  piece === p.id
                     ? "bg-purple-600 text-white"
                     : "bg-white text-slate-600 hover:bg-purple-50"
                 }`}
               >
-                <span>{z.emoji}</span>
-                <span>{z.label}</span>
-                {design.colors[z.id] && (
-                  <span
-                    className="h-4 w-4 rounded-full border-2 border-white shadow"
-                    style={{ backgroundColor: design.colors[z.id] }}
-                  />
-                )}
+                <span>{p.emoji}</span>
+                <span>{p.label}</span>
+                <span
+                  className="h-4 w-4 rounded-full border-2 border-white shadow"
+                  style={{ backgroundColor: design.colors[p.id] ?? p.color }}
+                />
               </motion.button>
             ))}
           </motion.div>
@@ -277,15 +296,15 @@ export default function GarajePage() {
         <section className="mt-6 rounded-3xl bg-white p-4 shadow">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-              Color de: {zoneLabel}
+              Color de: {pieceLabel}
             </h2>
-            {design.colors[zone] && (
+            {design.colors[piece] && (
               <button
                 type="button"
-                onClick={clearZone}
+                onClick={clearPiece}
                 className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-200"
               >
-                Quitar pintura
+                Color original
               </button>
             )}
           </div>
@@ -297,7 +316,7 @@ export default function GarajePage() {
                 onClick={() => paint(c)}
                 aria-label={`Pintar de ${c}`}
                 className={`aspect-square rounded-xl border-4 transition ${
-                  design.colors[zone] === c
+                  design.colors[piece] === c
                     ? "border-purple-600 scale-110"
                     : "border-white hover:scale-105"
                 } shadow`}
@@ -307,25 +326,27 @@ export default function GarajePage() {
           </div>
         </section>
 
-        {/* Matricula */}
+        {/* Nombre */}
         <section className="mt-6 rounded-3xl bg-white p-4 shadow">
           <label
-            htmlFor="matricula"
+            htmlFor="nombre"
             className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-500"
           >
-            Tu matrícula
+            El nombre de tu héroe
           </label>
           <input
-            id="matricula"
-            value={design.matricula}
-            maxLength={10}
+            id="nombre"
+            value={design.nombre}
+            maxLength={14}
             onChange={(e) => {
-              const v = e.target.value.toUpperCase().replace(/[^A-Z0-9ÁÉÍÓÚÑ ]/g, "").slice(0, 10);
-              setDesign((d) => ({ ...d, matricula: v }));
+              const v = e.target.value
+                .replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]/g, "")
+                .slice(0, 14);
+              setDesign((d) => ({ ...d, nombre: v }));
               setReward(null);
             }}
-            placeholder="MI COCHE"
-            className="w-full rounded-2xl border-2 border-slate-200 px-4 py-3 text-center text-xl font-black tracking-widest text-slate-700 outline-none focus:border-purple-400"
+            placeholder="Capitán Diamante"
+            className="w-full rounded-2xl border-2 border-slate-200 px-4 py-3 text-center text-xl font-black text-slate-700 outline-none focus:border-purple-400"
           />
         </section>
 
@@ -337,19 +358,22 @@ export default function GarajePage() {
             disabled={saving || !dirty}
             className="rounded-full bg-purple-600 px-6 py-3 font-bold text-white shadow disabled:opacity-40"
           >
-            {saving ? "Guardando..." : dirty ? "Guardar mi coche 💎" : "Guardado"}
+            {saving ? "Guardando..." : dirty ? "Guardar mi héroe 💎" : "Guardado"}
           </button>
           <button
             type="button"
-            onClick={drive}
+            onClick={() => {
+              setPosing(true);
+              window.setTimeout(() => setPosing(false), 1700);
+            }}
             className="rounded-full bg-white px-6 py-3 font-bold text-slate-600 shadow hover:bg-slate-50"
           >
-            ¡A rodar! 🏁
+            ¡Pose de héroe! 💥
           </button>
           <span className="text-sm text-slate-500">
             {worked === 0
-              ? "Píntalo a tu gusto y gana diamantes"
-              : `${worked} ${worked === 1 ? "cambio" : "cambios"} en tu coche`}
+              ? "Vístelo a tu gusto y gana diamantes"
+              : `${worked} ${worked === 1 ? "cambio" : "cambios"} en tu héroe`}
           </span>
         </div>
 
@@ -365,7 +389,7 @@ export default function GarajePage() {
               className="mt-4 rounded-3xl bg-amber-50 p-4 text-center shadow"
             >
               <p className="text-lg font-bold text-amber-700">
-                ¡Coche guardado! +{reward.diamonds_earned} 💎
+                ¡Héroe guardado! +{reward.diamonds_earned} 💎
               </p>
               {reward.capped && (
                 <p className="mt-1 text-sm text-amber-600">
