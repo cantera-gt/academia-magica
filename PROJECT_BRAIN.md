@@ -282,6 +282,18 @@ Acordado el 10/09/2026 con Pablo. Aplica a toda sesión de Claude sobre este rep
     desde el 09/09 sin un solo enlace que llevara a ella.
   - **Pendiente**: `output/coches-plataforma/02-deportivo-r8.png` es un Audi R8 reconocible y el
     descapotable rosa tira al coche de Barbie. Antes de meterlos hay que pedirlos genéricos.
+- **Entretenimiento** (22/09): ruta `/alumno/entretenimiento`. Una sola puerta para las cuatro
+  cosas que el alumno hace cuando no estudia: Mi cuarto, El recreo, Mi garaje y Mundo Mágico.
+  Antes eran cuatro botones sueltos en la barra del inicio conviviendo con la tienda y el panel
+  de padres —seis destinos en una fila, demasiados para un niño de cuatro años—; ahora el inicio
+  tiene tres botones y la zona muestra cuatro tarjetas grandes. Las cuatro páginas vuelven aquí,
+  no al inicio.
+  - **Un profesor recibe al alumno** y explica qué hay en cada sitio, con botón para escucharlo
+    en su propia voz (`speakText` con el `voice_name` de `teachers`, la misma voz que usa en
+    clase). No es un profesor al azar en cada visita: sale de un hash del id del alumno, así que
+    a cada niño le recibe siempre el mismo y se vuelve «su» profesor de la zona de juegos.
+  - Solo entran profesores con `speak_lang` español: el texto va en español y James da clase en
+    inglés. Sin SQL nuevo — `teachers` ya era legible por los alumnos.
 - **Mundo Mágico** (22/09): ruta `/alumno/mundo-magico`, hermana del garaje. Cinco personajes
   (Superhéroe, Superheroína, Prisma, Bruma y Voltio), cada uno con dos vestuarios, hechos de
   renders 3D despiezados en capas (`public/mundo/<personaje>/<vestuario>/*.webp`, 699 KB los

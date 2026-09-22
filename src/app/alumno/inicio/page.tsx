@@ -301,28 +301,10 @@ export default function AlumnoInicioPage() {
             Tienda ✨
           </Link>
           <Link
-            href="/alumno/cuarto"
+            href="/alumno/entretenimiento"
             className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
           >
-            Mi cuarto 🏠
-          </Link>
-          <Link
-            href="/alumno/mundo-magico"
-            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
-          >
-            Mundo Mágico ✨
-          </Link>
-          <Link
-            href="/alumno/garaje"
-            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
-          >
-            Mi garaje 🚗
-          </Link>
-          <Link
-            href="/alumno/juegos"
-            className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur hover:bg-white/30"
-          >
-            Juegos 🎮
+            Entretenimiento 🎉
           </Link>
           <DiamondCounter value={profile.diamonds} />
         </div>

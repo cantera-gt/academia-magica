@@ -335,8 +335,8 @@ export default function CuartoPage() {
     <main className="min-h-screen bg-slate-50">
       <header className={`flex items-center justify-between bg-gradient-to-r ${theme.headerGradient} px-6 py-6 text-white`}>
         <div>
-          <Link href="/alumno/inicio" className="text-sm text-white/70 hover:text-white">
-            ← Mi inicio
+          <Link href="/alumno/entretenimiento" className="text-sm text-white/70 hover:text-white">
+            ← Entretenimiento
           </Link>
           <h1 className="mt-1 text-2xl font-bold">
             Cuarto de {profile.display_name} 🏠
